@@ -8,10 +8,11 @@
     <string name="action_settings">Settings</string>
 
     <string name="menu_home">Afiliaciones</string>
-    <string name="menu_gallery">Boletínes</string>
+    <string name="menu_gallery">Agenda Digital</string>
     <string name="menu_slideshow">Slideshow</string>
     <string name="afiliar">Afiliar</string>
     <string name="lista_de_alumnos">Lista de Alumnos</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="cambiar_cuenta">Cambiar Cuenta</string>
 </resources>

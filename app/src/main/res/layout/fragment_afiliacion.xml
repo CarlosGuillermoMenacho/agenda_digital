@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.home.HomeFragment">
+    tools:context=".Fragments.FragmentAfiliacion">
 
     <TextView
         android:id="@+id/text_home"
@@ -13,11 +13,25 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:background="#000"
         android:textAlignment="center"
+        android:text="@string/cambiar_cuenta"
+        android:textColor="@color/colorTextView"
         android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/separator1"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/lineSeparator"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/text_home"/>
+    <ListView
+        android:id="@+id/lvAfiliados"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
+        app:layout_constraintTop_toBottomOf="@id/separator1"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

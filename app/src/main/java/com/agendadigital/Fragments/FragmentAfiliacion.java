@@ -1,4 +1,4 @@
-package com.agendadigital.ui.home;
+package com.agendadigital.Fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,8 +13,9 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.agendadigital.R;
+import com.agendadigital.ui.home.HomeViewModel;
 
-public class HomeFragment extends Fragment {
+public class FragmentAfiliacion extends Fragment {
 
     private HomeViewModel homeViewModel;
 
@@ -22,7 +23,7 @@ public class HomeFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         homeViewModel =
                 ViewModelProviders.of(this).get(HomeViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
+        View root = inflater.inflate(R.layout.fragment_afiliacion, container, false);
         final TextView textView = root.findViewById(R.id.text_home);
         homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override

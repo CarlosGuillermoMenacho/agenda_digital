@@ -6,6 +6,7 @@ import android.view.Menu;
 
 import com.agendadigital.Fragments.BoletinFragment;
 import com.agendadigital.Interfaces.Comunicador;
+import com.agendadigital.Fragments.FragmentListaAlumnos;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
@@ -20,10 +21,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-public class MainActivity extends AppCompatActivity implements Comunicador {
+public class MainActivity extends AppCompatActivity  implements Comunicador {
 
     private AppBarConfiguration mAppBarConfiguration;
     private BoletinFragment boletinFragment;
+    private FragmentListaAlumnos galleryFragment;
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
     @Override
@@ -52,7 +54,6 @@ public class MainActivity extends AppCompatActivity implements Comunicador {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -68,14 +69,25 @@ public class MainActivity extends AppCompatActivity implements Comunicador {
     }
 
     @Override
-    public void enviarDatos(String dato) {
-        boletinFragment = new BoletinFragment();
+    public void enviarDatos(String dato,int fragmnet) {
         Bundle bundle = new Bundle();
-        bundle.putString("codigo",dato);
-        boletinFragment.setArguments(bundle);
-        fragmentManager = getSupportFragmentManager();
-        fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.nav_host_fragment,boletinFragment);
-        fragmentTransaction.commit();
+        if (fragmnet==R.id.boletinFragment) {
+            boletinFragment = new BoletinFragment();
+            bundle.putString("codigo",dato);
+            boletinFragment.setArguments(bundle);
+            fragmentManager = getSupportFragmentManager();
+            fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.nav_host_fragment,boletinFragment);
+            fragmentTransaction.commit();
+        }
+        if (fragmnet==R.id.nav_gallery) {
+            galleryFragment = new FragmentListaAlumnos();
+            bundle.putString("codigo",dato);
+            galleryFragment.setArguments(bundle);
+            fragmentManager = getSupportFragmentManager();
+            fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.nav_host_fragment,galleryFragment);
+            fragmentTransaction.commit();
+        }
     }
 }

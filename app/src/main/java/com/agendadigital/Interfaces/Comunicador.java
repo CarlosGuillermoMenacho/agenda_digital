@@ -1,5 +1,5 @@
 package com.agendadigital.Interfaces;
 
 public interface Comunicador {
-    public void enviarDatos(String dato);
+    void enviarDatos(String dato,int fragment);
 }
