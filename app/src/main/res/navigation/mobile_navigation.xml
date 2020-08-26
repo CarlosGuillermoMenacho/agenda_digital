@@ -28,7 +28,7 @@
         tools:layout="@layout/fragment_slideshow" />
     <fragment
         android:id="@+id/boletinFragment"
-        android:name="com.agendadigital.BoletinFragment"
+        android:name="com.agendadigital.Fragments.BoletinFragment"
         android:label="fragment_boletin"
         tools:layout="@layout/fragment_boletin" >
         <action

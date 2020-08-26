@@ -4,7 +4,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
 
-import com.agendadigital.ui.gallery.GalleryFragment;
+import com.agendadigital.Fragments.BoletinFragment;
+import com.agendadigital.Interfaces.Comunicador;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
@@ -19,7 +20,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-public class MainActivity extends AppCompatActivity implements Comunicador{
+public class MainActivity extends AppCompatActivity implements Comunicador {
 
     private AppBarConfiguration mAppBarConfiguration;
     private BoletinFragment boletinFragment;
@@ -65,7 +66,6 @@ public class MainActivity extends AppCompatActivity implements Comunicador{
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
-
 
     @Override
     public void enviarDatos(String dato) {

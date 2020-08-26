@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.Navigation;
 
-import com.agendadigital.Comunicador;
+import com.agendadigital.Interfaces.Comunicador;
 import com.agendadigital.R;
 
 import java.util.ArrayList;
