@@ -15,11 +15,24 @@
         android:id="@+id/nav_gallery"
         android:name="com.agendadigital.ui.gallery.GalleryFragment"
         android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        tools:layout="@layout/fragment_gallery" >
+        <action
+            android:id="@+id/action_nav_gallery_to_boletinFragment"
+            app:destination="@id/boletinFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_slideshow"
         android:name="com.agendadigital.ui.slideshow.SlideshowFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
+    <fragment
+        android:id="@+id/boletinFragment"
+        android:name="com.agendadigital.BoletinFragment"
+        android:label="fragment_boletin"
+        tools:layout="@layout/fragment_boletin" >
+        <action
+            android:id="@+id/action_boletinFragment_to_nav_gallery"
+            app:destination="@id/nav_gallery" />
+    </fragment>
 </navigation>

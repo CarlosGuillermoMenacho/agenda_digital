@@ -2,12 +2,16 @@
     <string name="app_name">Agenda Digital</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">Agenda Digital</string>
+    <string name="nav_header_subtitle">Aquí va el Usuario</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
+    <string name="menu_home">Afiliaciones</string>
+    <string name="menu_gallery">Boletínes</string>
     <string name="menu_slideshow">Slideshow</string>
+    <string name="afiliar">Afiliar</string>
+    <string name="lista_de_alumnos">Lista de Alumnos</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
