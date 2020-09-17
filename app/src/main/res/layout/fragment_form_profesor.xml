@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF"
+    tools:context=".Fragments.FragmentFormProfesor">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="30dp"
+        tools:ignore="UselessParent">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/formulario_de_habilitaci_n"
+            android:textSize="@dimen/sizeTitles"
+            android:gravity="center"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/profesor"
+            android:gravity="center"
+            android:textSize="@dimen/sizeTitles"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/sizeInfo"
+            android:text="@string/ingrese_su_clave"
+            android:layout_marginTop="20dp"/>
+        <EditText
+            android:id="@+id/etcodigoformprofesor"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="@drawable/boxedittext"
+            android:layout_marginTop="10dp"
+            android:padding="5dp"
+            android:hint="@string/clave"
+            android:textColor="@color/colorTextEdit"
+            android:autofillHints="false"
+            android:inputType="text" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/sizeInfo"
+            android:text="@string/ingrese_su_pass"
+            android:layout_marginTop="20dp"/>
+        <EditText
+            android:id="@+id/etclaveformprofesor"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="@drawable/boxedittext"
+            android:layout_marginTop="10dp"
+            android:padding="5dp"
+            android:hint="@string/password"
+            android:textColor="@color/colorTextEdit"
+            android:autofillHints="false"
+            android:inputType="numberPassword" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btnHabilitarformprofesor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/habilitar"
+                tools:ignore="ButtonStyle" />
+            <Button
+                android:id="@+id/btnCancelarformprofesor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cancelar"
+                tools:ignore="ButtonStyle" />
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>

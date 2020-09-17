@@ -7,4 +7,5 @@
     <color name="blanco">#fff</color>
     <color name="colorTextView">#000</color>
     <color name="lineSeparator">#000</color>
+    <color name="colorTextEdit">#000</color>
 </resources>

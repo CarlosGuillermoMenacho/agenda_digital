@@ -3,10 +3,15 @@ package com.agendadigital;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
+import android.widget.TextView;
 
 import com.agendadigital.Fragments.BoletinFragment;
+import com.agendadigital.Fragments.FragmentFormProfesor;
+import com.agendadigital.Fragments.FragmentFormTutor;
 import com.agendadigital.Interfaces.Comunicador;
 import com.agendadigital.Fragments.FragmentListaAlumnos;
+import com.agendadigital.clases.AdminSQLite;
+import com.agendadigital.clases.Globals;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
@@ -24,10 +29,7 @@ import androidx.appcompat.widget.Toolbar;
 public class MainActivity extends AppCompatActivity  implements Comunicador {
 
     private AppBarConfiguration mAppBarConfiguration;
-    private BoletinFragment boletinFragment;
-    private FragmentListaAlumnos galleryFragment;
-    private FragmentManager fragmentManager;
-    private FragmentTransaction fragmentTransaction;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,10 +46,14 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+        View hview = navigationView.getHeaderView(0);
+        TextView nameUser = hview.findViewById(R.id.tvNameUser);
+        AdminSQLite adm = new AdminSQLite(MainActivity.this,"agenda",null,1);
+        Globals.user = adm.getUserActivo();
+        nameUser.setText(Globals.user.getNombre());
+
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow,R.id.boletinFragment)
+                R.id.nav_home, R.id.fragmentAgendaDigital, R.id.nav_slideshow,R.id.lista_alu_Fragment,R.id.fragmentLicencia)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -56,7 +62,6 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -71,23 +76,46 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
     @Override
     public void enviarDatos(String dato,int fragmnet) {
         Bundle bundle = new Bundle();
+        FragmentTransaction fragmentTransaction;
+        FragmentManager fragmentManager;
         if (fragmnet==R.id.boletinFragment) {
-            boletinFragment = new BoletinFragment();
+            BoletinFragment boletinFragment = new BoletinFragment();
             bundle.putString("codigo",dato);
             boletinFragment.setArguments(bundle);
             fragmentManager = getSupportFragmentManager();
             fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.nav_host_fragment,boletinFragment);
+            fragmentTransaction.replace(R.id.nav_host_fragment, boletinFragment);
             fragmentTransaction.commit();
         }
         if (fragmnet==R.id.nav_gallery) {
-            galleryFragment = new FragmentListaAlumnos();
+            FragmentListaAlumnos galleryFragment = new FragmentListaAlumnos();
             bundle.putString("codigo",dato);
             galleryFragment.setArguments(bundle);
             fragmentManager = getSupportFragmentManager();
             fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.nav_host_fragment,galleryFragment);
+            fragmentTransaction.replace(R.id.nav_host_fragment, galleryFragment);
             fragmentTransaction.commit();
         }
     }
+
+    @Override
+    public void cambiarForm(int fragment) {
+        FragmentTransaction fragmentTransaction;
+        FragmentManager fragmentManager;
+        if (fragment==R.id.fragmentFormTutor){
+            FragmentFormTutor fragmentFormTutor = new FragmentFormTutor();
+            fragmentManager = getSupportFragmentManager();
+            fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.container_form,fragmentFormTutor);
+            fragmentTransaction.commit();
+        }
+        if (fragment==R.id.fragmentFormProfesor){
+            FragmentFormProfesor fragmentFormProfesor = new FragmentFormProfesor();
+            fragmentManager = getSupportFragmentManager();
+            fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.container_form,fragmentFormProfesor);
+            fragmentTransaction.commit();
+        }
+    }
+
 }

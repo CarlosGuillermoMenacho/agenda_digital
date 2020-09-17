@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fff"
+    tools:context=".Fragments.FragmentFormTutor">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="30dp"
+        tools:ignore="UselessParent">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/formulario_de_habilitaci_n"
+            android:textSize="@dimen/sizeTitles"
+            android:gravity="center"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/tutor"
+            android:gravity="center"
+            android:textSize="@dimen/sizeTitles"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/sizeInfo"
+            android:text="@string/ingrese_su_n_mero_de_c_dula"
+            android:layout_marginTop="20dp"/>
+        <EditText
+            android:id="@+id/etCedulaformtutor"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="@drawable/boxedittext"
+            android:layout_marginTop="10dp"
+            android:padding="5dp"
+            android:hint="@string/c_dula_de_identidad"
+            android:textColor="@color/colorTextEdit"
+            android:autofillHints="false"
+            android:inputType="number" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/sizeInfo"
+            android:text="@string/ingrese_su_n_mero_de_tel_fono"
+            android:layout_marginTop="20dp"/>
+        <EditText
+            android:id="@+id/etTelefonoformtutor"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="@drawable/boxedittext"
+            android:layout_marginTop="10dp"
+            android:padding="5dp"
+            android:hint="@string/tel_fono"
+            android:textColor="@color/colorTextEdit"
+            android:autofillHints="false"
+            android:inputType="number" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btnHabilitarformtutor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/habilitar"
+                tools:ignore="ButtonStyle" />
+            <Button
+                android:id="@+id/btnCancelarformtutor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cancelar"
+                tools:ignore="ButtonStyle" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+</FrameLayout>
