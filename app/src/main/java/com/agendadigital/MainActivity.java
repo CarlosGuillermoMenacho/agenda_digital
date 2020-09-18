@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.widget.TextView;
 
 import com.agendadigital.Fragments.BoletinFragment;
+import com.agendadigital.Fragments.FragmentFormAlumno;
 import com.agendadigital.Fragments.FragmentFormProfesor;
 import com.agendadigital.Fragments.FragmentFormTutor;
 import com.agendadigital.Interfaces.Comunicador;
@@ -33,17 +34,12 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         View hview = navigationView.getHeaderView(0);
@@ -116,6 +112,14 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
             fragmentTransaction.replace(R.id.container_form,fragmentFormProfesor);
             fragmentTransaction.commit();
         }
+        if (fragment==R.id.fragmentFormAlumno){
+            FragmentFormAlumno fragmentFormAlumno = new FragmentFormAlumno();
+            fragmentManager = getSupportFragmentManager();
+            fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.container_form, fragmentFormAlumno);
+            fragmentTransaction.commit();
+        }
+
     }
 
 }

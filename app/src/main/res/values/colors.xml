@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
@@ -8,4 +9,23 @@
     <color name="colorTextView">#000</color>
     <color name="lineSeparator">#000</color>
     <color name="colorTextEdit">#000</color>
+
+    <color name="color_primary">#091D54</color>
+    <color name="color_primary_variant">#0A0A3E</color>
+
+    <color name="color_secondary">#ff9100</color>
+    <color name="color_secondary_variant">#c56200</color>
+
+    <color name="color_background">#ffffff</color>
+    <color name="color_surface">#ffffff</color>
+    <color name="color_error">#F44336</color>
+
+    <color name="color_divider">#1E000000</color>
+
+    <color name="color_on_primary">#ffffff</color>
+    <color name="color_on_secondary">#ffffff</color>
+    <color name="color_on_background">#000000</color>
+    <color name="color_on_surface">#000000</color>
+    <color name="color_on_error">#ffffff</color>
+
 </resources>

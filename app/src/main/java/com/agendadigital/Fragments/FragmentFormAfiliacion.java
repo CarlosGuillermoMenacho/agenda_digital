@@ -33,7 +33,7 @@ public class FragmentFormAfiliacion extends Fragment{
                              Bundle savedInstanceState) {
         final View vista = inflater.inflate(R.layout.fragment_form_afiliacion, container, false);
         Spinner spinner = vista.findViewById(R.id.spSelector);
-        String[] opciones = new String[]{"Tutor/Padre","Profesor"};
+        String[] opciones = new String[]{"Tutor/Padre","Profesor","Alumno"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),R.layout.item_spinner,opciones);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -58,6 +58,8 @@ public class FragmentFormAfiliacion extends Fragment{
             case 1:
                 comunicador.cambiarForm(R.id.fragmentFormProfesor);
                 break;
+            case 2:
+                comunicador.cambiarForm(R.id.fragmentFormAlumno);
         }
     }
 

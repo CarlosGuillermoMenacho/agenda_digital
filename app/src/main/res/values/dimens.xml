@@ -7,4 +7,6 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="sizeTitles">24sp</dimen>
     <dimen name="sizeInfo">16sp</dimen>
+    <dimen name="margin_default">16dp</dimen>
+    <dimen name="margin_max">32dp</dimen>
 </resources>

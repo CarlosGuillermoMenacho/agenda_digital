@@ -1,19 +1,21 @@
 package com.agendadigital.Fragments;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
+
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
 
 import com.agendadigital.R;
 import com.agendadigital.clases.AdminSQLite;
@@ -32,32 +34,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FragmentFormProfesor extends Fragment {
+public class FragmentFormAlumno extends Fragment {
 
-    private Button btnCancelar;
-    private Button btnHabilitar;
+    public FragmentFormAlumno() { }
+    @Override
+    public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); }
+
+    private Button btnCancelar, btnHabilitar;
     private EditText codigo;
     private EditText clave;
-    private String cod_prof,clave_prof;
-
-    public FragmentFormProfesor() { }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+    private String cod_alu, clave_alu;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-       View vista = inflater.inflate(R.layout.fragment_form_profesor, container, false);
-       hacerCast(vista);
-       oncliks();
-       return vista;
-    }
 
+        View vista = inflater.inflate(R.layout.fragment_form_alumno, container, false);
+        hacerCast(vista);
+        oncliks();
+        return vista;
+    }
     private void oncliks() {
         btnCancelar.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("ResourceType")
             @Override
             public void onClick(View v) {
                 Navigation.findNavController(v).navigate(R.id.nav_home);
@@ -80,7 +79,7 @@ public class FragmentFormProfesor extends Fragment {
                 progressDialog.setIndeterminate(false);
                 progressDialog.show();
 
-                StringRequest stringRequest = new StringRequest(Request.Method.POST,Constants.url + "/habilitar.php?op=profesor", new Response.Listener<String>() {
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.url + "/habilitar.php?op=alu", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         progressDialog.dismiss();
@@ -93,7 +92,7 @@ public class FragmentFormProfesor extends Fragment {
 
                                 AdminSQLite adminSQLite = new AdminSQLite(getContext(), "agenda", null, 1);
                                 ArrayList<String> valores = new ArrayList<>();
-                                valores.add(cod_prof);
+                                valores.add(cod_alu);
                                 valores.add(nombre);
                                 adminSQLite.saveProfesor(valores);
 
@@ -130,8 +129,8 @@ public class FragmentFormProfesor extends Fragment {
                     @Override
                     protected Map<String, String> getParams() {
                         Map<String, String> params = new HashMap<>();
-                        params.put("codigo", cod_prof);
-                        params.put("clave", clave_prof);
+                        params.put("codigo", cod_alu);
+                        params.put("clave", clave_alu);
                         return params;
                     }
                 };
@@ -157,20 +156,21 @@ public class FragmentFormProfesor extends Fragment {
 
     private boolean existe() {
         AdminSQLite adm = new AdminSQLite(getContext(),"agenda",null,1);
-        Cursor cursor = adm.profesor(cod_prof);
+        Cursor cursor = adm.estudiante(cod_alu);
         return cursor.moveToFirst();
     }
 
     private boolean validarDatos() {
-        cod_prof = codigo.getText().toString();
-        clave_prof = clave.getText().toString();
-        return !cod_prof.isEmpty() && cod_prof.length() < 4 && !clave_prof.isEmpty();
+        cod_alu = codigo.getText().toString();
+        clave_alu = clave.getText().toString();
+        return !cod_alu.isEmpty() && cod_alu.length() < 4 && !clave_alu.isEmpty();
     }
 
     private void hacerCast(View vista) {
-        btnCancelar = vista.findViewById(R.id.btnCancelarformprofesor);
-        btnHabilitar = vista.findViewById(R.id.btnHabilitarformprofesor);
-        codigo = vista.findViewById(R.id.etcodigoformprofesor);
-        clave = vista.findViewById(R.id.etclaveformprofesor);
+        btnCancelar  = vista.findViewById(R.id.btnCancelarformalumno);
+        btnHabilitar = vista.findViewById(R.id.btnHabilitarformalumno);
+        codigo = vista.findViewById(R.id.etcodigoformalumno);
+        clave = vista.findViewById(R.id.etclaveformalumno);
     }
+
 }

@@ -1,72 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@android:color/white"
     android:layout_margin="@dimen/margin_default"
-    tools:context=".Fragments.FragmentFormTutor">
+    tools:context=".Fragments.FragmentFormAlumno">
 
     <TextView
-        android:id="@+id/fHTutor"
+        android:id="@+id/fHAlumno"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/formularioHabilitacion"
         android:textSize="@dimen/sizeTitles"
         android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
-        android:id="@+id/titleTutor"
+        android:id="@+id/title2Alumno"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/tutor"
+        android:text="@string/alumno"
         android:gravity="center"
         android:textSize="@dimen/sizeTitles"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fHTutor"/>
+        app:layout_constraintTop_toBottomOf="@id/fHAlumno"/>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/imputUsuario"
+        android:id="@+id/imputUsuarioA"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_max"
         app:endIconMode="clear_text"
-        android:hint="@string/cedulaIdentidad"
-        app:helperText="@string/ingreseCedula"
+        android:hint="@string/codigo"
+        app:helperText="@string/ingreseCodigo"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/titleTutor">
+        app:layout_constraintTop_toBottomOf="@id/title2Alumno">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etCedulaformtutor"
+            android:id="@+id/etcodigoformalumno"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:inputType="number"/>
+            android:inputType="text"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/imputClave"
+        android:id="@+id/imputClaveA"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_max"
-        app:endIconMode="clear_text"
-        android:hint="@string/telefono"
-        app:helperText="@string/ingreseTelefono"
+        app:endIconMode="password_toggle"
+        android:hint="@string/clave"
+        app:helperText="@string/ingreseCodigo"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imputUsuario">
+        app:layout_constraintTop_toBottomOf="@id/imputUsuarioA">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etTelefonoformtutor"
+            android:id="@+id/etclaveformalumno"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:inputType="number"/>
@@ -75,25 +74,24 @@
 
 
     <Button
-        android:id="@+id/btnHabilitarformtutor"
+        android:id="@+id/btnHabilitarformalumno"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/margin_max"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="@dimen/margin_max"
         android:text="@string/habilitar"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.142"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imputClave" />
+        app:layout_constraintTop_toBottomOf="@id/imputClaveA" />
 
     <Button
-        android:id="@+id/btnCancelarformtutor"
+        android:id="@+id/btnCancelarformalumno"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_max"
         android:text="@string/cancelar"
+        android:layout_marginTop="@dimen/margin_max"
+        app:layout_constraintTop_toBottomOf="@id/imputClaveA"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnHabilitarformtutor"
-        app:layout_constraintTop_toBottomOf="@id/imputClave" />
+        app:layout_constraintStart_toEndOf="@id/btnHabilitarformalumno"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

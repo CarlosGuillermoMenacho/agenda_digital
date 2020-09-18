@@ -112,6 +112,9 @@ public class FragmentAfiliacion extends Fragment {
         if (codigos.get(position)[1].equals("profesor")){
             adm.deleteProfesor(codigos.get(position)[0]);
         }
+        if (codigos.get(position)[1].equals("estudiante")){
+            adm.deleteEstudiante(codigos.get(position)[0]);
+        }
     }
 
 
@@ -119,7 +122,7 @@ public class FragmentAfiliacion extends Fragment {
         btnNew = vista.findViewById(id.btnNewUser);
         btnDelete = vista.findViewById(id.btnDeleteUser);
         btnListo = vista.findViewById(id.btnListoafiliacion);
-        title = vista.findViewById(id.text_home);
+        title = vista.findViewById(id.textCambiarCuenta);
         lista = vista.findViewById(id.lvAfiliados);
     }
 

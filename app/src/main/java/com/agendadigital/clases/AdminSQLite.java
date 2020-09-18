@@ -215,4 +215,21 @@ public class AdminSQLite extends SQLiteOpenHelper {
     public Cursor getMaterias(String alu){
         return getReadableDatabase().rawQuery("select * from materias where cod_est='"+alu+"'",null);
     }
+
+    public int getCountNotificacion (String cod_emisor, String cod_tutor, String cod_estudiante) {
+
+        return getReadableDatabase().rawQuery("select * from notificaciones " +
+                        "where cod_est="+cod_estudiante + "  and  emisor= "+ cod_emisor +" and "+
+                        "cod_tutor="+cod_tutor ,
+                null).getCount();
+
+    }
+    public int testEstados (String cod_emisor, String cod_tutor, String cod_estudiante) {
+        return getReadableDatabase().rawQuery("update notificaciones set visto = 1 " +
+                        "where cod_est="+cod_estudiante + "  and  emisor= "+ cod_emisor +" and "+
+                        "cod_tutor="+cod_tutor ,
+                null).getCount();
+    }
+
+
 }

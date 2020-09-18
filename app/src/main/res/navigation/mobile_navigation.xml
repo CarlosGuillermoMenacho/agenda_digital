@@ -18,15 +18,18 @@
         android:name="com.agendadigital.Fragments.FragmentKardex"
         android:label="Kardex de Pago"
         tools:layout="@layout/fragment_lista_alu"/>
+
+
+    <!--Navigation Drawer-->
     <fragment
         android:id="@+id/nav_gallery"
         android:name="com.agendadigital.Fragments.FragmentAgendaDigital"
-        android:label="@string/menu_gallery"
+        android:label="@string/agendaDigital"
         tools:layout="@layout/fragment_lista_alumnos" />
     <fragment
         android:id="@+id/nav_slideshow"
         android:name="com.agendadigital.Fragments.FragmentBoletin"
-        android:label="@string/menu_slideshow"
+        android:label="@string/boletines"
         tools:layout="@layout/fragment_slideshow"/>
     <fragment
         android:id="@+id/boletinFragment"
@@ -96,4 +99,9 @@
         android:id="@+id/fragmentTabDinamico"
         android:name="com.agendadigital.Fragments.FragmentTabDinamico"
         android:label="FragmentTabDinamico" />
+    <fragment
+        android:id="@+id/fragmentFormAlumno"
+        android:name="com.agendadigital.Fragments.FragmentFormAlumno"
+        android:label="fragment_form_alumno"
+        tools:layout="@layout/fragment_form_alumno" />
 </navigation>

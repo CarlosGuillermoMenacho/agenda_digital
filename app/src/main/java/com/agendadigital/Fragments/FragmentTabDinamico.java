@@ -52,9 +52,14 @@ public class FragmentTabDinamico extends Fragment {
         tabLayout.setupWithViewPager(viewPager);
         Globals.notificacioness = adm.getNotificaciones(Globals.estudiante.getCodigo(),Globals.user.getCodigo());
         cargarTabs();
+        contadorNotificaciones(tabLayout);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+
+                adm.testEstados("1","1","1");
+                tab.removeBadge();
+
             }
 
             @Override
@@ -83,9 +88,10 @@ public class FragmentTabDinamico extends Fragment {
         viewPager.setAdapter(adaptadorViewPager);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    private void contadorNotificaciones(TabLayout tabLayout) {
+
+        int cursorContadorNotificaciones = adm.getCountNotificacion("1", "1", "1");
+        tabLayout.getTabAt(1).getOrCreateBadge().setNumber(cursorContadorNotificaciones);
 
     }
 }
