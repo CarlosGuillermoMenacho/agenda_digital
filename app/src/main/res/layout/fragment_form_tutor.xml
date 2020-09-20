@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@android:color/white"
+    android:background="@color/color_background_personalizado"
     android:layout_margin="@dimen/margin_default"
     tools:context=".Fragments.FragmentFormTutor">
 
@@ -56,7 +56,7 @@
         android:id="@+id/imputClave"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_max"
+        android:layout_marginTop="@dimen/margin_default"
         app:endIconMode="clear_text"
         android:hint="@string/telefono"
         app:helperText="@string/ingreseTelefono"
@@ -74,26 +74,27 @@
     </com.google.android.material.textfield.TextInputLayout>
 
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnHabilitarformtutor"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/margin_max"
         android:layout_marginTop="32dp"
         android:text="@string/habilitar"
+        android:padding="@dimen/paddingButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imputClave" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCancelarformtutor"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_max"
+        android:layout_marginTop="@dimen/margin_default"
         android:text="@string/cancelar"
+        android:padding="@dimen/paddingButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnHabilitarformtutor"
-        app:layout_constraintTop_toBottomOf="@id/imputClave" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnHabilitarformtutor" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

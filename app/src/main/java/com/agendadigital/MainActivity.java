@@ -35,6 +35,8 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        configTheme();
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -43,11 +45,11 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         View hview = navigationView.getHeaderView(0);
-        TextView nameUser = hview.findViewById(R.id.tvNameUser);
+        /*TextView nameUser = hview.findViewById(R.id.tvUser);*/
         AdminSQLite adm = new AdminSQLite(MainActivity.this,"agenda",null,1);
         Globals.user = adm.getUserActivo();
-        nameUser.setText(Globals.user.getNombre());
-
+        /*nameUser.setText(Globals.user.getNombre());
+*/
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.fragmentAgendaDigital, R.id.nav_slideshow,R.id.lista_alu_Fragment,R.id.fragmentLicencia)
                 .setDrawerLayout(drawer)
@@ -120,6 +122,10 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
             fragmentTransaction.commit();
         }
 
+    }
+
+    private void configTheme() {
+        setTheme(R.style.AppTheme);
     }
 
 }

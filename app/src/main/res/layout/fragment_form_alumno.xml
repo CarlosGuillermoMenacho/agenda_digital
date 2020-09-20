@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@android:color/white"
+    android:background="@color/color_background_personalizado"
     android:layout_margin="@dimen/margin_default"
     tools:context=".Fragments.FragmentFormAlumno">
 
@@ -55,7 +55,7 @@
         android:id="@+id/imputClaveA"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_max"
+        android:layout_marginTop="@dimen/margin_default"
         app:endIconMode="password_toggle"
         android:hint="@string/clave"
         app:helperText="@string/ingreseCodigo"
@@ -73,25 +73,28 @@
     </com.google.android.material.textfield.TextInputLayout>
 
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnHabilitarformalumno"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_max"
         android:text="@string/habilitar"
+        android:padding="@dimen/paddingButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.142"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imputClaveA" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCancelarformalumno"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_default"
+        android:padding="@dimen/paddingButton"
         android:text="@string/cancelar"
-        android:layout_marginTop="@dimen/margin_max"
-        app:layout_constraintTop_toBottomOf="@id/imputClaveA"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btnHabilitarformalumno"/>
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnHabilitarformalumno" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

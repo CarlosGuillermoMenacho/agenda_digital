@@ -47,5 +47,7 @@
     <string name="red">#FB0303</string>
 
     <string name="notificacion">Notificacion</string>
+    <string name="colegioAizama">Agenda Digital \nAizama</string>
+    <string name="user">RODRIGUEZ AIZAMA JHONNY WILSON</string>
 
 </resources>

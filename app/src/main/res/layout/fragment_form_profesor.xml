@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@android:color/white"
+    android:background="@color/color_background_personalizado"
     android:layout_margin="@dimen/margin_default"
     tools:context=".Fragments.FragmentFormProfesor">
 
@@ -55,7 +55,7 @@
         android:id="@+id/imputClaveP"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_max"
+        android:layout_marginTop="@dimen/margin_default"
         app:endIconMode="password_toggle"
         android:hint="@string/clave"
         app:helperText="@string/ingreseClave"
@@ -72,25 +72,27 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnHabilitarformprofesor"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_max"
         android:text="@string/habilitar"
+        android:padding="@dimen/paddingButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.142"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imputClaveP" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCancelarformprofesor"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/cancelar"
-        android:layout_marginTop="@dimen/margin_max"
+        android:padding="@dimen/paddingButton"
+        android:layout_marginTop="@dimen/margin_default"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imputClaveP"
-        app:layout_constraintStart_toEndOf="@+id/btnHabilitarformprofesor" />
+        app:layout_constraintTop_toBottomOf="@id/btnHabilitarformprofesor"
+        app:layout_constraintStart_toStartOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
