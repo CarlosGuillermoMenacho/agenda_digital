@@ -21,4 +21,7 @@
     <dimen name="paddingButton">15dp</dimen>
 
 
+    <dimen name="item_size_alumno">56dp</dimen>
+
+
 </resources>

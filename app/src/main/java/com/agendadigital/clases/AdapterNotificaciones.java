@@ -25,7 +25,9 @@ public class AdapterNotificaciones extends RecyclerView.Adapter<AdapterNotificac
     @NonNull
     @Override
     public ViewHolderNotificaciones onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        @SuppressLint("InflateParams") View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.notificactio_message,null,false);
+        @SuppressLint("InflateParams")
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.notificactio_message,
+                null,false);
         return new ViewHolderNotificaciones(view);
     }
 

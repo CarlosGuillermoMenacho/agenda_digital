@@ -126,7 +126,10 @@ public class FragmentListaAlumnos extends Fragment {
                 if (cursor.moveToFirst()){
                     Globals.notificaciones = new Notificaciones();
                     do {
-                        Globals.notificaciones.add(new Notificacion(cursor.getInt(0),cursor.getInt(1),cursor.getInt(3),cursor.getInt(7),cursor.getInt(4),cursor.getString(2),cursor.getString(5),cursor.getString(6)));
+                        Globals.notificaciones.add(new Notificacion(cursor.getInt(0)
+                                ,cursor.getInt(1),cursor.getInt(3),
+                                cursor.getInt(7),cursor.getInt(4),
+                                cursor.getString(2),cursor.getString(5),cursor.getString(6)));
                     }while (cursor.moveToNext());
                 }
                 cursor.close();

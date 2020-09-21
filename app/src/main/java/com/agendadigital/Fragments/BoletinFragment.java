@@ -2,7 +2,6 @@ package com.agendadigital.Fragments;
 
 import android.content.ContentValues;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
@@ -36,13 +35,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-//import androidx.appcompat.app.AppCompatActivity;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link BoletinFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class BoletinFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
@@ -96,7 +89,7 @@ public class BoletinFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
         View vista=inflater.inflate(R.layout.fragment_boletin, container, false);
 
         final TableDynamic tableDynamic = new TableDynamic(tableLayout, getContext());

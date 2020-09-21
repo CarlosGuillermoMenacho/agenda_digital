@@ -21,7 +21,9 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL("create table notas(codigo int,cod_mat varchar,descri varchar ,nota1 varchar,nota2 varchar,nota3 varchar)");
         db.execSQL("create table tutor(codigo varchar,nombre varchar, cedula varchar, telefono varchar, activo int)");
         db.execSQL("create table alu_tut(tutor int,alu int)");
+
         db.execSQL("create table alumno(codigo int,nombre,curso varchar,cod_cur int)");
+
         db.execSQL("create table profesor(codigo varchar,nombre varchar, activo int)");
         db.execSQL("create table notificaciones(codigo int,cod_est int,mensaje varchar,emisor int,cod_tutor int,fecha varchar, hora varchar, visto int)");
         db.execSQL("create table materias(cod_est varchar,cod_materia varchar,nomb_materia varchar)");
@@ -165,7 +167,8 @@ public class AdminSQLite extends SQLiteOpenHelper {
         return  ususarios;
     }
     public Cursor estudiantes(String codigoTutor){
-        return getReadableDatabase().rawQuery("select a.codigo,a.nombre from alumno a,alu_tut t where t.alu = a.codigo and t.tutor="+codigoTutor,null);
+        return getReadableDatabase().rawQuery("select a.codigo,a.nombre from alumno a,alu_tut t where t.alu = a.codigo" +
+                                                " and t.tutor="+codigoTutor,null);
     }
     public Cursor estudiante(String codEstudiante){
         return getReadableDatabase().rawQuery("select * from alumno where codigo='"+codEstudiante+"'",null);
