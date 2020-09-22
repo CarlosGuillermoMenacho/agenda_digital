@@ -49,5 +49,6 @@
     <string name="notificacion">Notificacion</string>
     <string name="colegioAizama">Agenda Digital \nAizama</string>
     <string name="user">RODRIGUEZ AIZAMA JHONNY WILSON</string>
+    <string name="motivo_de_la_licencia">Motivo de la licencia</string>
 
 </resources>

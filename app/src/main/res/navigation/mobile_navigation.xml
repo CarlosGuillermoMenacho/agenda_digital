@@ -13,6 +13,7 @@
             android:id="@+id/action_nav_home_to_fragmentFormAfiliacion2"
             app:destination="@id/fragmentFormAfiliacion" />
     </fragment>
+
     <fragment
         android:id="@+id/lista_alu_Fragment"
         android:name="com.agendadigital.Fragments.FragmentKardex"
@@ -104,4 +105,14 @@
         android:name="com.agendadigital.Fragments.FragmentFormAlumno"
         android:label="fragment_form_alumno"
         tools:layout="@layout/fragment_form_alumno" />
+    <fragment
+        android:id="@+id/fragmentFormLicencia"
+        android:name="com.agendadigital.Fragments.FragmentFormLicencia"
+        android:label="fragment_form_licencia"
+        tools:layout="@layout/fragment_form_licencia" />
+    <fragment
+        android:id="@+id/fragmentLicencias"
+        android:name="com.agendadigital.Fragments.FragmentLicencias"
+        android:label="fragment_licencias"
+        tools:layout="@layout/fragment_licencias" />
 </navigation>

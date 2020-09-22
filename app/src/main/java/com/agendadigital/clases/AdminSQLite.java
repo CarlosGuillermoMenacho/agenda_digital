@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class AdminSQLite extends SQLiteOpenHelper {
     public AdminSQLite(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
@@ -19,86 +20,21 @@ public class AdminSQLite extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table kar_alu(codigo int,detalle varchar,fecha date ,recnum int,haber float,acreedor float)");
         db.execSQL("create table notas(codigo int,cod_mat varchar,descri varchar ,nota1 varchar,nota2 varchar,nota3 varchar)");
-        db.execSQL("create table tutor(codigo varchar,nombre varchar, cedula varchar, telefono varchar, activo int)");
+        db.execSQL("create table tutor(codigo int,nombre varchar, cedula varchar, telefono varchar, activo int)");
         db.execSQL("create table alu_tut(tutor int,alu int)");
-
-        db.execSQL("create table alumno(codigo int,nombre,curso varchar,cod_cur int)");
-
+        db.execSQL("create table alumno(codigo int,nombre,curso varchar,cod_cur int,colegio varchar,ip varchar,cod_col int,foto varchar)");
         db.execSQL("create table profesor(codigo varchar,nombre varchar, activo int)");
-        db.execSQL("create table notificaciones(codigo int,cod_est int,mensaje varchar,emisor int,cod_tutor int,fecha varchar, hora varchar, visto int)");
-        db.execSQL("create table materias(cod_est varchar,cod_materia varchar,nomb_materia varchar)");
+        db.execSQL("create table licencias(id int,codigo int,cod_tut int, f_sol varchar,h_sol varchar,f_ini varchar,f_fin varchar,obs varchar,estado int)");
+        db.execSQL("create table estados(id_est int,descrip varchar)");
 
-
-        db.execSQL("insert into materias values('241','1','Matemáticas')");
-        db.execSQL("insert into materias values('241','2','Física')");
-        db.execSQL("insert into materias values('241','3','Lenguaje')");
-        db.execSQL("insert into materias values('241','4','Química')");
-        db.execSQL("insert into materias values('241','5','Biología')");
-        db.execSQL("insert into materias values('241','6','Música')");
-        db.execSQL("insert into materias values('241','7','Geografía')");
-        db.execSQL("insert into materias values('241','8','Filosofía')");
-        db.execSQL("insert into materias values('241','9','Sociales')");
-        db.execSQL("insert into materias values('241','10','Educación Física')");
-
-        db.execSQL("insert into notificaciones values(1,241,'Mensaje numero 1 de matematicas',1,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(2,241,'Mensaje numero 2 de matematicas',1,22,'2020-05-03','08:30',0)");
-        db.execSQL("insert into notificaciones values(3,241,'Mensaje numero 3 de matematicas',1,22,'2020-05-04','08:30',0)");
-        db.execSQL("insert into notificaciones values(4,241,'Mensaje numero 4 de matematicas',1,22,'2020-05-05','08:30',0)");
-        db.execSQL("insert into notificaciones values(5,241,'Mensaje numero 5 de matematicas',1,22,'2020-05-06','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(6,241,'Mensaje numero 1 de fisica',2,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(7,241,'Mensaje numero 2 de fisica',2,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(8,241,'Mensaje numero 3 de fisica',2,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(9,241,'Mensaje numero 4 de fisica',2,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(10,241,'Mensaje numero 5 de fisica',2,22,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(11,241,'Mensaje numero 1 de lenguaje',3,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(12,241,'Mensaje numero 2 de lenguaje',3,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(13,241,'Mensaje numero 3 de lenguaje',3,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(14,241,'Mensaje numero 4 de lenguaje',3,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(15,241,'Mensaje numero 5 de lenguaje',3,22,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(16,241,'Mensaje numero 1 de quimica',4,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(17,241,'Mensaje numero 2 de quimica',4,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(18,241,'Mensaje numero 3 de quimica',4,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(19,241,'Mensaje numero 4 de quimica',4,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(20,241,'Mensaje numero 5 de quimica',4,22,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(21,241,'Mensaje numero 1 de Biologia',5,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(22,241,'Mensaje numero 2 de Biologia',5,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(23,241,'Mensaje numero 3 de Biologia',5,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(24,241,'Mensaje numero 4 de Biologia',5,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(25,241,'Mensaje numero 5 de Biologia',5,22,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(26,241,'Mensaje numero 1 de musica',6,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(27,241,'Mensaje numero 2 de musica',6,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(28,241,'Mensaje numero 3 de musica',6,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(29,241,'Mensaje numero 4 de musica',6,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(30,241,'Mensaje numero 5 de musica',6,22,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(31,241,'Mensaje numero 1 de geografia',7,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(32,241,'Mensaje numero 2 de geografia',7,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(33,241,'Mensaje numero 3 de geografia',7,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(34,241,'Mensaje numero 4 de geografia',7,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(35,241,'Mensaje numero 5 de geografia',7,22,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(36,241,'Mensaje numero 1 de filosofia',8,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(37,241,'Mensaje numero 2 de filosofia',8,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(38,241,'Mensaje numero 3 de filosofia',8,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(39,241,'Mensaje numero 4 de filosofia',8,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(40,241,'Mensaje numero 5 de filosofia',8,22,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(41,241,'Mensaje numero 1 de sociales',9,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(42,241,'Mensaje numero 2 de sociales',9,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(43,241,'Mensaje numero 3 de sociales',9,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(44,241,'Mensaje numero 4 de sociales',9,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(45,241,'Mensaje numero 5 de sociales',9,22,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(46,241,'Mensaje numero 1 de educacion fisica',10,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(47,241,'Mensaje numero 2 de educacion fisica',10,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(48,241,'Mensaje numero 3 de educacion fisica',10,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(49,241,'Mensaje numero 4 de educacion fisica',10,22,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(50,241,'Mensaje numero 5 de educacion fisica',10,22,'2020-05-02','08:30',0)");
+        db.execSQL("insert into estados values(0,'PASIVO')");
+        db.execSQL("insert into estados values(1,'ACTIVO')");
+        db.execSQL("insert into estados values(2,'ANULADO')");
+        db.execSQL("insert into estados values(3,'EJECUTADO')");
+     /*   db.execSQL("insert into licencias values(1,1,1,'2020-05-01','08:01','2020-05-01','2020-05-01','prueba',0)");
+        db.execSQL("insert into licencias values(2,2,1,'2020-05-01','08:02','2020-05-01','2020-05-01','prueba',0)");
+        db.execSQL("insert into licencias values(3,3,3,'2020-05-01','08:03','2020-05-01','2020-05-01','prueba',0)");
+        db.execSQL("insert into licencias values(4,1,1,'2020-05-01','08:04','2020-05-01','2020-05-01','prueba',0)");*/
     }
 
     @Override
@@ -106,6 +42,9 @@ public class AdminSQLite extends SQLiteOpenHelper {
 
     }
 
+    public Cursor licencias(int cod_alu){//devuelve en un cursor todos los profesores habilitados
+        return getReadableDatabase().rawQuery("select l.id,l.codigo,l.cod_tut,l.f_sol,l.h_sol,l.f_ini,l.f_fin,l.obs,t.nombre,e.descrip as estado from licencias l,tutor t,estados e where l.codigo="+cod_alu+" and l.cod_tut=t.codigo and l.estado=e.id_est",null);
+    }
     public Cursor tutores(){//devuelve en un cursor todos los tutores habilitados
         return getReadableDatabase().rawQuery("select * from tutor",null);
     }
@@ -130,11 +69,26 @@ public class AdminSQLite extends SQLiteOpenHelper {
     public void saveTutor(ArrayList<String> valores){
         getWritableDatabase().execSQL("insert into tutor values('"+valores.get(0)+"','"+valores.get(1)+"','"+valores.get(2)+"','"+valores.get(3)+"',0)");
     }
+    public void saveLicencia(int id,int codigo,int cod_tut,String f_sol,String hora,String f_ini,String f_fin,String obs){
+        getWritableDatabase().execSQL("insert into licencias values("+id+","+codigo+","+cod_tut+",'"+f_sol+"','"+hora+"','"+f_ini+"','"+f_fin+"','"+obs+"',1)");
+    }
+    public Cursor licencia(int cod_alu,Date fecha){
+        return getReadableDatabase().rawQuery("select * from licencias where estado=1 and codigo='"+cod_alu+"'",null);
+    }
+    public Cursor verif_Lic(int codi_lice){
+        return getReadableDatabase().rawQuery("select * from licencias where id="+codi_lice,null);
+    }
+    public Cursor verif_alu(int codi_alum){
+        return getReadableDatabase().rawQuery("select * from alumno where codigo="+codi_alum,null);
+    }
     public Cursor tutor(String cedula,String telefono){
         return getReadableDatabase().rawQuery("select * from tutor where cedula='"+cedula+"' and telefono='"+telefono+"'",null);
     }
     public void deleteEstudiante(String codigo){
         getWritableDatabase().execSQL("delete from alumno where codigo = "+codigo);
+    }
+    public void anularLicencia(int codigo){
+        getWritableDatabase().execSQL("update licencias set estado=2 where id="+codigo);
     }
     public void deleteTutor(String codigo){
         Cursor cursor = getAlus(codigo);
@@ -149,6 +103,18 @@ public class AdminSQLite extends SQLiteOpenHelper {
         getWritableDatabase().execSQL("delete from tutor where codigo="+codigo);
         getWritableDatabase().execSQL("delete from alu_tut where tutor = "+codigo);
     }
+
+    public ArrayList<Licencia> obt_licencias(){
+        Cursor licenc = licencias(Integer.parseInt(Globals.estudiante.getCodigo()));
+        ArrayList<Licencia> ususarios = new ArrayList<>();
+        if (licenc.moveToFirst()) {
+            do {
+                ususarios.add(new Licencia(licenc.getString(0), licenc.getString(1), licenc.getString(2), licenc.getString(3), licenc.getString(4), licenc.getString(5), licenc.getString(6), licenc.getString(7), licenc.getString(8), licenc.getString(9)));
+            } while (licenc.moveToNext());
+        }
+        return  ususarios;
+    }
+
     public ArrayList<User> users(){
         Cursor tutores = tutores();
         Cursor profesores = profesores();
@@ -167,8 +133,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
         return  ususarios;
     }
     public Cursor estudiantes(String codigoTutor){
-        return getReadableDatabase().rawQuery("select a.codigo,a.nombre from alumno a,alu_tut t where t.alu = a.codigo" +
-                                                " and t.tutor="+codigoTutor,null);
+        return getReadableDatabase().rawQuery("select a.codigo,a.nombre,a.colegio from alumno a,alu_tut t where t.alu = a.codigo and t.tutor="+codigoTutor,null);
     }
     public Cursor estudiante(String codEstudiante){
         return getReadableDatabase().rawQuery("select * from alumno where codigo='"+codEstudiante+"'",null);
@@ -200,39 +165,4 @@ public class AdminSQLite extends SQLiteOpenHelper {
         }
         return new User();
     }
-    public void saveNotificacion(String codigo,String cod_est,String menasje, String emisor,String fecha,String hora,String cod_tutor){
-        getWritableDatabase().execSQL("insert into notificaciones values("+codigo+","+cod_est+",'"+menasje+"',"+emisor+","+cod_tutor+",'"+fecha+"','"+hora+"',0)");
-    }
-    public Cursor getNotificacion(String codigo){
-        return getReadableDatabase().rawQuery("select * from notificaction where codigo="+codigo,null);
-    }
-    public Cursor getNotificaciones(String cod_est,String cod_tutor){
-        return getReadableDatabase().rawQuery("select * from notificaciones where cod_est="+cod_est+" and cod_tutor="+cod_tutor,null);
-    }
-    public Cursor getNotificaciones(String cod_est,String cod_tutor,String emisor){
-        return getReadableDatabase().rawQuery("select * from notificaciones where cod_est="+cod_est+" and emisor="+emisor+" and cod_tutor="+cod_tutor,null);
-    }
-    public void saveMaterias(String Alu,String codMat,String nombMat){
-        getWritableDatabase().execSQL("insert into materias values('"+Alu+"','"+codMat+"','"+nombMat+"')");
-    }
-    public Cursor getMaterias(String alu){
-        return getReadableDatabase().rawQuery("select * from materias where cod_est='"+alu+"'",null);
-    }
-
-    public int getCountNotificacion (String cod_emisor, String cod_tutor, String cod_estudiante) {
-
-        return getReadableDatabase().rawQuery("select * from notificaciones " +
-                        "where cod_est="+cod_estudiante + "  and  emisor= "+ cod_emisor +" and "+
-                        "cod_tutor="+cod_tutor ,
-                null).getCount();
-
-    }
-    public int testEstados (String cod_emisor, String cod_tutor, String cod_estudiante) {
-        return getReadableDatabase().rawQuery("update notificaciones set visto = 1 " +
-                        "where cod_est="+cod_estudiante + "  and  emisor= "+ cod_emisor +" and "+
-                        "cod_tutor="+cod_tutor ,
-                null).getCount();
-    }
-
-
 }

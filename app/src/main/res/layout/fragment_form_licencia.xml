@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fff"
+    tools:context=".Fragments.FragmentFormLicencia">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="30dp"
+        tools:ignore="UselessParent">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Formulario de Solicitud"
+            android:textSize="@dimen/sizeTitles"
+            android:gravity="center"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="LICENCIA"
+            android:gravity="center"
+            android:textSize="@dimen/sizeTitles"/>
+
+        <TextView
+            android:id="@+id/tvfecha"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fecha Actual" />
+
+        <Button
+            android:id="@+id/btndesde"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Desde Fecha..." />
+
+        <TextView
+            android:id="@+id/tvinicio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Inicio de Licencia"
+            android:textSize="18sp"
+            android:gravity="center"/>
+
+        <Button
+            android:id="@+id/btnhasta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hasta Fecha..." />
+
+        <TextView
+            android:id="@+id/tvfin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fin de Licencia"
+            android:textSize="18sp"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Explique el mótivo de la licencia"
+            android:textSize="@dimen/sizeInfo" />
+
+        <EditText
+            android:id="@+id/etObs"
+            android:layout_width="match_parent"
+            android:layout_height="198dp"
+            android:ems="10"
+            android:hint="@string/motivo_de_la_licencia"
+            android:gravity="start|top"
+            android:inputType="textMultiLine" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnHabilitarformtutor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ACEPTAR"
+                tools:ignore="ButtonStyle" />
+            <Button
+                android:id="@+id/btnCancelarformtutor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cancelar"
+                tools:ignore="ButtonStyle" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+</FrameLayout>
