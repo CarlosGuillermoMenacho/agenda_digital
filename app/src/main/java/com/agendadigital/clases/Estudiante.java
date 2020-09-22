@@ -6,6 +6,10 @@ public class Estudiante {
     private String foto;
     private String colegio;
 
+    public Estudiante() {
+
+
+    }
     public Estudiante(String string, String cursorString) {
         this.codigo = null;
         this.nombre = null;

@@ -1,4 +1,4 @@
-package com.agendadigital.Adapters;
+package com.agendadigital.Fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -26,7 +26,6 @@ import java.util.ArrayList;
 public class AdapterLicencias extends ArrayAdapter {
     private Context context;
     private ArrayList<Estudiante> datos;
-    Estudiante estudiante;
 
 
     public AdapterLicencias(Context context, ArrayList datos) {
@@ -49,14 +48,12 @@ public class AdapterLicencias extends ArrayAdapter {
         img = BitmapFactory.decodeByteArray(decode,0,decode.length);
 
 
-        ImageView imagen = (ImageView) item.findViewById(R.id.imgAlumno);
+        ImageView imagen = item.findViewById(R.id.imgAlumno);
         imagen.setImageBitmap(img);
 
-        TextView nombre = (TextView) item.findViewById(R.id.tvNombre);
+        TextView nombre = item.findViewById(R.id.tvNombre);
         nombre.setText(datos.get(position).getNombre());
 
         return item;
     }
-
-
 }

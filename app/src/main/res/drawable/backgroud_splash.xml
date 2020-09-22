@@ -3,7 +3,7 @@
 
     <item android:drawable="@color/color_background_personalizado"/>
     <item>
-        <bitmap android:src="@drawable/logo_aizama"
+        <bitmap android:src="@drawable/logo_emp_aizama"
                 android:gravity="center"/>
     </item>
 

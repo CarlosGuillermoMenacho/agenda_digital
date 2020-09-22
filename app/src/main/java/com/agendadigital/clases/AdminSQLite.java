@@ -207,7 +207,5 @@ public class AdminSQLite extends SQLiteOpenHelper {
                         "cod_tutor="+cod_tutor ,
                 null).getCount();
     }
-
-
-
+    
 }
