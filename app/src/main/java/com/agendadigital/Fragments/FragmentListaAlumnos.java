@@ -43,6 +43,7 @@ public class FragmentListaAlumnos extends Fragment {
     private AdminSQLite adm;
     private ArrayList<Estudiante> estudiantes;
 
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
@@ -71,7 +72,9 @@ public class FragmentListaAlumnos extends Fragment {
                                 Cursor cursor = adm.estudiante(fila.getString(0));
                                 if (!cursor.moveToFirst()) {
                                     adm.tutor_alu(Globals.user.getCodigo(), fila.getString(0));
-                                    adm.saveAlumno(fila.getString(0), fila.getString(1), fila.getString(2), fila.getString(3));
+                                    adm.saveAlumno(fila.getString(0), fila.getString(1),
+                                            fila.getString(2), fila.getString(3),fila.getString(4),
+                                            fila.getString(5), fila.getString(6),fila.getString(7));
                                 }
                             }
                             llenarLista();
@@ -107,11 +110,12 @@ public class FragmentListaAlumnos extends Fragment {
         ArrayList<String> nombres = new ArrayList<>();
         if (cursor.moveToFirst()){
             do {
-                estudiantes.add(new Estudiante(cursor.getString(0),cursor.getString(1)));
-                nombres.add(cursor.getString(1));
+                estudiantes.add(new Estudiante(cursor.getString(0),cursor.getString(1),
+                        cursor.getString(7),cursor.getString(2)));
+
             }while (cursor.moveToNext());
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireActivity(), android.R.layout.simple_list_item_1, nombres);
+            AdapterLicencias adapter = new AdapterLicencias(getContext(), estudiantes);
             lvListaAlumnosBoletin.setAdapter(adapter);
         }
     }

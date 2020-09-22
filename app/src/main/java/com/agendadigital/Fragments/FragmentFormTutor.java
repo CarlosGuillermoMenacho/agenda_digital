@@ -27,6 +27,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -86,15 +87,39 @@ public class FragmentFormTutor extends Fragment {
                     @Override
                     public void onResponse(String response) {
                         progressDialog.dismiss();
+
+
+
                         try {
+
+                                AdminSQLite adminSQLite = new AdminSQLite(getContext(), "agenda", null, 1);
+
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                             JSONObject jsonObject = new JSONObject(response);
                             String status = jsonObject.getString("status");
                             if (status.equals("ok")) {
-                                String nombre = jsonObject.getString("nombre");
-                                String codigo = jsonObject.getString("codigo");
+                                JSONObject tutor = jsonObject.getJSONObject("tutor");
 
-                                AdminSQLite adminSQLite = new AdminSQLite(getContext(), "agenda", null, 1);
+                                String nombre = tutor.getString("nombre");
+                                String codigo = tutor.getString("codigo");
+                                JSONArray alumnos = jsonObject.getJSONArray("alumnos");
+
+
+                                for (int i = 0; i< alumnos.length(); i++ ){
+                                    JSONObject alumno = alumnos.getJSONObject(i);
+                                    String codigoAlu = alumno.getString("codigo");
+                                    String nombreAlumno = alumno.getString("nombre");
+                                    String curso = alumno.getString("curso");
+                                    String cod_curso = alumno.getString("cod_cur");
+                                    String colegio = alumno.getString("colegio");
+                                    String ip = alumno.getString("ip");
+                                    String cod_col = alumno.getString("cod_col");
+                                    String fotoAlu = alumno.getString("foto");
+                                    adminSQLite.saveAlumno(codigoAlu, nombreAlumno, curso, cod_curso, colegio,
+                                                            ip, cod_col, fotoAlu);
+                                    adminSQLite.tutor_alu(codigo,codigoAlu);
+                                }
+
                                 ArrayList<String> valores = new ArrayList<>();
                                 valores.add(codigo);
                                 valores.add(nombre);

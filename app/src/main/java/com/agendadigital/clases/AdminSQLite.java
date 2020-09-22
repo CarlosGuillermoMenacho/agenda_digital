@@ -22,7 +22,9 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL("create table notas(codigo int,cod_mat varchar,descri varchar ,nota1 varchar,nota2 varchar,nota3 varchar)");
         db.execSQL("create table tutor(codigo int,nombre varchar, cedula varchar, telefono varchar, activo int)");
         db.execSQL("create table alu_tut(tutor int,alu int)");
-        db.execSQL("create table alumno(codigo int,nombre,curso varchar,cod_cur int,colegio varchar,ip varchar,cod_col int,foto varchar)");
+
+
+
         db.execSQL("create table profesor(codigo varchar,nombre varchar, activo int)");
         db.execSQL("create table licencias(id int,codigo int,cod_tut int, f_sol varchar,h_sol varchar,f_ini varchar,f_fin varchar,obs varchar,estado int)");
         db.execSQL("create table estados(id_est int,descrip varchar)");
@@ -35,11 +37,19 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL("insert into licencias values(2,2,1,'2020-05-01','08:02','2020-05-01','2020-05-01','prueba',0)");
         db.execSQL("insert into licencias values(3,3,3,'2020-05-01','08:03','2020-05-01','2020-05-01','prueba',0)");
         db.execSQL("insert into licencias values(4,1,1,'2020-05-01','08:04','2020-05-01','2020-05-01','prueba',0)");*/
+        db.execSQL("create table alumno(codigo int,nombre varchar,curso varchar,cod_cur int,colegio varchar," +
+                "ip varchar,cod_col int,foto varchar)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+    }
+
+    public void saveAlumno(String codigo , String nombre , String curso , String codCurso, String colegio,
+                           String ip, String cod_col, String foto  ){
+        getWritableDatabase().execSQL("insert into alumno values('"+codigo+"','"+nombre+"','"+curso+"','"
+                                        +codCurso+"','"+colegio+"','"+ip+"','"+cod_col+"','"+foto+"')");
     }
 
     public Cursor licencias(int cod_alu){//devuelve en un cursor todos los profesores habilitados
@@ -132,15 +142,17 @@ public class AdminSQLite extends SQLiteOpenHelper {
         }
         return  ususarios;
     }
+
+
+
     public Cursor estudiantes(String codigoTutor){
-        return getReadableDatabase().rawQuery("select a.codigo,a.nombre,a.colegio from alumno a,alu_tut t where t.alu = a.codigo and t.tutor="+codigoTutor,null);
+        return getReadableDatabase().rawQuery("select a.codigo, a.nombre, a.curso, a.cod_cur, a.colegio, a.ip, a.cod_col, a.foto " +
+                                            "from alumno a,alu_tut t where t.alu = a.codigo and t.tutor="+codigoTutor,null);
     }
     public Cursor estudiante(String codEstudiante){
         return getReadableDatabase().rawQuery("select * from alumno where codigo='"+codEstudiante+"'",null);
     }
-    public void saveAlumno(String codigo , String nombre , String curso , String codCurso){
-        getWritableDatabase().execSQL("insert into alumno values('"+codigo+"','"+nombre+"','"+curso+"','"+codCurso+"')");
-    }
+
     public void tutor_alu(String tutor, String alumno){
         getWritableDatabase().execSQL("insert into alu_tut values('"+tutor+"','"+alumno+"')");
     }
@@ -207,5 +219,5 @@ public class AdminSQLite extends SQLiteOpenHelper {
                         "cod_tutor="+cod_tutor ,
                 null).getCount();
     }
-    
+
 }

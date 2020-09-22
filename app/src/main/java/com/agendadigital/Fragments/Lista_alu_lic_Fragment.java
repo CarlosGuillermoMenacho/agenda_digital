@@ -60,8 +60,8 @@ public class Lista_alu_lic_Fragment extends Fragment {
         ArrayList<String> nombres = new ArrayList<>();
         if (cursor.moveToFirst()){
             do {
-                estudiantes.add(new Estudiante(cursor.getString(0),cursor.getString(1),
-                        cursor.getString(8),cursor.getString(2)));
+                /*estudiantes.add(new Estudiante(cursor.getString(0),cursor.getString(1),
+                        cursor.getString(8),cursor.getString(2)));*/
                /* nombres.add(cursor.getString(1)+"\nCol.:"+cursor.getString(2));*/
 
             }while (cursor.moveToNext());
