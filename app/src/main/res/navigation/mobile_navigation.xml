@@ -14,11 +14,11 @@
             app:destination="@id/fragmentFormAfiliacion" />
     </fragment>
 
-    <fragment
+    <!--<fragment
         android:id="@+id/lista_alu_Fragment"
         android:name="com.agendadigital.Fragments.FragmentKardex"
         android:label="Kardex de Pago"
-        tools:layout="@layout/fragment_lista_alu"/>
+        tools:layout="@layout/fragment_lista_alu"/>-->
 
 
     <!--Navigation Drawer-->
@@ -61,11 +61,11 @@
         android:name="com.agendadigital.Fragments.KardexPagoFragment"
         android:label="Kardex"
         tools:layout="@layout/fragment_kardexpago" />
-    <fragment
+    <!--<fragment
         android:id="@+id/fragmentListaAlu"
         android:name="com.agendadigital.Fragments.FragmentListaAlu"
         android:label="fragment_lista_alu"
-        tools:layout="@layout/fragment_lista_alu" />
+        tools:layout="@layout/fragment_lista_alu" />-->
     <fragment
         android:id="@+id/fragmentAgendaDigital"
         android:name="com.agendadigital.Fragments.FragmentAgendaDigital"
@@ -115,4 +115,9 @@
         android:name="com.agendadigital.Fragments.FragmentLicencias"
         android:label="fragment_licencias"
         tools:layout="@layout/fragment_licencias" />
+    <fragment
+        android:id="@+id/lista_alu_lic_Fragment"
+        android:name="com.agendadigital.Fragments.Lista_alu_lic_Fragment"
+        android:label="fragment_lista_alu_lic"
+        tools:layout="@layout/fragment_lista_alu_lic" />
 </navigation>

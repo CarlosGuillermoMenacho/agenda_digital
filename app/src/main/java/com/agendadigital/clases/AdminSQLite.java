@@ -165,4 +165,49 @@ public class AdminSQLite extends SQLiteOpenHelper {
         }
         return new User();
     }
+
+
+    public Cursor getNotificacion(String codigo){
+        return getReadableDatabase().rawQuery("select * from notificaction where codigo="+codigo,null);
+    }
+
+    public Cursor getNotificaciones(String cod_est,String cod_tutor){
+        return getReadableDatabase().rawQuery("select * from notificaciones where cod_est="+cod_est+" and cod_tutor="+cod_tutor,null);
+    }
+
+    public Cursor getNotificaciones(String cod_est,String cod_tutor,String emisor){
+        return getReadableDatabase().rawQuery("select * from notificaciones where cod_est="+cod_est+" and emisor="+emisor+" and cod_tutor="+cod_tutor,null);
+    }
+
+    public Cursor getMaterias(String alu){
+        return getReadableDatabase().rawQuery("select * from materias where cod_est='"+alu+"'",null);
+    }
+
+    public void saveNotificacion(String codigo,String cod_est,String menasje, String emisor,String fecha,String hora,String cod_tutor){
+        getWritableDatabase().execSQL("insert into notificaciones values("+codigo+","+cod_est+",'"+menasje+"',"+emisor+"," +
+                "                           "+cod_tutor+",'"+fecha+"','"+hora+"',0)");
+    }
+
+    public void saveMaterias(String Alu,String codMat,String nombMat){
+        getWritableDatabase().execSQL("insert into materias values('"+Alu+"','"+codMat+"','"+nombMat+"')");
+    }
+
+    public int getCountNotificacion (String cod_emisor, String cod_tutor, String cod_estudiante) {
+
+        return getReadableDatabase().rawQuery("select * from notificaciones " +
+                        "where cod_est="+cod_estudiante + "  and  emisor= "+ cod_emisor +" and "+
+                        "cod_tutor="+cod_tutor ,
+                null).getCount();
+
+    }
+
+    public int testEstados (String cod_emisor, String cod_tutor, String cod_estudiante) {
+        return getReadableDatabase().rawQuery("update notificaciones set visto = 1 " +
+                        "where cod_est="+cod_estudiante + "  and  emisor= "+ cod_emisor +" and "+
+                        "cod_tutor="+cod_tutor ,
+                null).getCount();
+    }
+
+
+
 }
