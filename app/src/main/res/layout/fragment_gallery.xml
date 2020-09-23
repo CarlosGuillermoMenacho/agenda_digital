@@ -26,7 +26,7 @@
         android:id="@+id/linelisbolalum"
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="@color/redLine"
+        android:background="@color/rojo"
         app:layout_constraintTop_toBottomOf="@id/text_gallery"
         android:layout_marginTop="5dp"/>
     <ListView

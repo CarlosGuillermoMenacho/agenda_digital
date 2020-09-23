@@ -92,7 +92,7 @@ public class FragmentFormTutor extends Fragment {
 
                         try {
 
-                                AdminSQLite adminSQLite = new AdminSQLite(getContext(), "agenda", null, 1);
+                            AdminSQLite adminSQLite = new AdminSQLite(getContext(), "agenda", null, 1);
 
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                             JSONObject jsonObject = new JSONObject(response);
@@ -116,13 +116,14 @@ public class FragmentFormTutor extends Fragment {
                                     String cod_col = alumno.getString("cod_col");
                                     String fotoAlu = alumno.getString("foto");
                                     adminSQLite.saveAlumno(codigoAlu, nombreAlumno, curso, cod_curso, colegio,
-                                                            ip, cod_col, fotoAlu);
+                                                            ip, cod_col, fotoAlu,0);
                                     adminSQLite.tutor_alu(codigo,codigoAlu);
                                 }
 
                                 ArrayList<String> valores = new ArrayList<>();
                                 valores.add(codigo);
                                 valores.add(nombre);
+                                valores.add("");
                                 valores.add(cedula);
                                 valores.add(telefono);
                                 adminSQLite.saveTutor(valores);

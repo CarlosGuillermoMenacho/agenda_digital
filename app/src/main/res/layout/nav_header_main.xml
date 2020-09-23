@@ -55,9 +55,8 @@
             android:layout_height="50dp"
             android:layout_gravity="center"
             android:padding="5dp"
-            android:src="@mipmap/ic_launcher_round"
-
-            />
+            android:src="@drawable/ic_user"
+            app:tint="@android:color/black" />
 
         <TextView
             android:id="@+id/tvUser"

@@ -20,12 +20,10 @@ public class AdminSQLite extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table kar_alu(codigo int,detalle varchar,fecha date ,recnum int,haber float,acreedor float)");
         db.execSQL("create table notas(codigo int,cod_mat varchar,descri varchar ,nota1 varchar,nota2 varchar,nota3 varchar)");
-        db.execSQL("create table tutor(codigo int,nombre varchar, cedula varchar, telefono varchar, activo int)");
         db.execSQL("create table alu_tut(tutor int,alu int)");
 
 
 
-        db.execSQL("create table profesor(codigo varchar,nombre varchar, activo int)");
         db.execSQL("create table licencias(id int,codigo int,cod_tut int, f_sol varchar,h_sol varchar,f_ini varchar,f_fin varchar,obs varchar,estado int)");
         db.execSQL("create table estados(id_est int,descrip varchar)");
 
@@ -38,7 +36,9 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL("insert into licencias values(3,3,3,'2020-05-01','08:03','2020-05-01','2020-05-01','prueba',0)");
         db.execSQL("insert into licencias values(4,1,1,'2020-05-01','08:04','2020-05-01','2020-05-01','prueba',0)");*/
         db.execSQL("create table alumno(codigo int,nombre varchar,curso varchar,cod_cur int,colegio varchar," +
-                "ip varchar,cod_col int,foto varchar)");
+                "ip varchar,cod_col int,foto varchar, activo int, esUser int)");
+        db.execSQL("create table tutor(codigo int,nombre varchar, foto varchar, cedula varchar, telefono varchar," + " activo int)");
+        db.execSQL("create table profesor(codigo varchar,nombre varchar, foto varchar,"+ "activo int)");
     }
 
     @Override
@@ -47,20 +47,26 @@ public class AdminSQLite extends SQLiteOpenHelper {
     }
 
     public void saveAlumno(String codigo , String nombre , String curso , String codCurso, String colegio,
-                           String ip, String cod_col, String foto  ){
+                           String ip, String cod_col, String foto, int esUser  ){
         getWritableDatabase().execSQL("insert into alumno values('"+codigo+"','"+nombre+"','"+curso+"','"
-                                        +codCurso+"','"+colegio+"','"+ip+"','"+cod_col+"','"+foto+"')");
+                                        +codCurso+"','"+colegio+"','"+ip+"','"+cod_col+"','"+foto+"','',"+esUser+")");
     }
 
     public Cursor licencias(int cod_alu){//devuelve en un cursor todos los profesores habilitados
         return getReadableDatabase().rawQuery("select l.id,l.codigo,l.cod_tut,l.f_sol,l.h_sol,l.f_ini,l.f_fin,l.obs,t.nombre,e.descrip as estado from licencias l,tutor t,estados e where l.codigo="+cod_alu+" and l.cod_tut=t.codigo and l.estado=e.id_est",null);
     }
+
     public Cursor tutores(){//devuelve en un cursor todos los tutores habilitados
         return getReadableDatabase().rawQuery("select * from tutor",null);
     }
     public Cursor profesores(){//devuelve en un cursor todos los profesores habilitados
         return getReadableDatabase().rawQuery("select * from profesor",null);
     }
+    public Cursor alumnos(){//devuelve en un cursor todos los profesores habilitados
+        return getReadableDatabase().rawQuery("select * from alumno where esUser = 1" ,null);
+    }
+
+
     public Cursor profesor(String codigo){//devuelve los datos de un profesor dado un codigo
         return getReadableDatabase().rawQuery("select * from profesor where codigo='"+codigo+"'",null);
     }
@@ -77,7 +83,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
         getWritableDatabase().execSQL("delete from profesor where codigo='"+codigo+"'");
     }
     public void saveTutor(ArrayList<String> valores){
-        getWritableDatabase().execSQL("insert into tutor values('"+valores.get(0)+"','"+valores.get(1)+"','"+valores.get(2)+"','"+valores.get(3)+"',0)");
+        getWritableDatabase().execSQL("insert into tutor values('"+valores.get(0)+"','"+valores.get(1)+"','"+valores.get(2)+"','"+valores.get(3)+"','"+valores.get(4)+"',0)");
     }
     public void saveLicencia(int id,int codigo,int cod_tut,String f_sol,String hora,String f_ini,String f_fin,String obs){
         getWritableDatabase().execSQL("insert into licencias values("+id+","+codigo+","+cod_tut+",'"+f_sol+"','"+hora+"','"+f_ini+"','"+f_fin+"','"+obs+"',1)");
@@ -128,18 +134,30 @@ public class AdminSQLite extends SQLiteOpenHelper {
     public ArrayList<User> users(){
         Cursor tutores = tutores();
         Cursor profesores = profesores();
+        Cursor alumnos = alumnos();
         ArrayList<User> ususarios = new ArrayList<>();
         if (tutores.moveToFirst()){
             do {
-                ususarios.add(new User(tutores.getString(0),tutores.getString(1),"tutor"));
+                ususarios.add(new User(tutores.getString(0),tutores.getString(1),
+                        tutores.getString(2),"tutor"));
             }while (tutores.moveToNext());
         }
         if (profesores.moveToFirst())
         {
             do {
-                ususarios.add(new User(profesores.getString(0),profesores.getString(1),"profesor"));
+                ususarios.add(new User(profesores.getString(0),profesores.getString(1),
+                         profesores.getString(2),"profesor"));
             }while (profesores.moveToNext());
         }
+        if (alumnos.moveToFirst())
+        {
+            do {
+                ususarios.add(new User(alumnos.getString(0),alumnos.getString(1),
+                        alumnos.getString(7) ,"alumno"));
+            }while (profesores.moveToNext());
+        }
+
+
         return  ususarios;
     }
 
@@ -169,12 +187,18 @@ public class AdminSQLite extends SQLiteOpenHelper {
     public User getUserActivo(){
         @SuppressLint("Recycle") Cursor cursor = getReadableDatabase().rawQuery("select * from tutor where activo = 1",null);
         if (cursor.moveToFirst()&&cursor.getCount()==1){
-            return new User(cursor.getString(0),cursor.getString(1),"tutor");
+            return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2), "tutor");
         }
         @SuppressLint("Recycle") Cursor cursor1 = getReadableDatabase().rawQuery("select * from profesor where activo = 1",null);
         if (cursor1.moveToFirst()&&cursor1.getCount()==1){
-            return new User(cursor1.getString(0),cursor1.getString(1),"profesor");
+            return new User(cursor1.getString(0),cursor1.getString(1),cursor1.getString(2) ,"profesor");
         }
+        @SuppressLint("Recycle") Cursor cursor2 = getReadableDatabase().rawQuery("select * from alumno where activo = 1",null);
+        if (cursor1.moveToFirst()&&cursor2.getCount()==1){
+            return new User(cursor2.getString(0),cursor2.getString(1), cursor2.getString(7),"profesor");
+        }
+
+
         return new User();
     }
 

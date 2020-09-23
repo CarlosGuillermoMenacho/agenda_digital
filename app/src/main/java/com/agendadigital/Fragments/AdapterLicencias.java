@@ -38,9 +38,6 @@ public class AdapterLicencias extends ArrayAdapter {
         TextView nombre = item.findViewById(R.id.tvNombre);
         nombre.setText(datos.get(position).getNombre());
 
-
-
-
         try {
             Bitmap img;
             if (!foto.isEmpty()){

@@ -41,6 +41,7 @@ public class FragmentAfiliacion extends Fragment {
     private AdminSQLite adm;
     private Usuarios usuarios;
 
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View vista = inflater.inflate(layout.fragment_afiliacion,container,false);
@@ -80,6 +81,9 @@ public class FragmentAfiliacion extends Fragment {
                         public void onClick(DialogInterface dialog, int which) {
                             deleteItem(position);
                             llenarListas();
+                            if (Globals.user.getCodigo() == codigos.get(position)[0]){
+                                Globals.user = null;
+                            }
                         }
                     });
                     builder.setNegativeButton("No",null);
@@ -88,6 +92,7 @@ public class FragmentAfiliacion extends Fragment {
                     Globals.user = usuarios.getUsuarios().get(position);
                     adm.userActivo(usuarios.getUsuarios().get(position).getCodigo(),usuarios.getUsuarios().get(position).getTipo());
                     startActivity(new Intent(getContext(), MainActivity.class));
+
                 }
             }
         });
@@ -100,6 +105,7 @@ public class FragmentAfiliacion extends Fragment {
                 btnNew.setVisibility(View.VISIBLE);
                 btnListo.setVisibility(View.GONE);
                 delete = false;
+
             }
         });
     }
@@ -127,6 +133,7 @@ public class FragmentAfiliacion extends Fragment {
     }
 
     private void llenarListas() {
+
         usuarios = new Usuarios(getContext());
         codigos = new ArrayList<>();
         ArrayList<String> nombres = new ArrayList<>();

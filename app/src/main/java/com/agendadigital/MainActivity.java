@@ -3,6 +3,7 @@ package com.agendadigital;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.agendadigital.Fragments.BoletinFragment;
@@ -30,6 +31,9 @@ import androidx.appcompat.widget.Toolbar;
 public class MainActivity extends AppCompatActivity  implements Comunicador {
 
     private AppBarConfiguration mAppBarConfiguration;
+    private NavigationView navigationView;
+    private AdminSQLite adm;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +47,22 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
 
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
+        adm = new AdminSQLite(MainActivity.this,"agenda",null,1);
 
         View hview = navigationView.getHeaderView(0);
+
         TextView nameUser = hview.findViewById(R.id.tvUser);
-        AdminSQLite adm = new AdminSQLite(MainActivity.this,"agenda",null,1);
         Globals.user = adm.getUserActivo();
         nameUser.setText(Globals.user.getNombre());
+
+        if (Globals.user.getFoto() != null){
+
+            ImageView imgUser = hview.findViewById(R.id.ivUser);
+            Globals.user = adm.getUserActivo();
+            imgUser.setImageBitmap(Globals.user.getFoto());
+        }
+
 
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.fragmentAgendaDigital, R.id.nav_slideshow,R.id.lista_alu_Fragment,R.id.fragmentLicencia)
@@ -128,5 +141,6 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
     private void configTheme() {
         setTheme(R.style.AppTheme);
     }
+
 
 }

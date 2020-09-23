@@ -74,7 +74,7 @@ public class FragmentListaAlumnos extends Fragment {
                                     adm.tutor_alu(Globals.user.getCodigo(), fila.getString(0));
                                     adm.saveAlumno(fila.getString(0), fila.getString(1),
                                             fila.getString(2), fila.getString(3),fila.getString(4),
-                                            fila.getString(5), fila.getString(6),fila.getString(7));
+                                            fila.getString(5), fila.getString(6),fila.getString(7),0);
                                 }
                             }
                             llenarLista();
