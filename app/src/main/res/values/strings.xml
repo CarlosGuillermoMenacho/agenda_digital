@@ -1,4 +1,4 @@
-<resources >
+<resources>
 
     <!--Nombre de la aplicacion-->
     <string name="app_name">Agenda Digital</string>
@@ -50,5 +50,11 @@
     <string name="colegioAizama">Agenda Digital \nAizama</string>
     <string name="user">RODRIGUEZ AIZAMA JHONNY WILSON</string>
     <string name="motivo_de_la_licencia">Motivo de la licencia</string>
+    <string name="publicidad">Publicidad</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="sitio_web">Sitio Web</string>
+    <string name="puntoVentas">Puntos de Ventas</string>
+    <string name="paginaPrincipal">Pagina Principal</string>
 
 </resources>

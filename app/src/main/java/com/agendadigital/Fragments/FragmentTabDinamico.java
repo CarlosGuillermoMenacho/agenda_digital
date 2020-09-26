@@ -24,12 +24,6 @@ public class FragmentTabDinamico extends Fragment {
     private AdaptadorViewPager adaptadorViewPager;
     private AdminSQLite adm;
 
-    public FragmentTabDinamico() {
-        // Required empty public constructor
-    }
-
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +86,5 @@ public class FragmentTabDinamico extends Fragment {
 
         int cursorContadorNotificaciones = adm.getCountNotificacion("1", "1", "1");
         tabLayout.getTabAt(1).getOrCreateBadge().setNumber(cursorContadorNotificaciones);
-
     }
 }

@@ -22,6 +22,10 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL("create table notas(codigo int,cod_mat varchar,descri varchar ,nota1 varchar,nota2 varchar,nota3 varchar)");
         db.execSQL("create table alu_tut(tutor int,alu int)");
 
+        db.execSQL("create table notificaciones(codigo int,cod_est int,mensaje varchar,emisor int,cod_tutor int,fecha varchar, hora varchar, visto int)");
+        db.execSQL("create table materias(cod_est varchar,cod_materia varchar,nomb_materia varchar)");
+
+        db.execSQL("create table publicidad(cod_publi int,cod_materia varchar,nomb_materia varchar)");
 
 
         db.execSQL("create table licencias(id int,codigo int,cod_tut int, f_sol varchar,h_sol varchar,f_ini varchar,f_fin varchar,obs varchar,estado int)");
@@ -35,16 +39,42 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL("insert into licencias values(2,2,1,'2020-05-01','08:02','2020-05-01','2020-05-01','prueba',0)");
         db.execSQL("insert into licencias values(3,3,3,'2020-05-01','08:03','2020-05-01','2020-05-01','prueba',0)");
         db.execSQL("insert into licencias values(4,1,1,'2020-05-01','08:04','2020-05-01','2020-05-01','prueba',0)");*/
+
         db.execSQL("create table alumno(codigo int,nombre varchar,curso varchar,cod_cur int,colegio varchar," +
                 "ip varchar,cod_col int,foto varchar, activo int, esUser int)");
         db.execSQL("create table tutor(codigo int,nombre varchar, foto varchar, cedula varchar, telefono varchar," + " activo int)");
         db.execSQL("create table profesor(codigo varchar,nombre varchar, foto varchar,"+ "activo int)");
+
+
+        /* Publicidades table */
+        db.execSQL("create table empresa_pub(cod_pai int, cod_ciu int, cod_rub int, cod_emp int, nombre varchar," +
+                                             "descrip varchar, url varchar, estado int)");
+        db.execSQL("create table emp_inicio( cod_emp int, cod_ini int, img varchar, estado int)");
+        db.execSQL("create table emp_ptos_ubic(cod_emp int, cod_pto int, ubica varchar, estado int)");
+        db.execSQL("create table emp_pub(cod_emp int, cod_pub int, img varchar, estado int)");
+        db.execSQL("create table emp_rubro( cod_rub int, descrip varchar, estado int)");
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
     }
+
+  /*  public Cursor getNotificacion(String codigo){
+        return getReadableDatabase().rawQuery("select * from notificaction where codigo="+codigo,null);
+    }*/
+
+    public Cursor getImgEmpInicio (String cod_emp) {
+        return getReadableDatabase().rawQuery("select img from emp_inicio where cod_emp="+ cod_emp+" and estado = 1",
+                                            null);
+    }
+
+    public Cursor getInfoEmp (String cod_emp) {
+        return getReadableDatabase().rawQuery("select emp.nombre, emp.url, epu.ubica, ep.img  from empresa_pub emp, emp_ptos_ubic epu, emp_pub ep  " +
+                                                "where emp.cod_emp="+cod_emp+" and epu.cod_emp = "+cod_emp+" and ep.cod_empu = "+cod_emp+"",null);
+    }
+
 
     public void saveAlumno(String codigo , String nombre , String curso , String codCurso, String colegio,
                            String ip, String cod_col, String foto, int esUser  ){

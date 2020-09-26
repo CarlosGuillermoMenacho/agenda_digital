@@ -23,6 +23,7 @@
 
     <dimen name="item_size_alumno">56dp</dimen>
     <dimen name="size_item_alumno">72dp</dimen>
+    <dimen name="padding_min">8dp</dimen>
 
 
 </resources>

@@ -30,6 +30,12 @@
             android:icon="@drawable/ic_licencia"
             android:title="@string/licencias" />
 
+        <item
+            android:id="@+id/publicidad"
+            android:icon="@drawable/ic_publicidad"
+            android:title="@string/publicidad"
+            />
+
     </group>
 
 </menu>

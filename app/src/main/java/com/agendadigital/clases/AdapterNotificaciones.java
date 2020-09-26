@@ -1,6 +1,5 @@
 package com.agendadigital.clases;
 
-
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +17,9 @@ public class AdapterNotificaciones extends RecyclerView.Adapter<AdapterNotificac
     private ArrayList<String> itemFacturas;
 
     public AdapterNotificaciones(ArrayList<String> itemFacturas) {
+
         this.itemFacturas = itemFacturas;
+
     }
 
 

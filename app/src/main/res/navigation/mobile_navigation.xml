@@ -120,4 +120,8 @@
         android:name="com.agendadigital.Fragments.Lista_alu_lic_Fragment"
         android:label="fragment_lista_alu_lic"
         tools:layout="@layout/fragment_lista_alu_lic" />
+    <fragment
+        android:id="@+id/fragmentPublicidad"
+        android:name="com.agendadigital.Fragments.FragmentPublicidad"
+        android:label="FragmentPublicidad" />
 </navigation>

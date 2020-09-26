@@ -141,8 +141,10 @@ public class FragmentAfiliacion extends Fragment {
         ArrayList<User> arraUser = new ArrayList<>(usuarios.getUsuarios());
 
         for (int i = 0 ; i < arraUser.size(); i++){
+
             codigos.add(new String[]{arraUser.get(i).getCodigo(),arraUser.get(i).getTipo()});
             nombres.add(arraUser.get(i).getNombre());
+
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireActivity(), android.R.layout.simple_list_item_1, nombres);

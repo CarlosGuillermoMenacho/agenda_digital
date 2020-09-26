@@ -65,7 +65,8 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
 
 
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.fragmentAgendaDigital, R.id.nav_slideshow,R.id.lista_alu_Fragment,R.id.fragmentLicencia)
+                R.id.nav_home, R.id.fragmentAgendaDigital, R.id.nav_slideshow,R.id.lista_alu_Fragment,
+                R.id.fragmentLicencia, R.id.fragmentPublicidad)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
