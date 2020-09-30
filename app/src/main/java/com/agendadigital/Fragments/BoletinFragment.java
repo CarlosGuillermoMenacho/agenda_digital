@@ -95,8 +95,11 @@ public class BoletinFragment extends Fragment {
         final TableDynamic tableDynamic = new TableDynamic(tableLayout, getContext());
         final TextView tvcurso=vista.findViewById(R.id.tvCurso);
         final TextView tvalumno=vista.findViewById(R.id.tvAlumno);
+
         tableLayout=vista.findViewById(R.id.table);
+
         tvalumno.setText(codigoAlumno);
+
         id2=tvalumno.getText().toString();
         builder=new AlertDialog.Builder(getContext());
         if (!id2.isEmpty()) {

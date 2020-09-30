@@ -17,12 +17,8 @@ public class AdapterNotificaciones extends RecyclerView.Adapter<AdapterNotificac
     private ArrayList<String> itemFacturas;
 
     public AdapterNotificaciones(ArrayList<String> itemFacturas) {
-
         this.itemFacturas = itemFacturas;
-
     }
-
-
     @NonNull
     @Override
     public ViewHolderNotificaciones onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -31,13 +27,10 @@ public class AdapterNotificaciones extends RecyclerView.Adapter<AdapterNotificac
                 null,false);
         return new ViewHolderNotificaciones(view);
     }
-
     @Override
     public void onBindViewHolder(@NonNull ViewHolderNotificaciones holder, int position) {
         holder.mensaje.setText(itemFacturas.get(position));
-
     }
-
     @Override
     public int getItemCount() {
         return itemFacturas.size();

@@ -1,0 +1,19 @@
+<resources>
+
+	<dimen name="fab_margin">19.2dp</dimen>
+	<dimen name="paddingButton">18dp</dimen>
+	<dimen name="padding_min">9.6dp</dimen>
+	<dimen name="margin_default">19.2dp</dimen>
+	<dimen name="padding_default">19.2dp</dimen>
+	<dimen name="margin_max">38.4dp</dimen>
+	<dimen name="item_size_alumno">67.2dp</dimen>
+	<dimen name="activity_vertical_margin">19.2dp</dimen>
+	<dimen name="nav_header_vertical_spacing">9.6dp</dimen>
+	<dimen name="activity_horizontal_margin">19.2dp</dimen>
+	<dimen name="nav_header_height">288dp</dimen>
+	<dimen name="size_item_alumno">86.4dp</dimen>
+	<dimen name="sizeUser">21.6sp</dimen>
+	<dimen name="sizeTitles">28.8sp</dimen>
+	<dimen name="sizeInfo">19.2sp</dimen>
+
+</resources>

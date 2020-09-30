@@ -27,6 +27,7 @@
         android:id="@+id/lvListaAlumnosBoletin"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_margin="@dimen/margin_default"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/guideLine"
         app:layout_constraintTop_toBottomOf="@id/text_listaAlumno"
@@ -39,22 +40,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:padding="@dimen/padding_default"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintGuide_percent="0.5"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
-        android:id="@+id/publicidad"
+        android:id="@+id/publicidadInicio"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scaleType="fitXY"
+        android:layout_margin="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/guideLine"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:src="@drawable/publicidad"
-        />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 
 

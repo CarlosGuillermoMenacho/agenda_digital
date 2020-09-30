@@ -2,12 +2,14 @@ package com.agendadigital.Fragments;
 
 import android.annotation.SuppressLint;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -23,11 +25,13 @@ import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.Notificacion;
 import com.agendadigital.clases.Notificaciones;
+import com.agendadigital.clases.PublicidadInicio;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.itextpdf.text.pdf.codec.Base64;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,6 +47,12 @@ public class FragmentListaAlumnos extends Fragment {
     private AdminSQLite adm;
     private ArrayList<Estudiante> estudiantes;
 
+    private ArrayList<PublicidadInicio> imgPublicidad;
+    private ImageView imgPublicidadInicio;
+
+    private int positonPud = 0;
+
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -52,12 +62,14 @@ public class FragmentListaAlumnos extends Fragment {
         enlaces(root);
         llenarLista();
         requestEstudiantes();
+        requestImgPublicidad();
         oncliks();
         return root;
     }
 
 
     private void requestEstudiantes() {
+
         if (Globals.user.getCodigo()!=null) {
             StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.url
                                           + "/estudiante.php?op=alu_tutor", new Response.Listener<String>() {
@@ -107,7 +119,49 @@ public class FragmentListaAlumnos extends Fragment {
         }
     }
 
+    private void requestImgPublicidad() {
+
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.url
+                    + "/publicidad_inicio.php", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+
+                        JSONArray jsonArray = new JSONArray(response);
+                        for (int i =0; i < jsonArray.length(); i++){
+                            JSONArray fila = jsonArray.getJSONArray(i);
+                            String codPud = fila.getString(0);
+                            String imgPud = fila.getString(1);
+                            Cursor cursor = adm.getImgEmpInicio(codPud);
+                            if (!cursor.moveToFirst()) {
+
+                                adm.saveInicioPublicidad(codPud,imgPud);
+
+                            }
+                        }
+                        llenarImgPublicidad();
+
+                        } catch (JSONException e) {
+                        Toast.makeText(getContext(), "Error al procesar los datos", Toast.LENGTH_SHORT).show();
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getContext(), "Error en la red...", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            MySingleton.getInstance(getContext()).addToRequest(stringRequest);
+
+    }
+
+
     private void llenarLista() {
+
         Cursor cursor = adm.estudiantes(Globals.user.getCodigo());
         estudiantes = new ArrayList<>();
         ArrayList<String> nombres = new ArrayList<>();
@@ -116,12 +170,76 @@ public class FragmentListaAlumnos extends Fragment {
                 estudiantes.add(new Estudiante(cursor.getString(0),cursor.getString(1),
                         cursor.getString(7),cursor.getString(2)));
 
+
             }while (cursor.moveToNext());
 
             AdapterLicencias adapter = new AdapterLicencias(getContext(), estudiantes);
             lvListaAlumnosBoletin.setAdapter(adapter);
         }
     }
+
+    private void llenarImgPublicidad() {
+
+        Cursor cursor = adm.getImgEmpInicio();
+        imgPublicidad = new ArrayList<>();
+        ArrayList<String> imgPub  = new ArrayList<>();
+
+        if (cursor.moveToFirst()){
+            do {
+                if (cursor.getInt(3 ) == 1) {
+                    positonPud = cursor.getInt(1);
+                }
+                imgPublicidad.add(new PublicidadInicio( cursor.getString(0), cursor.getString(1),
+                                   cursor.getString(2), cursor.getInt(3) ));
+
+                imgPub.add(cursor.getString(2));
+
+            }while (cursor.moveToNext());
+
+
+
+            if (positonPud == 0 ) {
+
+                if (imgPublicidad.size()>1){
+                    adm.setVisibilitedPub(imgPublicidad.get(1).getCodigoPublicidad());
+                }
+                String imgPosition = imgPublicidad.get(0).getImgPublicidad();
+                imgPublicidadInicio.setImageBitmap(converter64(imgPosition));
+            } else {
+                for (int i = 0; i < imgPublicidad.size(); i ++) {
+                    if (imgPublicidad.get(i).getVisibilidad() == 1) {
+
+                        int nextImg =  ((i+1) % imgPublicidad.size()) + 1;
+                        adm.setVisibilitedPub(imgPublicidad.get(nextImg - 1).getCodigoPublicidad());
+
+
+                        imgPublicidadInicio.setImageBitmap(converter64(imgPublicidad.get(i).getImgPublicidad()));
+
+                    }
+                }
+            }
+
+        }
+    }
+
+    private Bitmap converter64(String imgPub) {
+        Bitmap img = null;
+        try {
+            if (imgPub != null && !imgPub.isEmpty() ){
+
+                String base64 = imgPub.split(",")[1];
+                byte[] decode;
+
+                decode = Base64.decode(base64);
+                img = BitmapFactory.decodeByteArray(decode,0,decode.length);
+
+                }
+        } catch(IllegalArgumentException iae) {
+            img = null;
+        }
+        return img;
+    }
+
 
     private void oncliks() {
         lvListaAlumnosBoletin.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -164,5 +282,7 @@ public class FragmentListaAlumnos extends Fragment {
 
     private void enlaces(View root) {
         lvListaAlumnosBoletin = root.findViewById(R.id.lvListaAlumnosBoletin);
+        imgPublicidadInicio = root.findViewById(R.id.publicidadInicio);
+
     }
 }

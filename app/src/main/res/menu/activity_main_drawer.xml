@@ -31,7 +31,7 @@
             android:title="@string/licencias" />
 
         <item
-            android:id="@+id/publicidad"
+            android:id="@+id/fragmentPublicidad"
             android:icon="@drawable/ic_publicidad"
             android:title="@string/publicidad"
             />

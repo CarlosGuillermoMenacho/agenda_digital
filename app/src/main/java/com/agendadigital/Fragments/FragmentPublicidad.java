@@ -11,11 +11,23 @@ import androidx.viewpager.widget.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.agendadigital.R;
 import com.agendadigital.clases.AdaptadorViewPager;
 import com.agendadigital.clases.AdminSQLite;
+import com.agendadigital.clases.Constants;
+import com.agendadigital.clases.Globals;
+import com.agendadigital.clases.MySingleton;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.tabs.TabLayout;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 public class FragmentPublicidad extends Fragment {
 
@@ -27,7 +39,7 @@ public class FragmentPublicidad extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        adm = new AdminSQLite(getContext(), "publicidad", null, 1);
+        adm = new AdminSQLite(getContext(), "agenda", null, 1);
     }
 
     @Override
@@ -42,43 +54,85 @@ public class FragmentPublicidad extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        requestImgPublicidad();
+
         viewPagerPublicidad = view.findViewById(R.id.viewPagerPublicidad);
         tabLayoutPublicidad = view.findViewById(R.id.tabLayoutPublicidad);
+
         adaptadorViewPagerPublicidad = new AdaptadorViewPager(requireActivity().getSupportFragmentManager());
-        tabLayoutPublicidad.setupWithViewPager(viewPagerPublicidad);
+
+
         TabsPublicidad();
+        tabLayoutPublicidad.setupWithViewPager(viewPagerPublicidad);
         tabLayoutPublicidad.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-
-            }
-
+            public void onTabSelected(TabLayout.Tab tab) { }
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
+            public void onTabUnselected(TabLayout.Tab tab) { }
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {
+            public void onTabReselected(TabLayout.Tab tab) { }
+        });
+    }
 
+
+    private void requestImgPublicidad() {
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.url
+                + "/publicidad.php", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONArray jsonArray = new JSONArray(response);
+                    for (int i =0; i < jsonArray.length(); i++){
+                        JSONArray fila = jsonArray.getJSONArray(i);
+                        String urlPublicidad = fila.getString(0);
+                        String nombrePublicidad = fila.getString(1);
+                        String imgPublicidad = fila.getString(2);
+                        String ubicacionPublicidad = fila.getString(3);
+                        String codigoPublicidad = fila.getString(4);
+
+                        Cursor cursor = adm.getPublicidad(codigoPublicidad);
+
+                        if (!cursor.moveToFirst()) {
+                            adm.savePublicidad(urlPublicidad, nombrePublicidad ,imgPublicidad,
+                                    ubicacionPublicidad,codigoPublicidad);
+                        }
+                        TabsPublicidad();
+                    }
+
+                } catch (JSONException e) {
+                    Toast.makeText(getContext(), "Error al procesar los datos", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getContext(), "Error en la red...", Toast.LENGTH_SHORT).show();
             }
         });
 
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        MySingleton.getInstance(getContext()).addToRequest(stringRequest);
+
+
 
     }
-
     private void TabsPublicidad() {
 
         adaptadorViewPagerPublicidad = new AdaptadorViewPager(getChildFragmentManager());
-        adaptadorViewPagerPublicidad.agregarFragmento(new FragmentViewPagerPublicidad(1),"Publicidad");
-        Cursor cursor = adm.getEmpresas();
+        Cursor cursor = adm.getPublicidad();
+
         if (cursor.moveToFirst()){
             do {
-                adaptadorViewPagerPublicidad.agregarFragmento(new FragmentViewPagerPublicidad(10)
-                                                              ,cursor.getString(2));
+                String letra = cursor.getString(1);
+
+                adaptadorViewPagerPublicidad.agregarFragmento(new FragmentViewPagerPublicidad(cursor.getInt(4)),
+                                                                  cursor.getString(1) );
             } while (cursor.moveToNext());
         }
-        viewPagerPublicidad.setAdapter(adaptadorViewPagerPublicidad);
 
+        viewPagerPublicidad.setAdapter(adaptadorViewPagerPublicidad);
     }
 }

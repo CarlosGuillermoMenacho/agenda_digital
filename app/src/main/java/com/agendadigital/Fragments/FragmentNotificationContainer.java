@@ -17,18 +17,12 @@ import com.agendadigital.clases.Globals;
 import java.util.ArrayList;
 
 public class FragmentNotificationContainer extends Fragment {
+
     private View vista;
     private int codMate;
+
     public FragmentNotificationContainer(int codMate) {
-        // Required empty public constructor
         this.codMate = codMate;
-    }
-
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -39,24 +33,20 @@ public class FragmentNotificationContainer extends Fragment {
         return vista;
     }
     public void cargarRecycler(){
+
         RecyclerView rvNotificacionesContainer = vista.findViewById(R.id.rvNotificationContainer);
         ArrayList<String> notificaciones = new ArrayList<>();
+
         if (codMate==0){
+
             for (int i = 0 ; i < Globals.notificaciones.size(); i++){
                 notificaciones.add(Globals.notificaciones.getNotificacion(i).getMensaje());
             }
+
             AdapterNotificaciones adapterNotificaciones = new AdapterNotificaciones(notificaciones);
             rvNotificacionesContainer.setLayoutManager(new LinearLayoutManager(getContext()));
             rvNotificacionesContainer.setAdapter(adapterNotificaciones);
-        }else{
-            for (int i = 0 ; i < Globals.notificaciones.size(); i++){
-                if (Globals.notificaciones.getNotificacion(i).getEmisor()==codMate){
-                    notificaciones.add(Globals.notificaciones.getNotificacion(i).getMensaje());
-                }
-            }
-            AdapterNotificaciones adapterNotificaciones = new AdapterNotificaciones(notificaciones);
-            rvNotificacionesContainer.setLayoutManager(new LinearLayoutManager(getContext()));
-            rvNotificacionesContainer.setAdapter(adapterNotificaciones);
+
         }
     }
 }

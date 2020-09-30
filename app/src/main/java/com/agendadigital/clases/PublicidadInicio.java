@@ -7,25 +7,45 @@ import com.itextpdf.text.pdf.codec.Base64;
 
 public class PublicidadInicio {
 
-    private String codigoPublicidad;
-    private String publicidadFoto;
+    private String cod_emp;
+    private String cod_ini;
+    private String imgPublicidad;
+    private int visibilidad;
 
-    public PublicidadInicio( String codigoPublicidad, String publicidadFoto ) {
-
-        this.codigoPublicidad = codigoPublicidad;
-        this.publicidadFoto = publicidadFoto;
-
+    public PublicidadInicio() {
     }
 
-    public String getCodigoPublicidad () { return codigoPublicidad;}
+    public PublicidadInicio(String codigoPublicidad, String codigoInicio, String img, int visibilidad) {
+
+        this.cod_emp = codigoPublicidad;
+        this.cod_ini = codigoInicio;
+        this.imgPublicidad = img;
+        this.visibilidad= visibilidad;
+    }
+
+    public void setCod_emp(String cod_emp) {
+        this.cod_emp = cod_emp;
+    }
+
+
+    public int getVisibilidad() {
+        return visibilidad;
+    }
+
+    public String getImgPublicidad() {
+        return imgPublicidad;
+    }
+
+    public String getCodigoPublicidad () {
+        return cod_ini;}
 
     public Bitmap getFotoPublicidad () {
 
         Bitmap img = null;
         try {
-            if (publicidadFoto != null && !publicidadFoto.isEmpty() ){
+            if (imgPublicidad != null && !imgPublicidad.isEmpty() ){
 
-                String base64 = publicidadFoto.split(",")[1];
+                String base64 = imgPublicidad.split(",")[1];
                 byte[] decode;
 
                 decode = Base64.decode(base64);

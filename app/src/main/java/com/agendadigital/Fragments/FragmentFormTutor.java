@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.agendadigital.R;
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Constants;
+import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -51,6 +52,7 @@ public class FragmentFormTutor extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View vista = inflater.inflate(R.layout.fragment_form_tutor, container, false);
         hacerCast(vista);
         oncliks();
@@ -88,10 +90,7 @@ public class FragmentFormTutor extends Fragment {
                     public void onResponse(String response) {
                         progressDialog.dismiss();
 
-
-
                         try {
-
                             AdminSQLite adminSQLite = new AdminSQLite(getContext(), "agenda", null, 1);
 
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -201,3 +200,63 @@ public class FragmentFormTutor extends Fragment {
        etTelefono = vista.findViewById(R.id.etTelefonoformtutor);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+    @Override
+    public void onResponse(String response) {
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            String status = jsonObject.getString("status");
+            if (status.equals("ok")) {
+                JSONArray jsonArray = jsonObject.getJSONArray("estudiantes");
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONArray fila = jsonArray.getJSONArray(i);
+                    Cursor cursor = adm.estudiante(fila.getString(0));
+                    if (!cursor.moveToFirst()) {
+                        adm.tutor_alu(Globals.user.getCodigo(), fila.getString(0));
+                        adm.saveAlumno(fila.getString(0), fila.getString(1),
+                                fila.getString(2), fila.getString(3),fila.getString(4),
+                                fila.getString(5), fila.getString(6),fila.getString(7),
+                                0);
+                    }
+                }
+                llenarLista();
+            }
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

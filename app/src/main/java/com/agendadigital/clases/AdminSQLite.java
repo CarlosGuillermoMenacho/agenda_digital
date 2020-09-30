@@ -47,33 +47,57 @@ public class AdminSQLite extends SQLiteOpenHelper {
 
 
         /* Publicidades table */
-        db.execSQL("create table empresa_pub(cod_pai int, cod_ciu int, cod_rub int, cod_emp int, nombre varchar," +
-                                             "descrip varchar, url varchar, estado int)");
-        db.execSQL("create table emp_inicio( cod_emp int, cod_ini int, img varchar, estado int)");
-        db.execSQL("create table emp_ptos_ubic(cod_emp int, cod_pto int, ubica varchar, estado int)");
-        db.execSQL("create table emp_pub(cod_emp int, cod_pub int, img varchar, estado int)");
-        db.execSQL("create table emp_rubro( cod_rub int, descrip varchar, estado int)");
+
+
+        db.execSQL("create table emp_inicio( cod_emp int, cod_ini int, img varchar, visible int)");
+
+
+
+        db.execSQL("create table emp_publicidad( url varchar, nombre varchar, img varchar, ubica varchar, cod_emp int )");
 
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) { }
 
+    public Cursor getPublicidad (String cod_publicidad) {
+        return getReadableDatabase().rawQuery("select * from emp_publicidad where cod_emp="+ cod_publicidad,
+                null);
+    }
+    public void savePublicidad (String url, String nombre, String img, String ubicacion, String codigoPublicidad) {
+        getWritableDatabase().execSQL("insert into emp_publicidad values('"+url+"','"+nombre+"' ,'"+img+"'" +
+                                        ",'"+ubicacion+"','"+codigoPublicidad+"')");
+    }
+    public Cursor getPublicidad () {
+        return getReadableDatabase().rawQuery("select * from emp_publicidad",
+                null);
     }
 
-  /*  public Cursor getNotificacion(String codigo){
-        return getReadableDatabase().rawQuery("select * from notificaction where codigo="+codigo,null);
-    }*/
 
-    public Cursor getImgEmpInicio (String cod_emp) {
-        return getReadableDatabase().rawQuery("select img from emp_inicio where cod_emp="+ cod_emp+" and estado = 1",
+    public void saveInicioPublicidad(String codigo , String imgPublicidad ){
+        getWritableDatabase().execSQL("insert into emp_inicio values('','"+codigo+"','"+imgPublicidad+"',0)");
+    }
+
+
+
+    public Cursor getImgEmpInicio (String cod_ini) {
+        return getReadableDatabase().rawQuery("select * from emp_inicio where cod_ini="+ cod_ini,
                                             null);
     }
 
-    public Cursor getInfoEmp (String cod_emp) {
-        return getReadableDatabase().rawQuery("select emp.nombre, emp.url, epu.ubica, ep.img  from empresa_pub emp, emp_ptos_ubic epu, emp_pub ep  " +
-                                                "where emp.cod_emp="+cod_emp+" and epu.cod_emp = "+cod_emp+" and ep.cod_empu = "+cod_emp+"",null);
+
+    public Cursor getImgEmpInicio () {
+        return getReadableDatabase().rawQuery("select * from emp_inicio",
+                null);
     }
+
+    public void setVisibilitedPub (String cod_ini_img) {
+        getWritableDatabase().execSQL("update emp_inicio set visible = 0");
+        getWritableDatabase().execSQL("update emp_inicio set visible= 1 where cod_ini="+ cod_ini_img );
+    }
+
+
+
 
 
     public void saveAlumno(String codigo , String nombre , String curso , String codCurso, String colegio,

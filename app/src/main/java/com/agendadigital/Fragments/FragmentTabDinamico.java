@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,10 +15,25 @@ import androidx.viewpager.widget.ViewPager;
 import com.agendadigital.R;
 import com.agendadigital.clases.AdaptadorViewPager;
 import com.agendadigital.clases.AdminSQLite;
+import com.agendadigital.clases.Constants;
 import com.agendadigital.clases.Estudiante;
 import com.agendadigital.clases.Globals;
+import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.User;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.tabs.TabLayout;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FragmentTabDinamico extends Fragment {
     private ViewPager viewPager;
@@ -42,9 +58,13 @@ public class FragmentTabDinamico extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewPager = view.findViewById(R.id.viewPagerAvisos);
         TabLayout tabLayout = view.findViewById(R.id.tabLayoutAvisos);
+
         adaptadorViewPager = new AdaptadorViewPager(requireActivity().getSupportFragmentManager());
+
         tabLayout.setupWithViewPager(viewPager);
+
         Globals.notificacioness = adm.getNotificaciones(Globals.estudiante.getCodigo(),Globals.user.getCodigo());
+
         cargarTabs();
         contadorNotificaciones(tabLayout);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -70,8 +90,8 @@ public class FragmentTabDinamico extends Fragment {
     }
 
     public void cargarTabs() {
-        adaptadorViewPager = new AdaptadorViewPager(getChildFragmentManager());
 
+        adaptadorViewPager = new AdaptadorViewPager(getChildFragmentManager());
         adaptadorViewPager.agregarFragmento(new FragmentNotificationContainer(0),"Notificaciones");
         Cursor cursor = adm.getMaterias(Globals.estudiante.getCodigo());
         if (cursor.moveToFirst()){
@@ -88,3 +108,21 @@ public class FragmentTabDinamico extends Fragment {
         tabLayout.getTabAt(1).getOrCreateBadge().setNumber(cursorContadorNotificaciones);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
