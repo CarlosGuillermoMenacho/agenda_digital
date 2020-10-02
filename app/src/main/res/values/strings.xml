@@ -56,5 +56,8 @@
     <string name="sitio_web">Sitio Web</string>
     <string name="puntoVentas">Puntos de Ventas</string>
     <string name="paginaPrincipal">Pagina Principal</string>
+    <string name="action_lightTheme">Tema claro(Selecionado)</string>
+    <string name="action_darkTheme">Tema oscuro</string>
+    <string name="boletinNotas">Boletin de Notas</string>
 
 </resources>

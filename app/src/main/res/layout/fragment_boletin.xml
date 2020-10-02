@@ -17,10 +17,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="BOLETIN DE NOTAS"
+            android:text="@string/boletinNotas"
             android:textColor="#FFFFFF"
-            android:textSize="24sp"
-            android:background="#D30606"
+            android:textSize="20sp"
+            android:background="@color/colorListaAlumnos"
             android:textStyle="bold" />
 
         <LinearLayout

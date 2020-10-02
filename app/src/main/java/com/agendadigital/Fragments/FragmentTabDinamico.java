@@ -65,7 +65,7 @@ public class FragmentTabDinamico extends Fragment {
 
         Globals.notificacioness = adm.getNotificaciones(Globals.estudiante.getCodigo(),Globals.user.getCodigo());
 
-        cargarTabs();
+  /*      cargarTabs();*/
         contadorNotificaciones(tabLayout);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -89,18 +89,21 @@ public class FragmentTabDinamico extends Fragment {
 
     }
 
-    public void cargarTabs() {
+  /*  public void cargarTabs() {
 
         adaptadorViewPager = new AdaptadorViewPager(getChildFragmentManager());
         adaptadorViewPager.agregarFragmento(new FragmentNotificationContainer(0),"Notificaciones");
         Cursor cursor = adm.getMaterias(Globals.estudiante.getCodigo());
         if (cursor.moveToFirst()){
-            do {
-                adaptadorViewPager.agregarFragmento(new FragmentNotificationContainer(cursor.getInt(1)),cursor.getString(2));
+            *//*do {
+
+           *//**//*     adaptadorViewPager.agregarFragmento(new FragmentNotificationContainer(cursor.getInt(2)))
+                                                    ,cursor.getString(2));*//**//*
+                )*//*
             }while (cursor.moveToNext());
         }
         viewPager.setAdapter(adaptadorViewPager);
-    }
+    }*/
 
     private void contadorNotificaciones(TabLayout tabLayout) {
 

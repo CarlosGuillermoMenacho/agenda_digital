@@ -24,6 +24,7 @@ import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.Menus;
 import com.agendadigital.clases.User;
 import com.agendadigital.clases.Usuarios;
+import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 
@@ -40,7 +41,7 @@ public class FragmentAfiliacion extends Fragment {
     private boolean delete = false;
     private AdminSQLite adm;
     private Usuarios usuarios;
-
+    NavigationView nav;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -144,6 +145,16 @@ public class FragmentAfiliacion extends Fragment {
 
             codigos.add(new String[]{arraUser.get(i).getCodigo(),arraUser.get(i).getTipo()});
             nombres.add(arraUser.get(i).getNombre());
+            if (Globals.user.getTipo().equals("tutor")){
+
+
+
+
+            } else if (Globals.user.getTipo().equals("tutor")){
+
+            } else if (Globals.user.getTipo().equals("tutor")){
+
+            }
 
         }
 

@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_background_personalizado"
-    android:layout_margin="@dimen/margin_default"
+    android:padding="16dp"
     tools:context=".Fragments.FragmentAfiliacion">
 
     <TextView
@@ -14,18 +13,17 @@
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:text="@string/cambiarCuenta"
-        android:textColor="@android:color/black"
         android:textSize="@dimen/sizeTitles"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <TextView
+    <View
         android:id="@+id/separator1"
         android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="@android:color/black"
+        android:layout_height="1dp"
         android:layout_marginTop="10dp"
+        android:background="@android:color/darker_gray"
         app:layout_constraintTop_toBottomOf="@id/textCambiarCuenta"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -47,7 +45,9 @@
         android:text="@string/nuevo"
         android:padding="@dimen/paddingButton"
         app:icon="@drawable/ic_add"
-        app:strokeColor="@android:color/white"
+        android:backgroundTint="@color/colorButtons"
+        android:textColor="@color/text_color_buttons"
+        app:iconTint="@color/icon_buttons"
         app:layout_constraintBottom_toTopOf="@id/btnEditar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
@@ -57,7 +57,10 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/editar"
-        app:strokeColor="@android:color/white"
+
+        android:backgroundTint="@color/colorButtons"
+        android:textColor="@color/text_color_buttons"
+        app:iconTint="@color/icon_buttons"
         android:padding="@dimen/paddingButton"
         app:icon="@drawable/ic_edit"
         app:layout_constraintBottom_toTopOf="@id/btnDeleteUser"
@@ -70,7 +73,9 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/paddingButton"
         android:text="@string/eliminar"
-        app:strokeColor="@android:color/white"
+        android:backgroundTint="@color/colorButtons"
+        android:textColor="@color/text_color_buttons"
+        app:iconTint="@color/icon_buttons"
         app:icon="@drawable/ic_close"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -83,6 +88,9 @@
         android:text="@string/listo"
         android:visibility="gone"
         android:padding="@dimen/paddingButton"
+        android:backgroundTint="@color/colorButtons"
+        android:textColor="@color/text_color_buttons"
+        app:iconTint="@color/icon_buttons"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>

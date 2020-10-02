@@ -114,6 +114,7 @@ public class FragmentFormTutor extends Fragment {
                                     String ip = alumno.getString("ip");
                                     String cod_col = alumno.getString("cod_col");
                                     String fotoAlu = alumno.getString("foto");
+
                                     adminSQLite.saveAlumno(codigoAlu, nombreAlumno, curso, cod_curso, colegio,
                                                             ip, cod_col, fotoAlu,0);
                                     adminSQLite.tutor_alu(codigo,codigoAlu);
@@ -125,6 +126,7 @@ public class FragmentFormTutor extends Fragment {
                                 valores.add("");
                                 valores.add(cedula);
                                 valores.add(telefono);
+
                                 adminSQLite.saveTutor(valores);
 
                                 builder.setMessage("Se ha habilitado exitosamente...");

@@ -21,6 +21,11 @@
         android:layout_height="wrap_content"
         android:text="@string/sitio_web"
         app:icon="@drawable/ic_web"
+        android:backgroundTint="@color/colorButtons"
+        android:textColor="@color/text_color_buttons"
+        app:iconTint="@color/icon_buttons"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="5dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -29,6 +34,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/puntoVentas"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="5dp"
+        android:backgroundTint="@color/colorButtons"
+        android:textColor="@color/text_color_buttons"
+        app:iconTint="@color/icon_buttons"
         app:icon="@drawable/ic_ubicacion"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />

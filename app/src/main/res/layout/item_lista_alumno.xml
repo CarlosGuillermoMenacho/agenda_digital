@@ -4,7 +4,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
-    android:background="@android:color/white"
     android:layout_height="@dimen/size_item_alumno">
 
     <com.google.android.material.imageview.ShapeableImageView
@@ -16,12 +15,12 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:layout_marginStart="16dp"
-        style="@style/circleImageView"
+
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
-
+    <!--style="@style/circleImageView"-->
     <TextView
         android:id="@+id/tvNombre"
         android:layout_width="match_parent"

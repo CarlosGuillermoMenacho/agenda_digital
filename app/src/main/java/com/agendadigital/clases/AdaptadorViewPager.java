@@ -29,11 +29,9 @@ public class AdaptadorViewPager extends FragmentPagerAdapter {
         listaDeFragmentos.add(fragment);
         listaDeTitulosDeFragmentos.add(title);
     }
-
-    // Si es el título de la última pestaña, regresamos null, lo
-    // cual regresará el icono únicamente
     @Override
     public CharSequence getPageTitle(int position) {
         return listaDeTitulosDeFragmentos.get(position);
     }
+
 }

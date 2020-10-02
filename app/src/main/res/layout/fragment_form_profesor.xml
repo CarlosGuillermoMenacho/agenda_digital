@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="@dimen/margin_default"
     android:background="@color/color_background_personalizado"
-    android:layout_margin="@dimen/margin_default"
     tools:context=".Fragments.FragmentFormProfesor">
 
     <TextView
@@ -79,6 +79,10 @@
         android:layout_marginTop="@dimen/margin_max"
         android:text="@string/habilitar"
         android:padding="@dimen/paddingButton"
+        app:icon="@drawable/ic_user"
+        android:backgroundTint="@color/colorButtons"
+        android:textColor="@color/text_color_buttons"
+        app:iconTint="@color/icon_buttons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
@@ -90,6 +94,10 @@
         android:layout_height="wrap_content"
         android:text="@string/cancelar"
         android:padding="@dimen/paddingButton"
+        app:icon="@drawable/ic_close"
+        android:backgroundTint="@color/colorButtons"
+        android:textColor="@color/text_color_buttons"
+        app:iconTint="@color/icon_buttons"
         android:layout_marginTop="@dimen/margin_default"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnHabilitarformprofesor"

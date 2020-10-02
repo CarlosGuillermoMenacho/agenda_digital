@@ -37,15 +37,9 @@ public class FragmentPublicidad extends Fragment {
     private TabLayout tabLayoutPublicidad;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        adm = new AdminSQLite(getContext(), "agenda", null, 1);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        adm = new AdminSQLite(getContext(), "agenda", null, 1);
         View rootView = inflater.inflate(R.layout.fragment_publicidad, container, false);
         return rootView;
     }
@@ -54,7 +48,6 @@ public class FragmentPublicidad extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        requestImgPublicidad();
 
         viewPagerPublicidad = view.findViewById(R.id.viewPagerPublicidad);
         tabLayoutPublicidad = view.findViewById(R.id.tabLayoutPublicidad);
@@ -62,8 +55,10 @@ public class FragmentPublicidad extends Fragment {
         adaptadorViewPagerPublicidad = new AdaptadorViewPager(requireActivity().getSupportFragmentManager());
 
 
-        TabsPublicidad();
         tabLayoutPublicidad.setupWithViewPager(viewPagerPublicidad);
+        requestImgPublicidad();
+
+
         tabLayoutPublicidad.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) { }
@@ -121,18 +116,26 @@ public class FragmentPublicidad extends Fragment {
     }
     private void TabsPublicidad() {
 
-        adaptadorViewPagerPublicidad = new AdaptadorViewPager(getChildFragmentManager());
-        Cursor cursor = adm.getPublicidad();
+            adaptadorViewPagerPublicidad = new AdaptadorViewPager(getChildFragmentManager());
+            Cursor cursor = adm.getPublicidad();
 
-        if (cursor.moveToFirst()){
-            do {
-                String letra = cursor.getString(1);
+            if (cursor.moveToFirst()){
+                do {
 
-                adaptadorViewPagerPublicidad.agregarFragmento(new FragmentViewPagerPublicidad(cursor.getInt(4)),
-                                                                  cursor.getString(1) );
-            } while (cursor.moveToNext());
-        }
+                    FragmentViewPagerPublicidad fragmentViewPagerPublicidad = new FragmentViewPagerPublicidad();
 
-        viewPagerPublicidad.setAdapter(adaptadorViewPagerPublicidad);
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("codigoEmpresa", cursor.getInt(4) );
+                    fragmentViewPagerPublicidad.setArguments(bundle);
+                    adaptadorViewPagerPublicidad.agregarFragmento(fragmentViewPagerPublicidad,
+                            cursor.getString(1));
+                    viewPagerPublicidad.setOffscreenPageLimit(cursor.getInt(4));
+
+                } while (cursor.moveToNext());
+            }
+            viewPagerPublicidad.setAdapter(adaptadorViewPagerPublicidad);
+
     }
+
 }
+

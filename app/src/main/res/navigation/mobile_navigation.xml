@@ -72,7 +72,7 @@
         android:label="Agenda Digital"
         tools:layout="@layout/fragment_agenda_digital" />
     <fragment
-        android:id="@+id/fragmentKardex"
+        android:id="@+id/otro_Menu"
         android:name="com.agendadigital.Fragments.FragmentKardex"
         android:label="fragment_kardex"
         tools:layout="@layout/fragment_kardex" />
@@ -124,4 +124,6 @@
         android:id="@+id/fragmentPublicidad"
         android:name="com.agendadigital.Fragments.FragmentPublicidad"
         android:label="FragmentPublicidad" />
+
+
 </navigation>

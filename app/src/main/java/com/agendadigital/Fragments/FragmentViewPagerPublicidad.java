@@ -43,14 +43,19 @@ public class FragmentViewPagerPublicidad extends Fragment {
     private ArrayList<Publicidad> publicidad;
     private int codigoEmpresa;
 
-    public FragmentViewPagerPublicidad(int codigoEmpresa) {
-        this.codigoEmpresa = codigoEmpresa;
+    public FragmentViewPagerPublicidad() {
+
     }
+
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adm = new AdminSQLite(getContext(), "agenda", null, 1);
+        if (getArguments() != null ) {
+            codigoEmpresa = getArguments().getInt("codigoEmpresa");
+        }
     }
 
     @Override
@@ -59,16 +64,14 @@ public class FragmentViewPagerPublicidad extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_view_pager_publicidad, container, false);
         recyclerViewPublicidades = view.findViewById(R.id.RV_Publicidades);
+
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-
         cargarPublicidad();
-
     }
 
     public void cargarPublicidad(){
@@ -80,16 +83,12 @@ public class FragmentViewPagerPublicidad extends Fragment {
                                    cursor.getString(2), cursor.getString(3)
                                     ,cursor.getString(4)));
 
-
-
                 } while (cursor.moveToNext());
                 AdapterPublicidad data = new AdapterPublicidad(getContext() ,publicidad);
                 recyclerViewPublicidades.setLayoutManager(new LinearLayoutManager(getContext()));
                 recyclerViewPublicidades.setAdapter(data);
-            }
-        }
-
-
+               }
     }
+}
 
 

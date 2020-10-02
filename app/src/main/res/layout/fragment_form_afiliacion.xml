@@ -5,7 +5,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_background_personalizado"
     tools:context=".Fragments.FragmentFormAfiliacion">
 
     <LinearLayout
@@ -14,14 +13,13 @@
         android:layout_height="40dp"
         android:orientation="horizontal"
         android:paddingStart="10dp"
-        android:background="@android:color/white"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="RtlSymmetry">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/colorTextView"
+
             android:textSize="18sp"
             android:layout_gravity="center"
             android:layout_weight="1"
