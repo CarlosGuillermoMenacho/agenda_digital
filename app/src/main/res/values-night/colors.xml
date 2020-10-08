@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="colorListaAlumnos">@color/color_primary_dark</color>
+    <color name="colorBackgroundDrawer">@color/black_900</color>
+    <color name="colorButtons">@color/color_primary_dark</color>
+
+    <color name="color_background_personalizado">#121212</color>
+</resources>
