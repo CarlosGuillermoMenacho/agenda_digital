@@ -6,4 +6,5 @@
     <color name="colorButtons">@color/color_primary_dark</color>
 
     <color name="color_background_personalizado">#121212</color>
+
 </resources>
