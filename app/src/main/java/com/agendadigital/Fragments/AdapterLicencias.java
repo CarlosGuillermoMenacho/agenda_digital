@@ -1,4 +1,5 @@
 package com.agendadigital.Fragments;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -32,6 +33,7 @@ public class AdapterLicencias extends ArrayAdapter {
 
         String foto = datos.get(position).getFoto();
 
+        @SuppressLint("ViewHolder")
         View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_lista_alumno,
                 null,false);
 

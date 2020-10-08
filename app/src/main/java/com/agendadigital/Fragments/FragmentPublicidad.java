@@ -37,15 +37,9 @@ public class FragmentPublicidad extends Fragment {
     private TabLayout tabLayoutPublicidad;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        adm = new AdminSQLite(getContext(), "agenda", null, 1);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        adm = new AdminSQLite(getContext(), "agenda", null, 1);
         View rootView = inflater.inflate(R.layout.fragment_publicidad, container, false);
         return rootView;
     }
@@ -55,15 +49,16 @@ public class FragmentPublicidad extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         requestImgPublicidad();
-
         viewPagerPublicidad = view.findViewById(R.id.viewPagerPublicidad);
         tabLayoutPublicidad = view.findViewById(R.id.tabLayoutPublicidad);
 
         adaptadorViewPagerPublicidad = new AdaptadorViewPager(requireActivity().getSupportFragmentManager());
 
 
-        TabsPublicidad();
         tabLayoutPublicidad.setupWithViewPager(viewPagerPublicidad);
+
+
+
         tabLayoutPublicidad.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) { }
@@ -126,13 +121,21 @@ public class FragmentPublicidad extends Fragment {
 
         if (cursor.moveToFirst()){
             do {
-                String letra = cursor.getString(1);
 
-                adaptadorViewPagerPublicidad.agregarFragmento(new FragmentViewPagerPublicidad(cursor.getInt(4)),
-                                                                  cursor.getString(1) );
+                FragmentViewPagerPublicidad fragmentViewPagerPublicidad = new FragmentViewPagerPublicidad();
+
+                Bundle bundle = new Bundle();
+                bundle.putInt("codigoEmpresa", cursor.getInt(4) );
+                fragmentViewPagerPublicidad.setArguments(bundle);
+                adaptadorViewPagerPublicidad.agregarFragmento(fragmentViewPagerPublicidad,
+                        cursor.getString(1));
+                viewPagerPublicidad.setOffscreenPageLimit(cursor.getInt(4));
+
             } while (cursor.moveToNext());
         }
-
         viewPagerPublicidad.setAdapter(adaptadorViewPagerPublicidad);
+
     }
+
 }
+

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
     app:startDestination="@id/fragmentAgendaDigital">
+
     <fragment
         android:id="@+id/nav_home"
         android:name="com.agendadigital.Fragments.FragmentAfiliacion"
@@ -23,15 +24,21 @@
 
     <!--Navigation Drawer-->
     <fragment
+        android:id="@+id/fragment_Registro_Ingreso"
+        android:name="com.agendadigital.Fragments.FragmentIngreso"
+        android:label="Registro Ingreso"
+        tools:layout="@layout/fragment_ingreso"/>
+    <fragment
+        android:id="@+id/fragment_Registro_Salida"
+        android:name="com.agendadigital.Fragments.FragmentSalida"
+        android:label="Registro Salida"
+        tools:layout="@layout/fragment_salida"/>
+    <fragment
         android:id="@+id/nav_gallery"
         android:name="com.agendadigital.Fragments.FragmentAgendaDigital"
         android:label="@string/agendaDigital"
         tools:layout="@layout/fragment_lista_alumnos" />
-    <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.agendadigital.Fragments.FragmentBoletin"
-        android:label="@string/boletines"
-        tools:layout="@layout/fragment_slideshow"/>
+
     <fragment
         android:id="@+id/boletinFragment"
         android:name="com.agendadigital.Fragments.BoletinFragment"
@@ -74,7 +81,7 @@
     <fragment
         android:id="@+id/fragmentKardex"
         android:name="com.agendadigital.Fragments.FragmentKardex"
-        android:label="fragment_kardex"
+        android:label="Kardex De Pago"
         tools:layout="@layout/fragment_kardex" />
     <fragment
         android:id="@+id/fragmenViewAgendaDigital"
@@ -99,12 +106,9 @@
     <fragment
         android:id="@+id/fragmentTabDinamico"
         android:name="com.agendadigital.Fragments.FragmentTabDinamico"
-        android:label="FragmentTabDinamico" />
-    <fragment
-        android:id="@+id/fragmentFormAlumno"
-        android:name="com.agendadigital.Fragments.FragmentFormAlumno"
-        android:label="fragment_form_alumno"
-        tools:layout="@layout/fragment_form_alumno" />
+        android:label="Notificaciones"
+        tools:layout="@layout/fragment_tab_dinamico"/>
+
     <fragment
         android:id="@+id/fragmentFormLicencia"
         android:name="com.agendadigital.Fragments.FragmentFormLicencia"
@@ -113,15 +117,58 @@
     <fragment
         android:id="@+id/fragmentLicencias"
         android:name="com.agendadigital.Fragments.FragmentLicencias"
-        android:label="fragment_licencias"
+        android:label="Licencias"
         tools:layout="@layout/fragment_licencias" />
-    <fragment
-        android:id="@+id/lista_alu_lic_Fragment"
-        android:name="com.agendadigital.Fragments.Lista_alu_lic_Fragment"
-        android:label="fragment_lista_alu_lic"
-        tools:layout="@layout/fragment_lista_alu_lic" />
     <fragment
         android:id="@+id/fragmentPublicidad"
         android:name="com.agendadigital.Fragments.FragmentPublicidad"
-        android:label="FragmentPublicidad" />
+        android:label="FragmentPublicidad"
+        tools:layout="@layout/fragment_publicidad"/>
+
+    <fragment
+        android:id="@+id/fragmentHorario"
+        android:name="com.agendadigital.Fragments.FragmentHorario"
+        android:label="Horarios"
+        tools:layout="@layout/fragment_horario" />
+    <fragment
+        android:id="@+id/horario_Fragment"
+        android:name="com.agendadigital.Fragments.Horario_Fragment"
+        android:label="Horario"
+        tools:layout="@layout/fragment_horarios" />
+    <fragment
+        android:id="@+id/fragmentListaUtiles"
+        android:name="com.agendadigital.Fragments.FragmentListaUtiles"
+        android:label="Lista de Útiles"
+        tools:layout="@layout/fragment_lista_utiles" />
+    <fragment
+        android:id="@+id/utiles_Fragment"
+        android:name="com.agendadigital.Fragments.Utiles_Fragment"
+        android:label="Lista de Útiles"
+        tools:layout="@layout/fragment_utiles" />
+
+    <fragment
+        android:id="@+id/fragmentFormAdm"
+        android:name="com.agendadigital.Fragments.FragmentFormAdm"
+        android:label="fragment_form_adm"
+        tools:layout="@layout/fragment_form_adm" />
+    <fragment
+        android:id="@+id/fragmentFormDirector"
+        android:name="com.agendadigital.Fragments.FragmentFormDirector"
+        android:label="fragment_form_director"
+        tools:layout="@layout/fragment_form_director" />
+    <fragment
+        android:id="@+id/fragmentFormEst"
+        android:name="com.agendadigital.Fragments.FragmentFormEst"
+        android:label="fragment_form_est"
+        tools:layout="@layout/fragment_form_est" />
+    <fragment
+        android:id="@+id/fragmentIngreso"
+        android:name="com.agendadigital.Fragments.FragmentIngreso"
+        android:label="fragment_ingreso"
+        tools:layout="@layout/fragment_ingreso" />
+    <fragment
+        android:id="@+id/fragmentSalida"
+        android:name="com.agendadigital.Fragments.FragmentSalida"
+        android:label="fragment_salida"
+        tools:layout="@layout/fragment_salida" />
 </navigation>

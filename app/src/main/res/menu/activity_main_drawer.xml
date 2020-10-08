@@ -6,36 +6,61 @@
     <group android:checkableBehavior="single">
 
         <item
-            android:id="@+id/nav_home"
-            android:icon="@drawable/ic_afiliacion"
-            android:title="@string/afiliarCuenta" />
-
-        <item
             android:id="@+id/fragmentAgendaDigital"
             android:icon="@drawable/ic_agenda"
             android:title="@string/agendaDigital" />
-
-        <item
-            android:id="@+id/lista_alu_Fragment"
-            android:icon="@drawable/ic_kardex_pago"
-            android:title="@string/kardexPago" />
-
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_boletines"
-            android:title="@string/boletines" />
-
         <item
             android:id="@+id/fragmentLicencia"
             android:icon="@drawable/ic_licencia"
             android:title="@string/licencias" />
 
         <item
+            android:id="@+id/fragmentKardex"
+            android:icon="@drawable/ic_kardex_pago"
+            android:title="@string/kardexPago" />
+
+        <item
+            android:id="@+id/fragmentBoletin"
+            android:icon="@drawable/ic_boletines"
+            android:title="@string/boletines" />
+
+        <item
+            android:id="@+id/fragmentHorario"
+            android:icon="@drawable/ic_time"
+            android:title="@string/horario"/>
+        <item
+            android:id="@+id/fragmentListaUtiles"
+            android:icon="@drawable/ic_lista"
+            android:title="@string/listautiles"/>
+
+        <item
+            android:id="@+id/fragmentTabDinamico"
+            android:icon="@drawable/ic_agenda"
+            android:title="@string/agendaDigital" />
+
+
+
+
+
+        <item
+            android:id="@+id/fragment_Registro_Ingreso"
+            android:icon="@drawable/ic_entrada_salida"
+            android:title="@string/registroSalida" />
+        <item
+            android:id="@+id/fragment_Registro_Salida"
+            android:icon="@drawable/ic_entrada_salida"
+            android:title="@string/registroSalida" />
+
+        <item
             android:id="@+id/fragmentPublicidad"
             android:icon="@drawable/ic_publicidad"
-            android:title="@string/publicidad"
-            />
+            android:title="@string/publicidad" />
+
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_afiliacion"
+            android:title="@string/afiliarCuenta" />
+
 
     </group>
-
 </menu>

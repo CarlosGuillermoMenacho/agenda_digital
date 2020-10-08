@@ -2,17 +2,44 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.agendadigital">
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_LAUNCH_BROADCASTS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <application
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/Theme.MyApp"
+        android:configChanges="screenSize|orientation"
+        android:windowSoftInputMode="stateHidden"
         tools:targetApi="n">
+
+        <activity
+            android:name=".Afiliaciones.Estudiantes"
+            android:label="@string/textEstudiante">
+        </activity>
+
+        <activity
+            android:name=".Afiliaciones.Profesor"
+            android:label="@string/profesor">
+        </activity>
+
+        <activity
+            android:name=".Afiliaciones.Director"
+            android:label="@string/textDirector">
+        </activity>
+
+        <activity
+            android:name=".Afiliaciones.PersonalAdministrativo"
+            android:label="@string/PersonalAdministrativo">
+        </activity>
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -23,12 +50,32 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".services.AutoArranque">
+
+        <service
+            android:name=".services.restarter.JobService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".services.Service"
+            android:clearTaskOnLaunch="true"
+            android:enabled="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" />
+
+        <receiver
+            android:name=".services.restarter.RestartServiceBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="StartMyServiceAtBootReceiver" >
+
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="uk.ac.shef.oak.activity_recognition.sensor_service.RestartSensor" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </receiver>
-        <service android:name=".services.SocketService"/>
-    </application>
 
+        </receiver>
+
+    </application>
 </manifest>

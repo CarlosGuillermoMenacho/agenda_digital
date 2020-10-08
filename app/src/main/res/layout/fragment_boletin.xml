@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     tools:context=".Fragments.BoletinFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -89,6 +88,5 @@
         </LinearLayout>
 
     </LinearLayout>
-
 
 </LinearLayout>

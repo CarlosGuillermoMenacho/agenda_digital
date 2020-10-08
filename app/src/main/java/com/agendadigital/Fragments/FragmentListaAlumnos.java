@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
@@ -52,8 +54,6 @@ public class FragmentListaAlumnos extends Fragment {
 
     private int positonPud = 0;
 
-
-
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
@@ -62,11 +62,16 @@ public class FragmentListaAlumnos extends Fragment {
         enlaces(root);
         llenarLista();
         requestEstudiantes();
-        requestImgPublicidad();
+
         oncliks();
         return root;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        requestImgPublicidad();
+    }
 
     private void requestEstudiantes() {
 
@@ -83,6 +88,7 @@ public class FragmentListaAlumnos extends Fragment {
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONArray fila = jsonArray.getJSONArray(i);
                                 Cursor cursor = adm.estudiante(fila.getString(0));
+
                                 if (!cursor.moveToFirst()) {
                                     adm.tutor_alu(Globals.user.getCodigo(), fila.getString(0));
                                     adm.saveAlumno(fila.getString(0), fila.getString(1),
@@ -119,63 +125,61 @@ public class FragmentListaAlumnos extends Fragment {
         }
     }
 
-    private void requestImgPublicidad() {
-
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.url
-                    + "/publicidad_inicio.php", new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-
-                        JSONArray jsonArray = new JSONArray(response);
-                        for (int i =0; i < jsonArray.length(); i++){
-                            JSONArray fila = jsonArray.getJSONArray(i);
-                            String codPud = fila.getString(0);
-                            String imgPud = fila.getString(1);
-                            Cursor cursor = adm.getImgEmpInicio(codPud);
-                            if (!cursor.moveToFirst()) {
-
-                                adm.saveInicioPublicidad(codPud,imgPud);
-
-                            }
-                        }
-                        llenarImgPublicidad();
-
-                        } catch (JSONException e) {
-                        Toast.makeText(getContext(), "Error al procesar los datos", Toast.LENGTH_SHORT).show();
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getContext(), "Error en la red...", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            MySingleton.getInstance(getContext()).addToRequest(stringRequest);
-
-    }
-
-
     private void llenarLista() {
-
         Cursor cursor = adm.estudiantes(Globals.user.getCodigo());
         estudiantes = new ArrayList<>();
-        ArrayList<String> nombres = new ArrayList<>();
         if (cursor.moveToFirst()){
             do {
                 estudiantes.add(new Estudiante(cursor.getString(0),cursor.getString(1),
-                        cursor.getString(7),cursor.getString(2)));
-
+                        cursor.getString(7),cursor.getString(3),cursor.getString(9),cursor.getString(4),cursor.getString(5),cursor.getString(6)));
 
             }while (cursor.moveToNext());
 
             AdapterLicencias adapter = new AdapterLicencias(getContext(), estudiantes);
             lvListaAlumnosBoletin.setAdapter(adapter);
         }
+    }
+    private void requestImgPublicidad() {
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, Constants.url
+                + "/publicidad_inicio.php", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+
+                    JSONArray jsonArray = new JSONArray(response);
+                    for (int i =0; i < jsonArray.length(); i++){
+                        JSONArray fila = jsonArray.getJSONArray(i);
+                        String codEmp = fila.getString(0);
+                        String codPud = fila.getString(1);
+                        String imgPud = fila.getString(2);
+
+
+                        Cursor cursor = adm.getImgEmpInicioImg(codPud, codEmp);
+                        if (!cursor.moveToFirst()) {
+                            adm.saveInicioPublicidad(codEmp, codPud, imgPud);
+                        }
+
+                    }
+                    llenarImgPublicidad();
+
+
+                } catch (JSONException e) {
+                    Toast.makeText(getContext(), "Error al procesar los datos", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getContext(), "Error en la red...", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        MySingleton.getInstance(getContext()).addToRequest(stringRequest);
+
     }
 
     private void llenarImgPublicidad() {
@@ -190,13 +194,11 @@ public class FragmentListaAlumnos extends Fragment {
                     positonPud = cursor.getInt(1);
                 }
                 imgPublicidad.add(new PublicidadInicio( cursor.getString(0), cursor.getString(1),
-                                   cursor.getString(2), cursor.getInt(3) ));
+                        cursor.getString(2), cursor.getInt(3) ));
 
                 imgPub.add(cursor.getString(2));
 
             }while (cursor.moveToNext());
-
-
 
             if (positonPud == 0 ) {
 
@@ -233,7 +235,7 @@ public class FragmentListaAlumnos extends Fragment {
                 decode = Base64.decode(base64);
                 img = BitmapFactory.decodeByteArray(decode,0,decode.length);
 
-                }
+            }
         } catch(IllegalArgumentException iae) {
             img = null;
         }
@@ -247,21 +249,10 @@ public class FragmentListaAlumnos extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Globals.estudiante = estudiantes.get(position);
-                Cursor cursor = adm.getNotificaciones(Globals.estudiante.getCodigo(),Globals.user.getCodigo());
-                if (cursor.moveToFirst()){
-                    Globals.notificaciones = new Notificaciones();
-                    do {
-                        Globals.notificaciones.add(new Notificacion(cursor.getInt(0)
-                                ,cursor.getInt(1),cursor.getInt(3),
-                                cursor.getInt(7),cursor.getInt(4),
-                                cursor.getString(2),cursor.getString(5),cursor.getString(6)));
-                    }while (cursor.moveToNext());
-                }
-                cursor.close();
 
                 switch (Globals.menu){
                     case 0:
-                        Toast.makeText(getContext(),"Ir a Licencia",Toast.LENGTH_LONG).show();
+                        Navigation.findNavController(view).navigate(R.id.fragmentLicencias);
                         break;
                     case 1:
                         Navigation.findNavController(view).navigate(R.id.boletinFragment);
@@ -273,16 +264,39 @@ public class FragmentListaAlumnos extends Fragment {
                         Navigation.findNavController(view).navigate(R.id.kardexPagoFragment);
                         break;
                     case 4:
-                        Navigation.findNavController(view).navigate(R.id.fragmentTabDinamico);
+                        iraNotificaciones(view);
+
+                        break;
+                    case 5:
+                        Navigation.findNavController(view).navigate(R.id.horario_Fragment);
+                        break;
+                    case 6:
+                        Navigation.findNavController(view).navigate(R.id.utiles_Fragment);
                         break;
                 }
             }
         });
     }
 
+    private void iraNotificaciones(View view) {
+        Cursor cursor = adm.getNotificaciones(Globals.estudiante.getCodigo(),Globals.user.getCodigo());
+        if (cursor.moveToFirst()){
+            Globals.notificaciones = new Notificaciones();
+            do {
+                Globals.notificaciones.add(new Notificacion(cursor.getInt(0)
+                        ,cursor.getInt(1),cursor.getInt(3),
+                        cursor.getInt(7),cursor.getInt(4),
+                        cursor.getString(2),cursor.getString(5),cursor.getString(6)));
+            }while (cursor.moveToNext());
+        }else {
+            Globals.notificaciones = null;
+        }
+        cursor.close();
+        Navigation.findNavController(view).navigate(R.id.fragmentTabDinamico);
+    }
+
     private void enlaces(View root) {
         lvListaAlumnosBoletin = root.findViewById(R.id.lvListaAlumnosBoletin);
         imgPublicidadInicio = root.findViewById(R.id.publicidadInicio);
-
     }
 }

@@ -6,4 +6,6 @@ public class Menus {
     public static final int ADMCUENTA = 2;
     public static final int KARDEX = 3;
     public static final int AGENDA = 4;
+    public static final int HORARIO = 5;
+    public static final int LISTAUTILES = 6;
 }

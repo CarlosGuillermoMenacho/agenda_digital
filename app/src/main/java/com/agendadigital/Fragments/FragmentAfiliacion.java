@@ -18,12 +18,15 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+
 import com.agendadigital.MainActivity;
+
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.Menus;
 import com.agendadigital.clases.User;
 import com.agendadigital.clases.Usuarios;
+import com.agendadigital.services.Service;
 
 import java.util.ArrayList;
 
@@ -53,9 +56,11 @@ public class FragmentAfiliacion extends Fragment {
         return vista;
     }
     private void onclick() {
+
         btnNew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 Navigation.findNavController(v).navigate(id.fragmentFormAfiliacion);
             }
         });
@@ -79,19 +84,59 @@ public class FragmentAfiliacion extends Fragment {
                     builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+
+                            String codigo = codigos.get(position)[0];
                             deleteItem(position);
+
                             llenarListas();
-                            if (Globals.user.getCodigo() == codigos.get(position)[0]){
+
+                            if (codigos.isEmpty()){
                                 Globals.user = null;
+                                Globals.user.setFoto(null);
+                                Globals.user.setNombre(null);
+                                requireActivity().stopService(new Intent(getContext(), Service.class));
+                            }else if (Globals.user.getCodigo().equals(codigo)){
+                                Globals.user = null;
+                                requireActivity().stopService(new Intent(getContext(), Service.class));
+                                startActivity(new Intent(getContext(), MainActivity.class));
                             }
                         }
                     });
                     builder.setNegativeButton("No",null);
                     builder.show();
                 }else {
-                    Globals.user = usuarios.getUsuarios().get(position);
+                    /*Globals.user = usuarios.getUsuarios().get(position);*/
                     adm.userActivo(usuarios.getUsuarios().get(position).getCodigo(),usuarios.getUsuarios().get(position).getTipo());
+                    requireActivity().stopService(new Intent(getContext(),Service.class));
                     startActivity(new Intent(getContext(), MainActivity.class));
+                    /*Navigation Drawer*/
+                    /*switch (Globals.user.getTipo())
+                    {
+                        case "tutor":
+                            adm.actUltTipo("tutor");
+                            requireActivity().stopService(new Intent(getContext(),Service.class));
+                            startActivity(new Intent(getContext(), MainActivity.class));
+                            break;
+                        case "estudiante":
+                            adm.actUltTipo("estudiante");
+                            requireActivity().stopService(new Intent(getContext(),Service.class));
+                            startActivity(new Intent(getContext(), Estudiantes.class));
+                            break;
+                        case "profesor":
+                            adm.actUltTipo("profesor");
+                            requireActivity().stopService(new Intent(getContext(),Service.class));
+                            startActivity(new Intent(getContext(), Profesor.class));
+                            break;
+                        case "director":
+                            adm.actUltTipo("director");
+                            startActivity(new Intent(getContext(), Director.class));
+                            break;
+                        case "personal":
+                            adm.actUltTipo("personal");
+                            requireActivity().stopService(new Intent(getContext(),Service.class));
+                            startActivity(new Intent(getContext(), PersonalAdministrativo.class));
+                            break;
+                    }*/
 
                 }
             }
@@ -112,14 +157,22 @@ public class FragmentAfiliacion extends Fragment {
 
     private void deleteItem(int position) {
 
-        if (codigos.get(position)[1].equals("tutor")){
-            adm.deleteTutor(codigos.get(position)[0]);
-        }
-        if (codigos.get(position)[1].equals("profesor")){
-            adm.deleteProfesor(codigos.get(position)[0]);
-        }
-        if (codigos.get(position)[1].equals("estudiante")){
-            adm.deleteEstudiante(codigos.get(position)[0]);
+        switch (codigos.get(position)[1]) {
+            case "tutor":
+                adm.deleteTutor(codigos.get(position)[0]);
+                break;
+            case "profesor":
+                adm.deleteProfesor(codigos.get(position)[0]);
+                break;
+            case "estudiante":
+                adm.deleteEstudiante(codigos.get(position)[0]);
+                break;
+            case "director":
+                adm.deleteDirector(codigos.get(position)[0]);
+                break;
+            case "personal":
+                adm.deletePersonal(codigos.get(position)[0]);
+                break;
         }
     }
 
@@ -143,7 +196,7 @@ public class FragmentAfiliacion extends Fragment {
         for (int i = 0 ; i < arraUser.size(); i++){
 
             codigos.add(new String[]{arraUser.get(i).getCodigo(),arraUser.get(i).getTipo()});
-            nombres.add(arraUser.get(i).getNombre());
+            nombres.add(arraUser.get(i).getTipo().toUpperCase()+": "+arraUser.get(i).getNombre());
 
         }
 

@@ -3,25 +3,33 @@ package com.agendadigital.Fragments;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+
 import com.agendadigital.R;
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Constants;
+import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
+import com.agendadigital.clases.User;
+import com.agendadigital.clases.Utils;
+import com.agendadigital.services.Service;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -36,13 +44,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FragmentFormTutor extends Fragment {
+import static android.content.Context.INPUT_METHOD_SERVICE;
+
+public class FragmentFormTutor extends Fragment{
     private Button btnCancelar, btnHabilitar;
     private EditText etCedula,etTelefono;
     private String cedula, telefono;
-    public FragmentFormTutor() {
-        // Required empty public constructor
-    }
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,7 +61,6 @@ public class FragmentFormTutor extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View vista = inflater.inflate(R.layout.fragment_form_tutor, container, false);
         hacerCast(vista);
         oncliks();
@@ -66,15 +74,24 @@ public class FragmentFormTutor extends Fragment {
             @SuppressLint("ResourceType")
             @Override
             public void onClick(View v) {
+                closeKeyboard();
                 Navigation.findNavController(v).navigate(R.id.nav_home);
             }
         });
         btnHabilitar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                closeKeyboard();
                 habilitar(v);
             }
         });
+    }
+
+    public void closeKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+        if (imm.isAcceptingText()){
+            imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+        }
     }
 
     private void habilitar(final View v) {
@@ -85,57 +102,68 @@ public class FragmentFormTutor extends Fragment {
                 progressDialog.setCancelable(false);
                 progressDialog.setIndeterminate(false);
                 progressDialog.show();
-                StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.url + "/habilitar.php?op=tutor", new Response.Listener<String>() {
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, ConstantsGlobals.url+ "/habilitar.php?op=tutor", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         progressDialog.dismiss();
-
                         try {
-                            AdminSQLite adminSQLite = new AdminSQLite(getContext(), "agenda", null, 1);
-
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                             JSONObject jsonObject = new JSONObject(response);
                             String status = jsonObject.getString("status");
                             if (status.equals("ok")) {
-                                JSONObject tutor = jsonObject.getJSONObject("tutor");
+                                AdminSQLite adminSQLite = new AdminSQLite(getContext(), "agenda", null, 1);
+                                SQLiteDatabase BaseDeDato = adminSQLite.getWritableDatabase();
 
-                                String nombre = tutor.getString("nombre");
-                                String codigo = tutor.getString("codigo");
-                                JSONArray alumnos = jsonObject.getJSONArray("alumnos");
+                                JSONObject datosArray = jsonObject.getJSONObject("tutor");
 
-
-                                for (int i = 0; i< alumnos.length(); i++ ){
-                                    JSONObject alumno = alumnos.getJSONObject(i);
-                                    String codigoAlu = alumno.getString("codigo");
-                                    String nombreAlumno = alumno.getString("nombre");
-                                    String curso = alumno.getString("curso");
-                                    String cod_curso = alumno.getString("cod_cur");
-                                    String colegio = alumno.getString("colegio");
-                                    String ip = alumno.getString("ip");
-                                    String cod_col = alumno.getString("cod_col");
-                                    String fotoAlu = alumno.getString("foto");
-                                    adminSQLite.saveAlumno(codigoAlu, nombreAlumno, curso, cod_curso, colegio,
-                                                            ip, cod_col, fotoAlu,0);
-                                    adminSQLite.tutor_alu(codigo,codigoAlu);
-                                }
-
+                                String nombre = datosArray.getString("nombre");
+                                String codigo = datosArray.getString("codigo");
+                                String fotot = datosArray.getString("foto");
                                 ArrayList<String> valores = new ArrayList<>();
                                 valores.add(codigo);
                                 valores.add(nombre);
-                                valores.add("");
+                                valores.add(fotot);//Agreagar aqui la foto desde el JSON
                                 valores.add(cedula);
                                 valores.add(telefono);
                                 adminSQLite.saveTutor(valores);
 
-                                builder.setMessage("Se ha habilitado exitosamente...");
+                                Globals.user = new User(codigo, nombre, fotot, "tutor");
+
+                                JSONArray datosArrayfact_pend = jsonObject.getJSONArray("alumnos");
+                                //BaseDeDato.execSQL("delete from alumno");
+                                for (int i = 0; i < datosArrayfact_pend.length(); i++) {
+                                    ContentValues Registros1 = new ContentValues();
+                                    ContentValues Registros2 = new ContentValues();
+                                    JSONObject jsonObjectClientes = datosArrayfact_pend.getJSONObject(i);
+                                    Registros1.put("codigo", jsonObjectClientes.getInt("codigo"));
+                                    //codi=" "+jsonObjectClientes.getInt("codigo");
+                                    Registros1.put("nombre", jsonObjectClientes.getString("nombre"));
+                                    Registros1.put("curso", jsonObjectClientes.getString("curso"));
+                                    Registros1.put("cod_cur", jsonObjectClientes.getInt("cod_cur"));
+                                    Registros1.put("cod_par", jsonObjectClientes.getString("cod_par"));
+                                    Registros1.put("colegio", jsonObjectClientes.getString("colegio"));
+                                    Registros1.put("ip", jsonObjectClientes.getString("ip"));
+                                    Registros1.put("cod_col", jsonObjectClientes.getInt("cod_col"));
+                                    Registros1.put("foto", jsonObjectClientes.getString("foto"));
+                                    Registros1.put("horario", "");
+                                    if (!existealu(jsonObjectClientes.getInt("codigo"))) { // verifico si existe el alumno, para no grabarlo mas de una vez
+                                        BaseDeDato.insert("alumno", null, Registros1);
+                                    }
+                                    Registros2.put("tutor", datosArray.getString("codigo"));
+                                    Registros2.put("alu", jsonObjectClientes.getInt("codigo"));
+                                    BaseDeDato.insert("alu_tut", null, Registros2);
+                                }
+
+                                builder.setMessage("Se habilitó exitosamente...");
                                 builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
+                                        requireActivity().stopService(new Intent(getContext(), Service.class));
                                         Navigation.findNavController(v).navigate(R.id.nav_home);
                                     }
                                 });
                             } else {
-                                builder.setMessage("El usuario no existe...");
+                                builder.setMessage("El usuario NO existe...");
                                 builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
@@ -181,7 +209,6 @@ public class FragmentFormTutor extends Fragment {
             Toast.makeText(getContext(),"Faltan datos...",Toast.LENGTH_SHORT).show();
         }
     }
-
     private boolean validar() {
         cedula = etCedula.getText().toString();
         telefono = etTelefono.getText().toString();
@@ -192,7 +219,11 @@ public class FragmentFormTutor extends Fragment {
         Cursor cursor = adm.tutor(cedula,telefono);
         return cursor.moveToFirst();
     }
-
+    private boolean existealu(int cod_alu) {
+        AdminSQLite adm = new AdminSQLite(getContext(),"agenda",null,1);
+        Cursor cursor = adm.verif_alu(cod_alu);
+        return cursor.moveToFirst();
+    }
     private void hacerCast(View vista) {
        btnCancelar  = vista.findViewById(R.id.btnCancelarformtutor);
        btnHabilitar = vista.findViewById(R.id.btnHabilitarformtutor);
@@ -200,63 +231,3 @@ public class FragmentFormTutor extends Fragment {
        etTelefono = vista.findViewById(R.id.etTelefonoformtutor);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-    @Override
-    public void onResponse(String response) {
-        try {
-            JSONObject jsonObject = new JSONObject(response);
-            String status = jsonObject.getString("status");
-            if (status.equals("ok")) {
-                JSONArray jsonArray = jsonObject.getJSONArray("estudiantes");
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONArray fila = jsonArray.getJSONArray(i);
-                    Cursor cursor = adm.estudiante(fila.getString(0));
-                    if (!cursor.moveToFirst()) {
-                        adm.tutor_alu(Globals.user.getCodigo(), fila.getString(0));
-                        adm.saveAlumno(fila.getString(0), fila.getString(1),
-                                fila.getString(2), fila.getString(3),fila.getString(4),
-                                fila.getString(5), fila.getString(6),fila.getString(7),
-                                0);
-                    }
-                }
-                llenarLista();
-            }
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/color_background_personalizado"
+    android:padding="@dimen/padding_default"
+    tools:context=".Fragments.FragmentFormAdm">
+
+    <TextView
+        android:id="@+id/fHTutor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/formularioHabilitacion"
+        android:textSize="@dimen/sizeTitles"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/titleTutor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/textAdministrativo"
+        android:gravity="center"
+        android:textSize="@dimen/sizeTitles"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fHTutor"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/imputUsuario"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_max"
+        app:endIconMode="clear_text"
+        android:hint="@string/codigo"
+        app:helperText="@string/ingreseCodigo"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleTutor">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/ET_codigoPersonal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:imeOptions="actionNext"
+            android:inputType="number"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/imputClave"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_default"
+        app:endIconMode="password_toggle"
+        android:hint="@string/clave"
+        app:helperText="@string/ingreseClave"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imputUsuario">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/ET_clavePersonal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:imeOptions="actionDone"
+            android:inputType="numberPassword"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnHabilitarPersonal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/habilitar"
+        android:padding="@dimen/paddingButton"
+        app:icon="@drawable/ic_user"
+        android:backgroundTint="@color/colorButtons"
+        android:textColor="@color/text_color_buttons"
+        app:iconTint="@color/icon_buttons"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imputClave" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCancelarPersonal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_default"
+        android:text="@string/cancelar"
+        android:padding="@dimen/paddingButton"
+        app:icon="@drawable/ic_close"
+        android:backgroundTint="@color/colorButtons"
+        android:textColor="@color/text_color_buttons"
+        app:iconTint="@color/icon_buttons"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnHabilitarPersonal" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

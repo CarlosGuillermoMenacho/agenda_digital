@@ -13,12 +13,12 @@
         <TextView
             android:id="@+id/tvTitulo"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:gravity="center"
-            android:text="KARDEX DE PAGOS"
+            android:text="@string/kardexPago"
             android:textColor="@android:color/white"
-            android:textSize="24sp"
-            android:background="@color/color_secondary"
+            android:textSize="20sp"
+            android:background="@color/colorListaAlumnos"
             android:textStyle="bold"/>
 
         <LinearLayout

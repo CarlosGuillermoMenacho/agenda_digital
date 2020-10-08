@@ -1,5 +1,8 @@
 <resources>
 
+    <string name="action_lightTheme">Tema claro(Selecionado)</string>
+    <string name="action_darkTheme">Tema Oscuro</string>
+
     <!--Nombre de la aplicacion-->
     <string name="app_name">Agenda Digital</string>
 
@@ -51,10 +54,25 @@
     <string name="user">RODRIGUEZ AIZAMA JHONNY WILSON</string>
     <string name="motivo_de_la_licencia">Motivo de la licencia</string>
     <string name="publicidad">Publicidad</string>
+    <string name="horario">Horarios</string>
+    <string name="listautiles">Lista de Útiles</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="sitio_web">Sitio Web</string>
     <string name="puntoVentas">Puntos de Ventas</string>
     <string name="paginaPrincipal">Pagina Principal</string>
+    <string name="formulario_de_habilitaci_n">Formulario de Habilitación</string>
+    <string name="ingrese_su_codigo">Ingrese su Código:</string>
+    <string name="ingrese_su_pass">Ingrese su Clave:</string>
+    <string name="password">Clave</string>
+    <string name="textEstudiante">Estudiante</string>
+
+    <string name="registroIngreso">Registro Ingreso</string>
+    <string name="registroSalida">Registro Ingreso</string>
+    <string name="textDirector">Director</string>
+    <string name="PersonalAdministrativo">Personal Administrativo</string>
+    <string name="RegistroUsuario">Registro Usuario</string>
+    <string name="textAdministrativo">Administrativo</string>
+    <string name="licenciaSolicitadas">Licencias Solicitadas</string>
 
 </resources>

@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#03DAC5</color>
+    <!--Colores Personalizados-->
+    <color name="text_color_buttons">@color/white_50</color>
+    <color name="icon_buttons">@color/white_50</color>
+    <color name="colorButtons">@color/color_primary_light</color>
+    <color name="colorListaAlumnos">@color/rojo</color>
+    <color name="colorBackgroundDrawer">@color/color_primary_light</color>
+
     <color name="rojo">#df242c</color>
     <color name="blanco">#fff</color>
     <color name="colorTextView">#000</color>
     <color name="lineSeparator">#000</color>
     <color name="colorTextEdit">#000</color>
 
-    <color name="color_primary">#091D54</color>
-    <color name="color_primary_variant">#0A0A3E</color>
 
-    <color name="color_secondary">#ff9100</color>
-    <color name="color_secondary_variant">#c56200</color>
+    <color name="color_primary">#0a0a3e</color>
+    <color name="color_primary_variant">#00001a</color>
 
     <color name="color_background">#ffffff</color>
     <color name="color_surface">#ffffff</color>
@@ -29,5 +31,30 @@
     <color name="color_on_error">#ffffff</color>
 
     <color name="color_background_personalizado">#f7f7f7</color>
+
+
+    <!--Color Light-->
+    <color name="color_primary_light">#0A0A3E</color>
+    <color name="color_primary_variant_light">#00001a</color>
+    <color name="color_error_light">#b00020</color> <!--Color error (light)-->
+
+    <!--Color Dark-->
+    <color name="color_primary_dark">#1565C0</color>
+    <color name="color_primary_variant_dark">#0077c2</color>
+    <color name="color_error_dark">#cf6679</color> <!--Color error (dark)-->
+
+    <!--Color Secondary Variant-->
+    <color name="color_secondary">#E91A25</color> <!--Color secondary-->
+    <color name="color_secondary_variant">#AE0000</color> <!--Color secondary variant-->
+
+
+    <!--Color surface (light), color on error (light), -->
+    <!--color on surface (dark), color on surface (dark)-->
+    <color name="white_50">#ffffff</color>
+
+    <color name="black_800">#121212</color> <!--Color surface (dark)-->
+    <!--Color on secondary (light), color on background (light),-->
+    <!--color on surface (light)-->
+    <color name="black_900">#000000</color>
 
 </resources>

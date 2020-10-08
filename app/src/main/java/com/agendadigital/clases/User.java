@@ -1,4 +1,4 @@
-package com.agendadigital.clases;
+ package com.agendadigital.clases;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,19 +31,29 @@ public class User {
     public String getNombre() {
         return nombre;
     }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
 
     public String getCodigo() {
         return codigo;
     }
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
 
     public String getTipo() {
         return tipo;
     }
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public String getFoto() { return foto; }
 
 
-
-    public Bitmap getFoto(){
+    public Bitmap getFotoConverter(String foto){
         Bitmap img = null;
         try {
 
@@ -62,4 +72,8 @@ public class User {
         }
         return img;
     }
+    public void setFoto(String foto) {
+        this.foto = foto;
+    }
+
 }
