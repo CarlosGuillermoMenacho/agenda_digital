@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/container_notificacion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/TV_Emisor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Emisor"
+            android:textSize="18dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="18dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <TextView
+            android:id="@+id/TV_NombreEmisor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nombre Emisor"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="3dp"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/TV_Emisor"/>
+
+        <TextView
+            android:id="@+id/TV_MensajeNotificacion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="8dp"
+            android:gravity="start"
+            android:text="Mensaje"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@+id/TV_Mensaje_Hora"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/TV_NombreEmisor" />
+
+
+        <ImageView
+            android:id="@+id/img_Notificacion"
+            android:layout_width="300dp"
+            android:adjustViewBounds="true"
+            android:layout_height="wrap_content"
+            android:background="@color/black_800"
+            app:layout_constraintBottom_toTopOf="@+id/TV_Mensaje_Hora"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/TV_NombreEmisor" />
+
+        <TextView
+            android:id="@+id/TV_Mensaje_Hora"
+            android:layout_width="82dp"
+            android:layout_height="25dp"
+            android:gravity="end"
+            android:text="20:30"
+            android:textAlignment="textEnd"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/TV_Mensaje_Hora" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

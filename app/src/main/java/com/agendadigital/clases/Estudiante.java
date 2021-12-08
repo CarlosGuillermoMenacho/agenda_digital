@@ -9,6 +9,7 @@ public class Estudiante {
     private String ip;
     private String cod_cur;
     private String cod_par;
+    private String cantidadMensajes;
 
     public Estudiante() {
         this.codigo = null;
@@ -19,11 +20,13 @@ public class Estudiante {
         this.ip = null;
         this.cod_cur = null;
         this.cod_par = null;
-
+        this.cantidadMensajes = null;
 
     }
 
-    public Estudiante(String codigo, String nombre, String ip,String cod_cur,String foto, String colegio, String cod_par, String hor) {
+
+
+    public Estudiante(String codigo, String nombre, String ip, String cod_cur, String foto, String colegio, String cod_par, String hor, String cantidadMensajes) {
         this.codigo = codigo;
         this.nombre = nombre;
         this.foto = foto;
@@ -32,6 +35,7 @@ public class Estudiante {
         this.ip = ip;
         this.cod_cur = cod_cur;
         this.cod_par = cod_par;
+        this.cantidadMensajes = cantidadMensajes;
     }
     public void setHor(String codigo) {
         this.codigo = codigo;
@@ -60,6 +64,8 @@ public class Estudiante {
         this.nombre = nombre;
     }
 
+    public void setcantidadMensajes(String cantidadMensajes) {this.cantidadMensajes = cantidadMensajes;}
+
     public String getHor() {
         return hor;
     }
@@ -73,5 +79,9 @@ public class Estudiante {
 
     public String getCod_par() {
         return cod_par;
+    }
+
+    public String getCantidadMensajes() {
+        return cantidadMensajes;
     }
 }

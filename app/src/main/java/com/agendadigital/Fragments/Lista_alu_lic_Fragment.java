@@ -4,38 +4,39 @@ import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.Navigation;
 
-import com.agendadigital.Fragments.AdapterLicencias;
 import com.agendadigital.R;
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Estudiante;
 import com.agendadigital.clases.Globals;
-import com.agendadigital.ui.gallery.GalleryViewModel;
 
 import java.util.ArrayList;
 
 public class Lista_alu_lic_Fragment extends Fragment {
 
-    private GalleryViewModel galleryViewModel;
     private ListView lvListaAlumnosBoletin;
     private AdminSQLite adm;
     private ArrayList<Estudiante> estudiantes;
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        galleryViewModel =
-                ViewModelProviders.of(this).get(GalleryViewModel.class);
 
         View root = inflater.inflate(R.layout.fragment_lista_alu_lic, container, false);
         adm = new AdminSQLite(getContext(),"agenda",null, 1);
@@ -71,6 +72,17 @@ public class Lista_alu_lic_Fragment extends Fragment {
         }
 
     }
-
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem dark = menu.findItem(R.id.action_darkTheme);
+        MenuItem light = menu.findItem(R.id.action_lightTheme);
+        if ( dark != null) {
+            dark.setVisible(false);
+        }
+        if ( light != null) {
+            light.setVisible(false);
+        }
+    }
 
 }

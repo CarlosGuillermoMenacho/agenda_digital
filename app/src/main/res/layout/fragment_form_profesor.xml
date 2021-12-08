@@ -49,7 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:imeOptions="actionNext"
-            android:inputType="number"/>
+            android:inputType="text"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -71,7 +71,7 @@
             android:layout_width="match_parent"
             android:imeOptions="actionDone"
             android:layout_height="match_parent"
-            android:inputType="number"/>
+            android:inputType="numberPassword"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 

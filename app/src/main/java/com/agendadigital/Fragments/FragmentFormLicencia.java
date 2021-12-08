@@ -221,7 +221,7 @@ public class FragmentFormLicencia extends Fragment {
                 progressDialog.setCancelable(false);
                 progressDialog.setIndeterminate(false);
                 progressDialog.show();
-                StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.url + "/grab_licencia.php", new Response.Listener<String>() {
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, "http://"+Globals.estudiante.getIp() + "/grab_licencia.php", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         progressDialog.dismiss();

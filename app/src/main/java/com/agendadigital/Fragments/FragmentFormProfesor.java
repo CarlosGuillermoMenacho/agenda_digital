@@ -3,7 +3,6 @@ package com.agendadigital.Fragments;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -26,7 +25,7 @@ import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.User;
-import com.agendadigital.clases.Utils;
+import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -109,7 +108,7 @@ public class FragmentFormProfesor extends Fragment {
                             String status = jsonObject.getString("status");
                             if (status.equals("ok")) {
 
-
+                                ArrayList<String[]> lista_col=new ArrayList<>();
 
                                 AdminSQLite adminSQLite = new AdminSQLite(getContext(), "agenda", null, 1);
                                 SQLiteDatabase BaseDeDato = adminSQLite.getWritableDatabase();
@@ -140,13 +139,14 @@ public class FragmentFormProfesor extends Fragment {
                                     if (!existeCol(jsonObjectClientes.getInt("cod_col"))) { // verifico si existe el alumno, para no grabarlo mas de una vez
                                         BaseDeDato.insert("colegios", null, Registros1);
                                     }
-                                    Registros2.put("cod_pro", jsonObjectClientes.getInt("cod_pro"));
+                                    lista_col.add(new String[]{jsonObjectClientes.getInt("cod_col")+"",jsonObjectClientes.getString("ip")});
+                                    Registros2.put("cod_pro", jsonObjectClientes.getString("cod_pro"));
                                     Registros2.put("cod_col", jsonObjectClientes.getInt("cod_col"));
                                     Registros2.put("estado", 1);
                                     BaseDeDato.insert("prof_col", null, Registros2);
                                 }
 
-
+                                obt_cursos_listas(codigo,lista_col);
 
 
 
@@ -179,13 +179,13 @@ public class FragmentFormProfesor extends Fragment {
                         progressDialog.dismiss();
                         Toast.makeText(getContext(),"Error en la red...",Toast.LENGTH_SHORT).show();
                     }
-                }) {
+                }){
                     @Override
                     protected Map<String, String> getParams() {
-                        Map<String, String> params = new HashMap<>();
-                        params.put("codigo", cod_prof);
-                        params.put("clave", clave_prof);
-                        return params;
+                        Map<String,String> header = new HashMap<>();
+                        header.put("codigo",cod_prof);
+                        header.put("clave",clave_prof);
+                        return header;
                     }
                 };
 
@@ -231,4 +231,73 @@ public class FragmentFormProfesor extends Fragment {
         codigo = vista.findViewById(R.id.ET_codigoProfesor);
         clave = vista.findViewById(R.id.ET_claveProfesor);
     }
+    private void obt_cursos_listas(final String codi_profe, final ArrayList<String[]> lista_cole){
+        for (int j = 0; j < lista_cole.size(); j++) {
+            String d_ip= lista_cole.get(j)[1];
+            final String codCol = lista_cole.get(j)[0];
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, "http://"+d_ip+ "/agendadigital/obt_cur_mat.php", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+
+                        JSONObject jsonObject = new JSONObject(response);
+                        String status = jsonObject.getString("status");
+                        if (status.equals("ok")) {
+                            JSONArray cursos = jsonObject.getJSONArray("cursos");
+                            AdminSQLite adm = new AdminSQLite(getContext(), "agenda", null, 1);
+                            ArrayList<String[]> codigoCursos = new ArrayList<>();
+                            for (int i = 0; i < cursos.length(); i++){
+                                JSONArray fila = cursos.getJSONArray(i);
+                                String codCur = fila.getString(0);
+                                String paralelo = fila.getString(1);
+                                String nombre = fila.getString(2);
+                                codigoCursos.add(new String[]{codCur,paralelo});
+
+                                adm.saveCursoProf(codi_profe,codCol,codCur,paralelo,nombre);
+
+                            }
+
+                            JSONArray materias = jsonObject.getJSONArray("materias");
+                            for (int i = 0; i < materias.length(); i++){
+                                JSONArray fila = materias.getJSONArray(i);
+                                String codmat = fila.getString(0);
+                                String nombre = fila.getString(1);
+                                adm.saveMateriasProf(codi_profe,codCol,codmat,nombre);
+                            }
+
+                            JSONArray listas = jsonObject.getJSONArray("listas");
+                            for (int i = 0; i < listas.length(); i++){
+                                JSONArray fila = listas.getJSONArray(i);
+                                for (int j = 0; j < fila.length(); j++){
+                                    JSONArray alumno = fila.getJSONArray(j);
+                                    String codAlu = alumno.getString(0);
+                                    String nombre = alumno.getString(1);
+                                    adm.saveListaAlumno(codi_profe,codCol,codigoCursos.get(i)[0],codigoCursos.get(i)[1],codAlu,nombre);
+                                }
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            }) {
+                @Override
+                protected Map<String, String> getParams() {
+                    Map<String, String> params = new HashMap<>();
+                    params.put("codigo", codi_profe);
+                    return params;
+                }
+            };
+
+            stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            MySingleton.getInstance(getContext()).addToRequest(stringRequest);
+        }
+    }
+
 }

@@ -25,12 +25,21 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL("create table notas(codigo int,cod_mat varchar,descri varchar ,nota1 varchar,nota2 varchar,nota3 varchar)");
         db.execSQL("create table alu_tut(tutor int,alu int)");
 
-        db.execSQL("create table notificaciones(codigo int,cod_est int,mensaje varchar,emisor varchar,cod_tutor int,fecha varchar, hora varchar, visto int)");
-        db.execSQL("create table materias(cod_est varchar,cod_materia varchar,nomb_materia varchar)");
-        db.execSQL("create table utiles(codigo int,gestion int,cod_mat varchar,materia varchar, descrip varchar)");
+        db.execSQL("create table notificaciones(codigo int,cod_est int,mensaje varchar,emisor varchar,cod_tutor int," +
+                                    "fecha varchar, hora varchar, visto int, tipo varchar, nombreEmisor varchar)");
 
+        db.execSQL("create table notificacionesDirCurso(id integer primary key autoincrement,codDir varchar,codCol int,cod_curso int,cod_par int,mensaje varchar,fecha varchar,hora varchar,tipo int)");
+        db.execSQL("create table notificacionesDirAlumno(id integer primary key autoincrement,codDir varchar,codEst varchar,mensaje varchar,fecha varchar,hora varchar,tipo int)");
+        db.execSQL("create table materias(cod_est varchar,cod_materia varchar,nomb_materia varchar)");
+        db.execSQL("create table cursos(cod_pro varchar,cod_col int,cod_curso int,cod_par int,nombre varchar)");
+        db.execSQL("create table materiasProf(cod_pro varchar,cod_col int,cod_mat varchar,nombre varchar)");
+        db.execSQL("create table listaAlumnos(cod_pro varchar,cod_col int,cod_curso int,cod_par int,codalu int,nombre varchar)");
+
+        db.execSQL("create table utiles(codigo int,gestion int,cod_mat varchar,materia varchar, descrip varchar)");
         db.execSQL("create table publicidad(cod_publi int,cod_materia varchar,nomb_materia varchar)");
 
+        db.execSQL("create table cursosDir(codDir int,codCol int,codCur int,codPar int,nombre varchar)");
+        db.execSQL("create table AlumnosDir(codDir int,codCol int,codCur int,codPar int,codEst int,nombre varchar)");
 
         db.execSQL("create table licencias(id int,codigo int,cod_tut int, f_sol varchar,h_sol varchar,f_ini varchar,f_fin varchar,obs varchar,estado int)");
         db.execSQL("create table estados(id_est int,descrip varchar)");
@@ -69,6 +78,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
 
         db.execSQL("insert into ult_usr values(1,0,'User','')");
 
+        db.execSQL("create table colegio_adm(codAdm int, nombre varchar,turno varchar,codCol int, ip varchar, estado int)");
 
         /* Publicidades table */
         db.execSQL("create table empresa_pub(cod_pai int, cod_ciu int, cod_rub int, cod_emp int, nombre varchar," +
@@ -81,7 +91,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL("create table emp_pub(cod_emp int, cod_pub int, img varchar, estado int)");
         db.execSQL("create table emp_rubro( cod_rub int, descrip varchar, estado int)");
 
-        db.execSQL("insert into materias values('1','1','Matemáticas')");
+        /*db.execSQL("insert into materias values('1','1','Matemáticas')");
         db.execSQL("insert into materias values('1','2','Física')");
         db.execSQL("insert into materias values('1','3','Lenguaje')");
         db.execSQL("insert into materias values('1','4','Química')");
@@ -98,67 +108,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL("insert into materias values('2','4','Química')");
         db.execSQL("insert into materias values('2','5','Biología')");
         db.execSQL("insert into materias values('2','6','Música')");
-        db.execSQL("insert into materias values('2','7','Geografía')");
-
-        db.execSQL("insert into notificaciones values(1,1,'Mensaje numero 1 de matematicas',1,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(2,1,'Mensaje numero 2 de matematicas',1,1,'2020-05-03','08:30',0)");
-        db.execSQL("insert into notificaciones values(3,1,'Mensaje numero 3 de matematicas',1,1,'2020-05-04','08:30',0)");
-        db.execSQL("insert into notificaciones values(4,1,'Mensaje numero 4 de matematicas',1,1,'2020-05-05','08:30',0)");
-        db.execSQL("insert into notificaciones values(5,1,'Mensaje numero 5 de matematicas',1,1,'2020-05-06','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(6,1,'Mensaje numero 1 de fisica',2,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(7,1,'Mensaje numero 2 de fisica',2,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(8,1,'Mensaje numero 3 de fisica',2,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(9,1,'Mensaje numero 4 de fisica',2,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(10,1,'Mensaje numero 5 de fisica',2,1,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(11,1,'Mensaje numero 1 de lenguaje',3,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(12,1,'Mensaje numero 2 de lenguaje',3,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(13,1,'Mensaje numero 3 de lenguaje',3,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(14,1,'Mensaje numero 4 de lenguaje',3,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(15,1,'Mensaje numero 5 de lenguaje',3,1,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(16,1,'Mensaje numero 1 de quimica',4,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(17,1,'Mensaje numero 2 de quimica',4,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(18,1,'Mensaje numero 3 de quimica',4,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(19,1,'Mensaje numero 4 de quimica',4,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(20,1,'Mensaje numero 5 de quimica',4,1,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(21,1,'Mensaje numero 1 de Biologia',5,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(22,1,'Mensaje numero 2 de Biologia',5,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(23,1,'Mensaje numero 3 de Biologia',5,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(24,1,'Mensaje numero 4 de Biologia',5,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(25,1,'Mensaje numero 5 de Biologia',5,1,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(26,1,'Mensaje numero 1 de musica',6,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(27,1,'Mensaje numero 2 de musica',6,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(28,1,'Mensaje numero 3 de musica',6,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(29,1,'Mensaje numero 4 de musica',6,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(30,1,'Mensaje numero 5 de musica',6,1,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(31,1,'Mensaje numero 1 de geografia',7,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(32,1,'Mensaje numero 2 de geografia',7,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(33,1,'Mensaje numero 3 de geografia',7,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(34,1,'Mensaje numero 4 de geografia',7,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(35,1,'Mensaje numero 5 de geografia',7,1,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(36,1,'Mensaje numero 1 de filosofia',8,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(37,1,'Mensaje numero 2 de filosofia',8,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(38,1,'Mensaje numero 3 de filosofia',8,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(39,1,'Mensaje numero 4 de filosofia',8,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(40,1,'Mensaje numero 5 de filosofia',8,1,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(41,1,'Mensaje numero 1 de sociales',9,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(42,1,'Mensaje numero 2 de sociales',9,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(43,1,'Mensaje numero 3 de sociales',9,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(44,1,'Mensaje numero 4 de sociales',9,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(45,1,'Mensaje numero 5 de sociales',9,1,'2020-05-02','08:30',0)");
-
-        db.execSQL("insert into notificaciones values(46,1,'Mensaje numero 1 de educacion fisica',10,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(47,1,'Mensaje numero 2 de educacion fisica',10,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(48,1,'Mensaje numero 3 de educacion fisica',10,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(49,1,'Mensaje numero 4 de educacion fisica',10,1,'2020-05-02','08:30',0)");
-        db.execSQL("insert into notificaciones values(50,1,'Mensaje numero 5 de educacion fisica',10,1,'2020-05-02','08:30',0)");
+        db.execSQL("insert into materias values('2','7','Geografía')");*/
     }
 
     @Override
@@ -216,10 +166,8 @@ public class AdminSQLite extends SQLiteOpenHelper {
     }
 
 
-    public void saveAlumno(String codigo , String nombre , String curso , String codCurso, String colegio,
-                           String ip, String cod_col, String foto, int esUser  ){
-        getWritableDatabase().execSQL("insert into alumno values('"+codigo+"','"+nombre+"','"+curso+"','"
-                                        +codCurso+"','"+colegio+"','"+ip+"','"+cod_col+"','"+foto+"','',"+esUser+")");
+    public void saveAlumno(String codigo, String nombre, String curso, String cod_cur, String cod_par, String colegio, String ip, String cod_col, String foto){
+        getWritableDatabase().execSQL("insert into alumno values("+codigo+",'"+nombre+"','"+curso+"',"+cod_par+","+cod_cur+",'"+colegio+"','"+ip+"',"+cod_col+",'"+foto+"',0,0,'')");
     }
 
     public Cursor licencias(int cod_alu){//devuelve en un cursor todos los profesores habilitados
@@ -254,7 +202,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
 
 
     public void saveAdm(ArrayList<String> valores){//guarda un profesor habilitado
-        getWritableDatabase().execSQL("insert into personal values('" + valores.get(0) + "','" + valores.get(1) + "','' ,0,'')");
+        getWritableDatabase().execSQL("insert into personal values('" + valores.get(0) + "','" + valores.get(1) + "','"+valores.get(2)+"' ,0,'')");
     }
 
 
@@ -265,23 +213,30 @@ public class AdminSQLite extends SQLiteOpenHelper {
         getWritableDatabase().execSQL("insert into profesor values('" + valores.get(0) + "','" + valores.get(1) + "','"+valores.get(2)+"',0)");
     }
     public Cursor getAlus(String tutor){
-        return getReadableDatabase().rawQuery("select * from alu_tut where tutor = "+tutor,null);
+        return getReadableDatabase().rawQuery("select * from alu_tut where tutor="+tutor,null);
     }
     public Cursor getTutors(String alu){
         return getReadableDatabase().rawQuery("select * from alu_tut where alu="+alu,null);
     }
     public void deleteProfesor(String codigo){
         getWritableDatabase().execSQL("delete from profesor where codigo='"+codigo+"'");
+
+
+
+
     }
     public void deleteDirector(String codigo){
-        getWritableDatabase().execSQL("delete from director where codigo='"+codigo+"'");
+        getWritableDatabase().execSQL("delete from cursosDir where codDir="+codigo);
+        getWritableDatabase().execSQL("delete from AlumnosDir where codDir="+codigo);
+        getWritableDatabase().execSQL("delete from dir_col where cod_dir="+codigo);
+        getWritableDatabase().execSQL("delete from director where cod_dir='"+codigo+"'");
     }
     public void deletePersonal(String codigo){
         getWritableDatabase().execSQL("delete from personal where codigo='"+codigo+"'");
     }
     public void saveTutor(ArrayList<String> valores){
         getWritableDatabase().execSQL("insert into tutor values('"+valores.get(0)+"','"+valores.get(1)+"','"+valores.get(2)+"','"+valores.get(3)+"','"+valores.get(4)+"',0)");
-        userActivo(valores.get(0),"tutor");
+/*        userActivo(valores.get(0),"tutor");*/
     }
     public void saveLicencia(int id,int codigo,int cod_tut,String f_sol,String hora,String f_ini,String f_fin,String obs){
         getWritableDatabase().execSQL("insert into licencias values("+id+","+codigo+","+cod_tut+",'"+f_sol+"','"+hora+"','"+f_ini+"','"+f_fin+"','"+obs+"',1)");
@@ -305,25 +260,44 @@ public class AdminSQLite extends SQLiteOpenHelper {
         return getReadableDatabase().rawQuery("select * from tutor where cedula='"+cedula+"' and telefono='"+telefono+"'",null);
     }
     public void deleteEstudiante(String codigo){
-        getWritableDatabase().execSQL("delete from estudiante where codigo = "+codigo);
+        getWritableDatabase().execSQL("delete from estudiante where codigo="+codigo);
     }
+    public void deleteAlumno(String codigo){
+        getWritableDatabase().execSQL("delete from alumno where codigo="+codigo);
+    }
+
     public void anularLicencia(int codigo){
         getWritableDatabase().execSQL("update licencias set estado=2 where id="+codigo);
     }
     public void deleteTutor(String codigo){
-        Cursor cursor = getAlus(codigo);
-        if (cursor.moveToFirst()){
-            do {
-                Cursor cursor1 = getTutors(cursor.getString(1));
-                if (cursor1.getCount()==1){
-                    deleteEstudiante(cursor.getString(1));
-                }
-            }while (cursor.moveToNext());
-        }
+
         getWritableDatabase().execSQL("delete from tutor where codigo="+codigo);
-        getWritableDatabase().execSQL("delete from alu_tut where tutor = "+codigo);
+        getWritableDatabase().execSQL("delete from notificaciones where cod_tutor="+codigo);
+        Cursor cursor2 = getAlus(codigo);
+        if (cursor2.moveToFirst()) {
+            getWritableDatabase().execSQL("delete from alu_tut where tutor="+codigo);
+            do {
+                String codAlu = cursor2.getString(1);
+                if (!tieneTutor(codAlu)){
+                    deleteAlumno(codAlu);
+                    deleteMaterias(codAlu);
+                }
+            } while (cursor2.moveToNext());
+        }
     }
 
+    private void deleteMaterias(String codAlu) {
+        getWritableDatabase().execSQL("delete from materias where cod_est="+codAlu );
+    }
+
+    private boolean tieneTutor(String codAlu) {
+        Cursor cursor = getReadableDatabase().rawQuery("select * from alu_tut where alu="+codAlu,null);
+        return cursor.moveToFirst();
+    }
+
+    public Cursor getNotificacion(String est, String tut , String idmsg){
+        return getReadableDatabase().rawQuery("select * from notificaciones where cod_est="+est+" and cod_tutor="+tut+" and codigo="+idmsg ,null);
+    }
     public ArrayList<Licencia> obt_licencias(){
         Cursor licenc = licencias(Integer.parseInt(Globals.estudiante.getCodigo()));
         ArrayList<Licencia> ususarios = new ArrayList<>();
@@ -401,6 +375,9 @@ public class AdminSQLite extends SQLiteOpenHelper {
     public Cursor estudiante(String codEstudiante){
         return getReadableDatabase().rawQuery("select * from estudiante where codigo='"+codEstudiante+"'",null);
     }
+    public Cursor hayestudiante(String codEstudiante){
+        return getReadableDatabase().rawQuery("select * from alumno where codigo='"+codEstudiante+"'",null);
+    }
     public Cursor lista_utiles(String cod_alu,int ano){
         return getReadableDatabase().rawQuery("select * from utiles where gestion ="+ano+" and codigo="+cod_alu,null);
     }
@@ -422,10 +399,10 @@ public class AdminSQLite extends SQLiteOpenHelper {
                 getWritableDatabase().execSQL("update estudiante set activo = 1 where codigo = " + codigo);
                 break;
             case "profesor":
-                getWritableDatabase().execSQL("update profesor set activo = 1 where codigo = " + codigo);
+                getWritableDatabase().execSQL("update profesor set activo = 1 where codigo = '" + codigo+"'");
                 break;
             case "director":
-                getWritableDatabase().execSQL("update director set activo = 1 where codigo = " + codigo);
+                getWritableDatabase().execSQL("update director set activo = 1 where cod_dir = " + codigo);
                 break;
             case "personal":
                 getWritableDatabase().execSQL("update personal set activo = 1 where codigo = " + codigo);
@@ -568,11 +545,17 @@ public class AdminSQLite extends SQLiteOpenHelper {
 
     }
 
-    public int testEstados (String cod_emisor, String cod_tutor, String cod_estudiante) {
-        return getReadableDatabase().rawQuery("update notificaciones set visto = 1 " +
-                        "where cod_est="+cod_estudiante + "  and  emisor= "+ cod_emisor +" and "+
-                        "cod_tutor="+cod_tutor ,
+    public int notificacionesPendientes (String codEstudiantes, String codTutor) {
+        return getReadableDatabase().rawQuery("select * from notificaciones  where visto = 0 " +
+                        "and cod_est="+codEstudiantes + " and "+
+                        "cod_tutor="+codTutor ,
                 null).getCount();
+    }
+
+    public void testEstados ( String cod_tutor, String cod_estudiante) {
+        getWritableDatabase().execSQL("update notificaciones set visto = 1 " +
+                        "where cod_est="+cod_estudiante + " and "+
+                        "cod_tutor="+cod_tutor  + " and visto = 0 " );
     }
 
     public ArrayList<String> obtenerIPS() {
@@ -596,7 +579,115 @@ public class AdminSQLite extends SQLiteOpenHelper {
         String codTutor = jsonObject.getString("cod_tutor");
         String fecha = jsonObject.getString("fecha");
         String hora = jsonObject.getString("hora");
+        String tipo = jsonObject.getString("tipo");
+        String nombreEmisor = jsonObject.getString("nombreemisor");
 
-        getWritableDatabase().execSQL("insert into notificaciones values("+id+","+est+",'"+msg+"','"+emisor+"',"+codTutor+",'"+fecha+"','"+hora+"',0)");
+        getWritableDatabase().execSQL("insert into notificaciones values("+id+","+est+",'"+msg+"'," +
+                            "'"+emisor+"',"+codTutor+",'"+fecha+"','"+hora+"',0,"+tipo+",'"+nombreEmisor+"')");
+    }
+    public Cursor colegiosDir(String codigoTutor){
+        return getReadableDatabase().rawQuery("select a.cod_col,a.nombre,a.ip,a.turno from colegios a,dir_col dc where dc.cod_col = a.cod_col and dc.cod_dir='"+codigoTutor+"'",null);
+    }
+    public Cursor colegiosProf(String codprof){
+        return getReadableDatabase().rawQuery("select a.cod_col,a.nombre,a.ip,a.turno from colegios a,prof_col pc where pc.cod_col = a.cod_col and pc.cod_pro='"+codprof+"'",null);
+    }
+    public String getNombreMateria(String codigo, String emisor) {
+
+        Cursor cursor =  getReadableDatabase().rawQuery("select nomb_materia from materias where cod_est ="+ codigo +
+                        " and cod_materia='"+emisor+"'",
+                null);
+        if (cursor.moveToFirst()){
+
+            return cursor.getString(0);
+
+        }
+        return "";
+
+    }
+    public Cursor getCursos(String prof,String col){
+        return getReadableDatabase().rawQuery("select * from cursos where cod_pro='"+prof+"' and cod_col="+col,null);
+    }
+    public Cursor getListas(String prof,String col){
+        return getReadableDatabase().rawQuery("select * from listaAlumnos where cod_pro='"+prof+"' and cod_col="+col,null);
+    }
+    public Cursor getMaterias(String prof,String col){
+        return getReadableDatabase().rawQuery("select * from materiasProf where cod_pro='"+prof+"' and cod_col="+col,null);
+    }
+    public boolean existecurso(String CodProf,String codCol,String CodCur,String CodPar){
+        Cursor cursor = getReadableDatabase().rawQuery("select * from cursos where cod_pro='"+CodProf+"' and cod_col="+codCol+" and cod_curso="+CodCur+" and cod_par="+CodPar,null);
+        return cursor.moveToFirst();
+    }
+
+    public void saveCursoProf(String codigo, String codCol, String codCur, String paralelo, String nombre) {
+        if (!existecurso(codigo,codCol,codCur,paralelo)){
+            getWritableDatabase().execSQL("insert into cursos values('"+codigo+"',"+codCol+","+codCur+","+paralelo+",'"+nombre+"')");
+        }
+    }
+    public boolean existemateria(String CodProf,String codCol,String Codmat){
+        Cursor cursor = getReadableDatabase().rawQuery("select * from materiasProf where cod_pro='"+CodProf+"' and cod_col="+codCol+" and cod_mat='"+Codmat+"'",null);
+        return cursor.moveToFirst();
+    }
+    public void saveMateriasProf(String codi_profe, String codCol, String codmat, String nombre) {
+        if (!existemateria(codi_profe,codCol,codmat)){
+            getWritableDatabase().execSQL("insert into materiasProf values('"+codi_profe+"',"+codCol+",'"+codmat+"','"+nombre+"')");
+        }
+    }
+    public boolean existelistaAlumno(String CodProf,String codCol,String CodCur,String codPar,String codalu){
+        Cursor cursor = getReadableDatabase().rawQuery("select * from listaAlumnos where cod_pro='"+CodProf+"' and cod_col="+codCol+" and cod_curso="+CodCur+" and cod_par="+codPar+" and codalu="+codalu,null);
+        return cursor.moveToFirst();
+    }
+    public void saveListaAlumno(String codi_profe, String codCol, String codCur, String codPar, String codAlu, String nombre) {
+        if (!existelistaAlumno(codi_profe,codCol,codCur,codPar,codAlu)){
+            getWritableDatabase().execSQL("insert into listaAlumnos values('"+codi_profe+"',"+codCol+","+codCur+","+codPar+","+codAlu+",'"+nombre+"')");
+        }
+    }
+    public boolean existecursoDir(String codigo, String codCol, String codcur){
+        Cursor cursor = getReadableDatabase().rawQuery("select * from cursosDir where codDir="+codigo+" and codCol="+codCol+" and codCur="+codcur,null);
+        return cursor.moveToFirst();
+    }
+    public void savecursosDir(String codigo, String codCol, String codcur,String codPar ,String nombre) {
+        if (!existecursoDir(codigo,codCol,codcur)){
+            getWritableDatabase().execSQL("insert into cursosDir values("+codigo+","+codCol+","+codcur+","+codPar+",'"+nombre+"')");
+        }
+    }
+    public Cursor getCursosDir(String codDir,String codCol){
+        return getReadableDatabase().rawQuery("select * from CursosDir where codDir="+codDir+" and codCol="+codCol,null);
+    }
+    public boolean existeAlumnoDir(String codigo, String codCol, String codCur, String codPar, String codest){
+        Cursor cursor = getReadableDatabase().rawQuery("select * from AlumnosDir where codDir="+codigo+" and codCol="+codCol+" and codCur="+codCur+" and codPar="+codPar+" and codEst="+codest,null);
+        return cursor.moveToFirst();
+    }
+    public void saveListaAlumnoDir(String codigo, String codCol, String codCur, String codPar, String codest, String nombre) {
+        if (!existeAlumnoDir(codigo,codCol,codCur,codPar,codest)){
+            getWritableDatabase().execSQL("insert into AlumnosDir values("+codigo+","+codCol+","+codCur+","+codPar+","+codest+",'"+nombre+"')");
+        }
+    }
+    public Cursor getAlumnosDir(String codDir,String codCol,String codCur,String codPar){
+        return getReadableDatabase().rawQuery("select * from AlumnosDir where codDir="+codDir+" and codCol="+codCol+" and codCur="+codCur+" and codPar="+codPar,null);
+    }
+    public void saveNotificacionDirCurso(String codDir, String codCol, String cod_curso, String cod_par,String mensaje,String fecha, String hora, int tipo){
+        getWritableDatabase().execSQL("insert into notificacionesDirCurso(codDir,codCol,cod_curso,cod_par,mensaje,fecha,hora,tipo) values('"+codDir+"',"+codCol+","+cod_curso+", "+cod_par+",'"+mensaje+"','"+fecha+"', '"+hora+"', "+tipo+")");
+    }
+
+    public Cursor getNotificacionesDirCurso(String codDir, String codCol, String cod_curso, String cod_par) {
+        return getReadableDatabase().rawQuery("select * from notificacionesDirCurso where codDir='"+codDir+"' and codCol="+codCol+" and cod_curso="+cod_curso+" and cod_par="+cod_par,null);
+    }
+    public void saveNotificacionDirAlumno(String codDir, String codEst,String mensaje,String fecha, String hora, int tipo){
+        getWritableDatabase().execSQL("insert into notificacionesDirAlumno(codDir,codEst,mensaje,fecha,hora,tipo) values('"+codDir+"','"+codEst+"','"+mensaje+"','"+fecha+"','"+hora+"',"+tipo+")");
+    }
+    public Cursor getNotificacionesDirAlumno(String codDir, String codEst) {
+        return getReadableDatabase().rawQuery("select * from notificacionesDirAlumno where codDir='"+codDir+"' and codEst="+codEst,null);
+    }
+
+    public void savemsgAnterior(String id, String codest, String msg, String emisor, String codtut, String fecha, String hora, String estado, String tipo,String nombreEmisor) {
+        getWritableDatabase().execSQL("insert into notificaciones values("+id+","+codest+",'"+msg+"','"+emisor+"','"+codtut+"','"+fecha+"','"+hora+"','"+estado+"','"+tipo+"','"+nombreEmisor+"')");
+    }
+
+    public void saveColAdm(String codAdm, String nombreCol, String turno, String codCol, String ip, String estado) {
+        getWritableDatabase().execSQL("insert into colegio_adm values("+codAdm+",'"+nombreCol+"','"+turno+"',"+codCol+",'"+ip+"',"+estado+")");
+    }
+
+    public Cursor getColAdm(String codigo) {
+        return getReadableDatabase().rawQuery("select * from colegio_adm where codAdm="+codigo,null);
     }
 }

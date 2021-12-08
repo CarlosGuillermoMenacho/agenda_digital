@@ -1,16 +1,16 @@
 package com.agendadigital;
 
-import android.content.BroadcastReceiver;
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,29 +35,20 @@ import com.agendadigital.Fragments.FragmentListaAlumnos;
 import com.agendadigital.Interfaces.Comunicador;
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Globals;
-import com.agendadigital.clases.Utils;
+import com.agendadigital.services.ProcessMainClass;
+import com.agendadigital.services.restarter.RestartServiceBroadcastReceiver;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity  implements Comunicador {
 
     private AppBarConfiguration mAppBarConfiguration;
-    private IntentFilter filter = new IntentFilter("SENDMESSAGE");
     NavigationView sNavigationView;
-    private TextView nameUser;
-    private AdminSQLite adm;
-
-    private Utils utils;
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Toast.makeText(this, "ON Destroyee",Toast.LENGTH_SHORT).show();
-    }
-
+    TextView nameUser;
+    ImageView imgUser;
     @Override
     protected void onPause() {
         super.onPause();
-        Toast.makeText(this, "ON Pauseee",Toast.LENGTH_SHORT).show();
+        Globals.tabsActivos.clear();
 
     }
 
@@ -74,166 +65,39 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
 
         View hview = sNavigationView.getHeaderView(0);
         nameUser = hview.findViewById(R.id.tvUser);
-
-        adm = new AdminSQLite(MainActivity.this, "agenda", null, 1);
-
-
+        imgUser = hview.findViewById(R.id.ivUser);
 /*        Globals.user = adm.getUltUsr();*/
-
-        Menu menu = sNavigationView.getMenu();
-        MenuItem admnistrarCuentas = menu.findItem(R.id.nav_home);
-        MenuItem agendaDigital = menu.findItem(R.id.fragmentAgendaDigital);
-        MenuItem licencias = menu.findItem(R.id.fragmentLicencia);
-        MenuItem kardexPago = menu.findItem(R.id.fragmentKardex);
-        MenuItem boletines = menu.findItem(R.id.fragmentBoletin);
-        MenuItem horarios = menu.findItem(R.id.fragmentHorario);
-        MenuItem listaUtiles = menu.findItem(R.id.fragmentListaUtiles);
-        MenuItem publicidad = menu.findItem(R.id.fragmentPublicidad);
-        MenuItem registroIngreso = menu.findItem(R.id.fragment_Registro_Ingreso);
-        MenuItem registroSalida = menu.findItem(R.id.fragment_Registro_Salida);
-        MenuItem fragmentTabDinamico = menu.findItem(R.id.fragmentTabDinamico);
-
 
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.fragmentAgendaDigital, R.id.fragmentBoletin,
                 R.id.fragmentLicencia, R.id.fragmentPublicidad,R.id.fragmentKardex,R.id.fragmentHorario,
                 R.id.fragmentListaUtiles, R.id.fragment_Registro_Ingreso, R.id.fragment_Registro_Salida,
-                R.id.fragmentTabDinamico)
+                R.id.fragment_Lista_Colegios_Prof, R.id.fragmentTabDinamicosEst, R.id.lista_Colegios_Fragment,
+                R.id.lista_Colegios_Director_Fragment, R.id.fragmentPracticoAlumnoItem, R.id.fragmentCalendarioItem,
+                R.id.fragmentEvaluacionItem
+                )
                 .setDrawerLayout(drawer)
                 .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(sNavigationView, navController);
-        NavGraph navGraph = navController.getGraph();
-
-        Globals.user = adm.getUserActivo();
-        if (Globals.user.getTipo() != null) {
-
-            switch (Globals.user.getTipo()) {
-
-                case "tutor":
-                    nameUser.setText(Globals.user.getNombre());
-                    fragmentTabDinamico.setVisible(false);
-                    registroIngreso.setVisible(false);
-                    registroSalida.setVisible(false);
-
-                    if (Globals.user.getFoto() != null){
-
-                        ImageView imgUser = hview.findViewById(R.id.ivUser);
-                        imgUser.setImageBitmap(Globals.user.getFotoConverter(Globals.user.getFoto()));
-                    }
-
-                    break;
-                case "estudiante":
-                    nameUser.setText(Globals.user.getNombre());
-                    agendaDigital.setVisible(false);
-                    listaUtiles.setVisible(false);
-                    horarios.setVisible(false);
-                    boletines.setVisible(false);
-                    kardexPago.setVisible(false);
-                    licencias.setVisible(false);
-                    registroIngreso.setVisible(false);
-                    registroSalida.setVisible(false);
-                    navGraph.setStartDestination(R.id.fragmentTabDinamico);
-                    navController.setGraph(navGraph);
-
-                    if (Globals.user.getFoto() != null){
-
-                        ImageView imgUser = hview.findViewById(R.id.ivUser);
-                        imgUser.setImageBitmap(Globals.user.getFotoConverter(Globals.user.getFoto()));
-                    }
-                    break;
-                case "profesor":
-                    nameUser.setText(Globals.user.getNombre());
-                    agendaDigital.setVisible(false);
-                    listaUtiles.setVisible(false);
-                    horarios.setVisible(false);
-                    boletines.setVisible(false);
-                    kardexPago.setVisible(false);
-                    licencias.setVisible(false);
-                    registroIngreso.setVisible(false);
-                    registroSalida.setVisible(false);
-                    navGraph.setStartDestination(R.id.fragmentTabDinamico);
-                    navController.setGraph(navGraph);
-
-                    if (Globals.user.getFoto() != null){
-
-                        ImageView imgUser = hview.findViewById(R.id.ivUser);
-                        imgUser.setImageBitmap(Globals.user.getFotoConverter(Globals.user.getFoto()));
-                    }
-
-                    break;
-                case "director":
-                    nameUser.setText(Globals.user.getNombre());
-                    agendaDigital.setVisible(false);
-                    listaUtiles.setVisible(false);
-                    horarios.setVisible(false);
-                    boletines.setVisible(false);
-                    kardexPago.setVisible(false);
-                    licencias.setVisible(false);
-                    registroIngreso.setVisible(false);
-                    registroSalida.setVisible(false);
-                    navGraph.setStartDestination(R.id.fragmentTabDinamico);
-                    navController.setGraph(navGraph);
-                    if (Globals.user.getFoto() != null){
-
-                        ImageView imgUser = hview.findViewById(R.id.ivUser);
-                        imgUser.setImageBitmap(Globals.user.getFotoConverter(Globals.user.getFoto()));
-                    }
-
-                    break;
-                case "personal":
-                    nameUser.setText(Globals.user.getNombre());
-                    fragmentTabDinamico.setVisible(false);
-                    agendaDigital.setVisible(false);
-                    listaUtiles.setVisible(false);
-                    horarios.setVisible(false);
-                    boletines.setVisible(false);
-                    kardexPago.setVisible(false);
-                    licencias.setVisible(false);
-                    navGraph.setStartDestination(R.id.fragment_Registro_Ingreso);
-                    navController.setGraph(navGraph);
-
-                    if (Globals.user.getFoto() != null){
-
-                        ImageView imgUser = hview.findViewById(R.id.ivUser);
-                        imgUser.setImageBitmap(Globals.user.getFotoConverter(Globals.user.getFoto()));
-                    }
-
-                    break;
-            }
-
-        } else {
-
-            agendaDigital.setVisible(false);
-            listaUtiles.setVisible(false);
-            horarios.setVisible(false);
-            boletines.setVisible(false);
-            kardexPago.setVisible(false);
-            licencias.setVisible(false);
-            registroIngreso.setVisible(false);
-            registroSalida.setVisible(false);
-            fragmentTabDinamico.setVisible(false);
-            navGraph.setStartDestination(R.id.nav_home);
-            navController.setGraph(navGraph);
-
-        }
 
 
+    navigation();
 
 
 
     }
 
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_lightTheme:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
                 break;
             case R.id.action_darkTheme:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -251,17 +115,19 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
-   /* @Override
+    @Override
     protected void onResume() {
         super.onResume();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            RestartServiceBroadcastReceiver.scheduleJob(getApplicationContext());
-        } else {
-            ProcessMainClass bck = new ProcessMainClass();
-            bck.launchService(getApplicationContext());
+        String extra = getIntent().getStringExtra("restartService");
+        if (extra==null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                RestartServiceBroadcastReceiver.scheduleJob(getApplicationContext());
+            } else {
+                ProcessMainClass bck = new ProcessMainClass();
+                bck.launchService(getApplicationContext());
+            }
         }
-        getApplication().registerReceiver(receiver,filter);
-    }*/
+    }
     @Override
     public void enviarDatos(String dato,int fragmnet) {
         Bundle bundle = new Bundle();
@@ -329,15 +195,184 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
 
     }
 
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Toast.makeText(getApplicationContext(),"Reaccionando",Toast.LENGTH_SHORT).show();
-        }
-    };
-
     private void configTheme() {
         setTheme(R.style.Theme_MyApp);
+    }
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (getCurrentFocus() != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            assert imm != null;
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+    public void navigation(){
+
+        AdminSQLite adm = new AdminSQLite(MainActivity.this, "agenda", null, 1);
+
+        Menu menu = sNavigationView.getMenu();
+        MenuItem agendaDigital = menu.findItem(R.id.fragmentAgendaDigital);
+        MenuItem licencias = menu.findItem(R.id.fragmentLicencia);
+        MenuItem kardexPago = menu.findItem(R.id.fragmentKardex);
+        MenuItem boletines = menu.findItem(R.id.fragmentBoletin);
+        MenuItem horarios = menu.findItem(R.id.fragmentHorario);
+        MenuItem listaUtiles = menu.findItem(R.id.fragmentListaUtiles);
+        MenuItem registroIngreso = menu.findItem(R.id.lista_Colegios_Fragment);
+        MenuItem registroSalida = menu.findItem(R.id.lista_Colegios_Salida_Fragment);
+        MenuItem fragmentTabDinamico = menu.findItem(R.id.fragmentTabDinamico);
+        MenuItem fragmentTabDinamicoEst= menu.findItem(R.id.fragmentTabDinamicosEst);
+        MenuItem ListaColegiosProf = menu.findItem(R.id.fragment_Lista_Colegios_Prof);
+        MenuItem ListaColegiosDir = menu.findItem(R.id.lista_Colegios_Director_Fragment);
+        MenuItem FragmentPracticoAlumno = menu.findItem(R.id.fragmentPracticoAlumnoItem);
+        MenuItem FragmentCalendario = menu.findItem(R.id.fragmentCalendarioItem);
+        MenuItem FragmentEvaluacion = menu.findItem(R.id.fragmentEvaluacionItem);
+        // MenuItem ListaColegios = menu.findItem(R.id.lista_Colegios_Fragment);
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+        NavigationUI.setupWithNavController(sNavigationView, navController);
+        NavGraph navGraph = navController.getGraph();
+
+        Globals.user = adm.getUserActivo();
+        if (Globals.user.getTipo() != null) {
+
+            switch (Globals.user.getTipo()) {
+
+                case "tutor":
+                    nameUser.setText(Globals.user.getNombre());
+                    fragmentTabDinamico.setVisible(false);
+                    registroIngreso.setVisible(false);
+                    registroSalida.setVisible(false);
+                    ListaColegiosProf.setVisible(false);
+                    fragmentTabDinamicoEst.setVisible(false);
+                    ListaColegiosDir.setVisible(false);
+                    //ListaColegios.setVisible(false);
+                    navGraph.setStartDestination(R.id.fragmentAgendaDigital);
+                    navController.setGraph(navGraph);
+
+                    if (Globals.user.getFoto() != null){
+                        imgUser.setImageBitmap(Globals.user.getFotoConverter(Globals.user.getFoto()));
+                    }
+
+                    break;
+                case "estudiante":
+                    nameUser.setText(Globals.user.getNombre());
+                    agendaDigital.setVisible(false);
+                    FragmentPracticoAlumno.setVisible(false);
+                    FragmentCalendario.setVisible(false);
+                    FragmentEvaluacion.setVisible(false);
+                    listaUtiles.setVisible(false);
+                    horarios.setVisible(false);
+                    boletines.setVisible(false);
+                    kardexPago.setVisible(false);
+                    ListaColegiosDir.setVisible(false);
+                    fragmentTabDinamico.setVisible(false);
+                    ListaColegiosProf.setVisible(false);
+                    licencias.setVisible(false);
+                    registroIngreso.setVisible(false);
+                    // ListaColegios.setVisible(false);
+                    registroSalida.setVisible(false);
+                    navGraph.setStartDestination(R.id.fragmentTabDinamicosEst);
+                    navController.setGraph(navGraph);
+
+                    if (Globals.user.getFoto() != null){
+                        imgUser.setImageBitmap(Globals.user.getFotoConverter(Globals.user.getFoto()));
+                    }
+                    break;
+                case "profesor":
+                    nameUser.setText(Globals.user.getNombre());
+                    agendaDigital.setVisible(false);
+                    FragmentPracticoAlumno.setVisible(false);
+                    FragmentEvaluacion.setVisible(false);
+                    FragmentCalendario.setVisible(false);
+                    agendaDigital.setVisible(false);
+                    listaUtiles.setVisible(false);
+                    horarios.setVisible(false);
+                    fragmentTabDinamicoEst.setVisible(false);
+                    boletines.setVisible(false);
+                    kardexPago.setVisible(false);
+                    fragmentTabDinamico.setVisible(false);
+                    licencias.setVisible(false);
+                    //ListaColegios.setVisible(false);
+                    ListaColegiosDir.setVisible(false);
+                    registroIngreso.setVisible(false);
+                    registroSalida.setVisible(false);
+                    navGraph.setStartDestination(R.id.fragment_Lista_Colegios_Prof);
+                    navController.setGraph(navGraph);
+
+                    if (Globals.user.getFoto() != null){
+                        imgUser.setImageBitmap(Globals.user.getFotoConverter(Globals.user.getFoto()));
+                    }
+
+                    break;
+                case "director":
+                    nameUser.setText(Globals.user.getNombre());
+                    agendaDigital.setVisible(false);
+                    listaUtiles.setVisible(false);
+                    horarios.setVisible(false);
+                    FragmentEvaluacion.setVisible(false);
+                    FragmentPracticoAlumno.setVisible(false);
+                    FragmentCalendario.setVisible(false);
+                    boletines.setVisible(false);
+                    fragmentTabDinamicoEst.setVisible(false);
+                    kardexPago.setVisible(false);
+                    licencias.setVisible(false);
+                    registroIngreso.setVisible(false);
+                    // ListaColegios.setVisible(false);
+                    registroSalida.setVisible(false);
+                    ListaColegiosProf.setVisible(false);
+                    fragmentTabDinamico.setVisible(false);
+                    navGraph.setStartDestination(R.id.lista_Colegios_Director_Fragment);
+                    navController.setGraph(navGraph);
+                    if (Globals.user.getFoto() != null){
+                        imgUser.setImageBitmap(Globals.user.getFotoConverter(Globals.user.getFoto()));
+                    }
+
+                    break;
+                case "personal":
+                    nameUser.setText(Globals.user.getNombre());
+                    fragmentTabDinamico.setVisible(false);
+                    ListaColegiosProf.setVisible(false);
+                    agendaDigital.setVisible(false);
+                    listaUtiles.setVisible(false);
+                    FragmentPracticoAlumno.setVisible(false);
+                    FragmentCalendario.setVisible(false);
+                    fragmentTabDinamicoEst.setVisible(false);
+                    horarios.setVisible(false);
+                    FragmentEvaluacion.setVisible(false);
+                    boletines.setVisible(false);
+                    kardexPago.setVisible(false);
+                    licencias.setVisible(false);
+                    ListaColegiosDir.setVisible(false);
+                    navGraph.setStartDestination(R.id.lista_Colegios_Fragment);
+                    navController.setGraph(navGraph);
+
+                    if (Globals.user.getFoto() != null){
+                        imgUser.setImageBitmap(Globals.user.getFotoConverter(Globals.user.getFoto()));
+                    }
+                    break;
+            }
+        } else {
+            fragmentTabDinamicoEst.setVisible(false);
+            ListaColegiosProf.setVisible(false);
+            agendaDigital.setVisible(false);
+            listaUtiles.setVisible(false);
+            FragmentPracticoAlumno.setVisible(false);
+            FragmentCalendario.setVisible(false);
+            horarios.setVisible(false);
+            boletines.setVisible(false);
+            FragmentEvaluacion.setVisible(false);
+            kardexPago.setVisible(false);
+            licencias.setVisible(false);
+            registroIngreso.setVisible(false);
+            registroSalida.setVisible(false);
+            //ListaColegios.setVisible(false);
+            ListaColegiosDir.setVisible(false);
+            fragmentTabDinamico.setVisible(false);
+            navGraph.setStartDestination(R.id.nav_home);
+            navController.setGraph(navGraph);
+
+        }
     }
 }
 

@@ -21,6 +21,7 @@ import androidx.navigation.Navigation;
 
 import com.agendadigital.R;
 import com.agendadigital.clases.AdminSQLite;
+import com.agendadigital.clases.Colegio;
 import com.agendadigital.clases.Constants;
 import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.Globals;
@@ -104,6 +105,7 @@ public class FragmentFormDirector extends Fragment {
                     public void onResponse(String response) {
                         progressDialog.dismiss();
                         try {
+                            ArrayList<Colegio> listacolegios = new ArrayList<>();
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                             JSONObject jsonObject = new JSONObject(response);
                             String status = jsonObject.getString("status");
@@ -131,6 +133,7 @@ public class FragmentFormDirector extends Fragment {
                                     ContentValues Registros2 = new ContentValues();
                                     JSONObject jsonObjectClientes = datosArrayfact_pend.getJSONObject(i);
                                     Registros1.put("cod_col", jsonObjectClientes.getInt("cod_col"));
+                                    listacolegios.add(new Colegio(jsonObjectClientes.getString("cod_col"),"",jsonObjectClientes.getString("ip"),""));
                                     Registros1.put("nombre", jsonObjectClientes.getString("nombre"));
                                     Registros1.put("ip", jsonObjectClientes.getString("ip"));
                                     Registros1.put("turno", jsonObjectClientes.getString("turno"));
@@ -142,6 +145,7 @@ public class FragmentFormDirector extends Fragment {
                                     Registros2.put("estado", 1);
                                     BaseDeDato.insert("dir_col", null, Registros2);
                                 }
+                                obtenerCursos(listacolegios);
                                 builder.setMessage("Se habilitó exitosamente...");
                                 builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
                                     @Override
@@ -199,6 +203,60 @@ public class FragmentFormDirector extends Fragment {
             Toast.makeText(getContext(),"Faltan datos...",Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void obtenerCursos(ArrayList<Colegio> listacolegios) {
+        for (int i = 0; i < listacolegios.size(); i++){
+            final String codCol = listacolegios.get(i).getCodigo();
+            String ip = listacolegios.get(i).getIp();
+            final AdminSQLite adm = new AdminSQLite(getContext(),"agenda",null,1);
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://"+ip + "/agendadigital/getCursosDir.php", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        String status = jsonObject.getString("status");
+                        if (status.equals("ok")){
+                            JSONArray cursos = jsonObject.getJSONArray("cursos");
+                            for (int i = 0; i < cursos.length(); i++){
+                                JSONArray fila = cursos.getJSONArray(i);
+                                String codcur = fila.getString(0);
+                                String codPar = fila.getString(1);
+                                String nombre = fila.getString(2);
+                                adm.savecursosDir(Globals.user.getCodigo(),codCol,codcur,codPar,nombre);
+                            }
+                            JSONArray listas = jsonObject.getJSONArray("listas");
+                            for (int i = 0; i < listas.length(); i++){
+                                JSONArray lista = listas.getJSONArray(i);
+                                for (int j = 0; j < lista.length(); j++){
+                                    JSONArray fila = lista.getJSONArray(j);
+                                    if (fila.length()>0) {
+                                        String codCur = fila.getString(0);
+                                        String codPar = fila.getString(1);
+                                        String codest = fila.getString(2);
+                                        String nombre = fila.getString(3);
+                                        adm.saveListaAlumnoDir(Globals.user.getCodigo(), codCol, codCur, codPar, codest, nombre);
+                                    }
+                                }
+
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                }
+            });
+
+            stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            MySingleton.getInstance(getContext()).addToRequest(stringRequest);
+        }
+    }
+
     private boolean existeCol(int cod_col) {
         AdminSQLite adm = new AdminSQLite(getContext(),"agenda",null,1);
         Cursor cursor = adm.verif_col(cod_col);

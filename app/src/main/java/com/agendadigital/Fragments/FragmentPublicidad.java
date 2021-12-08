@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -35,6 +37,12 @@ public class FragmentPublicidad extends Fragment {
     private AdaptadorViewPager adaptadorViewPagerPublicidad;
     private AdminSQLite adm;
     private TabLayout tabLayoutPublicidad;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -134,7 +142,19 @@ public class FragmentPublicidad extends Fragment {
             } while (cursor.moveToNext());
         }
         viewPagerPublicidad.setAdapter(adaptadorViewPagerPublicidad);
+    }
 
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem dark = menu.findItem(R.id.action_darkTheme);
+        MenuItem light = menu.findItem(R.id.action_lightTheme);
+        if ( dark != null) {
+            dark.setVisible(false);
+        }
+        if ( light != null) {
+            light.setVisible(false);
+        }
     }
 
 }

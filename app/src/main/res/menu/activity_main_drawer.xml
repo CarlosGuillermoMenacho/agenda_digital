@@ -38,18 +38,47 @@
             android:icon="@drawable/ic_agenda"
             android:title="@string/agendaDigital" />
 
-
-
-
+        <item
+            android:id="@+id/fragmentTabDinamicosEst"
+            android:icon="@drawable/ic_agenda"
+            android:title="@string/agendaDigital" />
 
         <item
-            android:id="@+id/fragment_Registro_Ingreso"
-            android:icon="@drawable/ic_entrada_salida"
-            android:title="@string/registroSalida" />
+            android:id="@+id/fragment_Lista_Colegios_Prof"
+            android:icon="@drawable/ic_agenda"
+            android:title="@string/lista_colegios" />
         <item
-            android:id="@+id/fragment_Registro_Salida"
+            android:id="@+id/lista_Colegios_Director_Fragment"
+            android:icon="@drawable/ic_agenda"
+            android:title="@string/lista_colegios" />
+        <!--item
+            android:id="@+id/lista_Colegios_Fragment"
+            android:icon="@drawable/ic_agenda"
+            android:title="@string/lista_colegios" /-->
+
+        <item
+            android:id="@+id/lista_Colegios_Fragment"
+            android:icon="@drawable/ic_entrada_salida"
+            android:title="@string/registroIngreso" />
+        <item
+            android:id="@+id/lista_Colegios_Salida_Fragment"
             android:icon="@drawable/ic_entrada_salida"
             android:title="@string/registroSalida" />
+
+        <item
+            android:id="@+id/fragmentPracticoAlumnoItem"
+            android:icon="@drawable/ic_agenda"
+            android:title="@string/practicoAlumno" />
+
+        <item
+            android:id="@+id/fragmentEvaluacionItem"
+            android:icon="@drawable/ic_agenda"
+            android:title="Evaluacion" />
+
+        <item
+            android:id="@+id/fragmentCalendarioItem"
+            android:icon="@drawable/ic_agenda"
+            android:title="@string/calendario" />
 
         <item
             android:id="@+id/fragmentPublicidad"

@@ -4,23 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_background_personalizado"
     tools:context=".Fragments.FragmentSalida">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="30dp"
         tools:ignore="UselessParent">
-
-
         <TextView
-            android:id="@+id/tvfecha"
+            android:id="@+id/tvfechaSal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Fecha actual:" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -31,13 +26,12 @@
                 android:textSize="@dimen/sizeInfo"
                 android:text="Tipo de Horario:"/>
             <Spinner
-                android:id="@+id/spSelector1"
+                android:id="@+id/spSelector1sal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
-
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/imputUsuario"
+            android:id="@+id/imputUsuariosal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -48,92 +42,59 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/titleTutor">
-
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etcodigoformprofesor"
+                android:id="@+id/etcodigoformprofesorsal"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:imeOptions="actionDone"
                 android:inputType="number"/>
-
         </com.google.android.material.textfield.TextInputLayout>
-
-
-
         <TextView
-            android:id="@+id/tvAlumno"
+            android:id="@+id/tvAlumnosal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:textSize="14sp" />
-
         <TextView
-            android:id="@+id/tvHorario"
+            android:id="@+id/tvHorariosal"
             android:layout_marginTop="15dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/tvatraso"
-            android:layout_marginTop="15dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
         <LinearLayout
             android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-
             <Button
-                android:id="@+id/btnBuscarA"
+                android:id="@+id/btnBuscarAsal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/text_color_buttons"
                 android:layout_weight="1"
                 android:text="BUSCAR ALUMNO" />
         </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="@dimen/sizeInfo"
-                android:text="Trajo AGENDA:"/>
-            <Spinner
-                android:id="@+id/spSelector2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:gravity="center"
             android:orientation="horizontal">
-
             <Button
-                android:id="@+id/btnHabilitarformprofesor"
+                android:id="@+id/btnHabilitarformprofesorsal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/text_color_buttons"
                 android:text="grabar"
                 android:layout_marginEnd="10dp"
                 tools:ignore="ButtonStyle" />
-
             <Button
-                android:id="@+id/btnCancelarformprofesor"
+                android:id="@+id/btnCancelarformprofesorsal"
                 android:layout_width="wrap_content"
+                android:textColor="@color/text_color_buttons"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:text="@string/cancelar"
                 tools:ignore="ButtonStyle" />
-
         </LinearLayout>
-
-
     </LinearLayout>
-
 </FrameLayout>

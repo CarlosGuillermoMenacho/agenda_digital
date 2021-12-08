@@ -30,6 +30,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -103,16 +104,27 @@ public class FragmentFormAdm extends Fragment {
                             if (status.equals("ok")) {
                                 AdminSQLite adminSQLite = new AdminSQLite(getContext(), "agenda", null, 1);
 
-
-                                String nombre = jsonObject.getString("nombre");
-                                String codigo = jsonObject.getString("codigo");
+                                JSONObject adm = jsonObject.getJSONObject("adm");
+                                String codigo = adm.getString("codigo");
+                                String nombre = adm.getString("nombre");
+                                String foto = adm.getString("foto");
 
                                 ArrayList<String> valores = new ArrayList<>();
                                 valores.add(codigo);
                                 valores.add(nombre);
-
+                                valores.add(foto);
                                 adminSQLite.saveAdm(valores);
-                                Globals.user = new User(codigo,nombre,"director","personal");
+                                JSONArray colegios = jsonObject.getJSONArray("colegios");
+                                for (int i = 0 ; i < colegios.length(); i++){
+                                    JSONObject colegio = colegios.getJSONObject(i);
+                                    String codAdm = colegio.getString("cod_adm");
+                                    String nombreCol = colegio.getString("nombre");
+                                    String turno = colegio.getString("turno");
+                                    String codCol = colegio.getString("cod_col");
+                                    String ip = colegio.getString("ip");
+                                    String estado = colegio.getString("estado");
+                                    adminSQLite.saveColAdm(codAdm,nombreCol,turno,codCol,ip,estado);
+                                }
 
 
                                 builder.setMessage("Se habilitó exitosamente...");

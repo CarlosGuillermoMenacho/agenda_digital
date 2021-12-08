@@ -2,9 +2,13 @@ package com.agendadigital.Fragments;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +31,7 @@ import com.agendadigital.clases.Menus;
 import com.agendadigital.clases.User;
 import com.agendadigital.clases.Usuarios;
 import com.agendadigital.services.Service;
+import com.github.nkzawa.socketio.client.Socket;
 
 import java.util.ArrayList;
 
@@ -43,7 +48,7 @@ public class FragmentAfiliacion extends Fragment {
     private boolean delete = false;
     private AdminSQLite adm;
     private Usuarios usuarios;
-
+    private Service myservice;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -53,6 +58,8 @@ public class FragmentAfiliacion extends Fragment {
         enlaces(vista);
         llenarListas();
         onclick();
+        Intent intent = new Intent(getContext(),Service.class);
+        requireActivity().bindService(intent,serviceConnection, Context.BIND_AUTO_CREATE);
         return vista;
     }
     private void onclick() {
@@ -92,23 +99,32 @@ public class FragmentAfiliacion extends Fragment {
 
                             if (codigos.isEmpty()){
                                 Globals.user = null;
-                                Globals.user.setFoto(null);
-                                Globals.user.setNombre(null);
-                                requireActivity().stopService(new Intent(getContext(), Service.class));
+
+                                Intent intent = new Intent(getContext(), MainActivity.class);
+                                intent.putExtra("servicio","1");
+                                startActivity(intent);
+                                Intent filter = new Intent("restarSockets");
+                                requireActivity().sendBroadcast(filter);
                             }else if (Globals.user.getCodigo().equals(codigo)){
                                 Globals.user = null;
-                                requireActivity().stopService(new Intent(getContext(), Service.class));
-                                startActivity(new Intent(getContext(), MainActivity.class));
+                                Intent intent = new Intent(getContext(), MainActivity.class);
+                                intent.putExtra("servicio","1");
+                                startActivity(intent);
+                                Intent filter = new Intent("restarSockets");
+                                requireActivity().sendBroadcast(filter);
                             }
                         }
                     });
                     builder.setNegativeButton("No",null);
                     builder.show();
                 }else {
-                    /*Globals.user = usuarios.getUsuarios().get(position);*/
+                    //Globals.user = usuarios.getUsuarios().get(position);*/
                     adm.userActivo(usuarios.getUsuarios().get(position).getCodigo(),usuarios.getUsuarios().get(position).getTipo());
-                    requireActivity().stopService(new Intent(getContext(),Service.class));
-                    startActivity(new Intent(getContext(), MainActivity.class));
+                    Intent filter = new Intent("restarSockets");
+                    requireActivity().sendBroadcast(filter);
+                    Intent intent = new Intent(getContext(), MainActivity.class);
+                    intent.putExtra("restartService","1");
+                    startActivity(intent);
                     /*Navigation Drawer*/
                     /*switch (Globals.user.getTipo())
                     {
@@ -155,6 +171,21 @@ public class FragmentAfiliacion extends Fragment {
         });
     }
 
+/*    getWritableDatabase().execSQL("delete from tutor where codigo="+codigo);
+    getWritableDatabase().execSQL("delete from alu_tut where tutor = "+codigo);
+    getWritableDatabase().execSQL("delete from notificaciones where cod_tutor = "+codigo);*/
+    private ServiceConnection serviceConnection  = new ServiceConnection() {
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        Service.LocalBinder binder = (Service.LocalBinder) service;
+        myservice = binder.getService();
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+
+    }
+};
     private void deleteItem(int position) {
 
         switch (codigos.get(position)[1]) {

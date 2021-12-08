@@ -6,12 +6,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
@@ -46,6 +49,7 @@ public class KardexPagoFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         codigoAlumno = Globals.estudiante.getCodigo();
     }
 
@@ -59,14 +63,15 @@ public class KardexPagoFragment extends Fragment {
         final TextView tvcurso=vista2.findViewById(R.id.tvCurso);
         final TextView tvalumno=vista2.findViewById(R.id.tvAlumno);
         tableLayout=vista2.findViewById(R.id.pagos);
+
         tvalumno.setText(codigoAlumno);
         id2=tvalumno.getText().toString();
         builder=new AlertDialog.Builder(getContext());
         if (!id2.isEmpty()) {
-            AdminSQLite dbs = new AdminSQLite(getContext(), "dbReader", null, 1);
+            AdminSQLite dbs = new AdminSQLite(getContext(), "agenda", null, 1);
             SQLiteDatabase sdq = dbs.getReadableDatabase();
             Toast.makeText(getContext(), "Espere mientras se descargan los datos", Toast.LENGTH_LONG).show();
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.url + "/agendadigital/get_kardex_pago.php", new Response.Listener<String>() {
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, "http://"+Globals.estudiante.getIp() + "/agendadigital/get_kardex_pago.php", new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     try {
@@ -80,7 +85,8 @@ public class KardexPagoFragment extends Fragment {
                             String materno="";
                             String nombres="";
                             String curso="";
-                            AdminSQLite admin = new AdminSQLite(getContext(), "dbReader", null, 1);
+
+                            AdminSQLite admin = new AdminSQLite(getContext(), "agenda", null, 1);
                             SQLiteDatabase BaseDeDato = admin.getWritableDatabase();
 
                             JSONObject datosArrayClientes = jsonObject.getJSONObject("alumno");
@@ -157,4 +163,18 @@ public class KardexPagoFragment extends Fragment {
         }
         return vista2;
     }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem dark = menu.findItem(R.id.action_darkTheme);
+        MenuItem light = menu.findItem(R.id.action_lightTheme);
+        if ( dark != null) {
+            dark.setVisible(false);
+        }
+        if ( light != null) {
+            light.setVisible(false);
+        }
+    }
+
 }

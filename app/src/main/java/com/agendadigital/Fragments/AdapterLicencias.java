@@ -1,5 +1,4 @@
 package com.agendadigital.Fragments;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,8 +10,12 @@ import android.widget.ImageView;
 
 import android.widget.TextView;
 import com.agendadigital.R;
+import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Estudiante;
+import com.agendadigital.clases.Globals;
+import com.agendadigital.clases.Menus;
 import com.itextpdf.text.pdf.codec.Base64;
+import com.nex3z.notificationbadge.NotificationBadge;
 
 import java.util.ArrayList;
 
@@ -20,7 +23,7 @@ import java.util.ArrayList;
 public class AdapterLicencias extends ArrayAdapter {
     private Context context;
     private ArrayList<Estudiante> datos;
-
+    private ArrayList<View> views = new ArrayList<>();
 
     public AdapterLicencias(Context context, ArrayList datos) {
         super(context, R.layout.item_lista_alumno, datos);
@@ -33,12 +36,23 @@ public class AdapterLicencias extends ArrayAdapter {
 
         String foto = datos.get(position).getFoto();
 
-        @SuppressLint("ViewHolder")
         View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_lista_alumno,
                 null,false);
+        views.add(item);
 
         TextView nombre = item.findViewById(R.id.tvNombre);
         nombre.setText(datos.get(position).getNombre());
+
+        if (Globals.menu == Menus.AGENDA) {
+            NotificationBadge badge = item.findViewById(R.id.badge);
+            if (Integer.parseInt(datos.get(position).getCantidadMensajes()) > 0) {
+                badge.setNumber(Integer.parseInt(datos.get(position).getCantidadMensajes()));
+            }
+
+        }
+
+
+
 
         try {
             Bitmap img;
@@ -59,4 +73,30 @@ public class AdapterLicencias extends ArrayAdapter {
         }
         return item;
     }
+    public void showBadge(String codEst){
+
+        int position = getPosition(codEst);
+        NotificationBadge badge = views.get(position).findViewById(R.id.badge);
+        badge.setNumber(0);
+        if (position != -1) {
+            AdminSQLite adm = new AdminSQLite(getContext(), "agenda", null, 1);
+            int cantidad = adm.notificacionesPendientes(codEst, Globals.user.getCodigo());
+            datos.get(position).setcantidadMensajes(Integer.toString(cantidad));
+            if (Integer.parseInt(datos.get(position).getCantidadMensajes()) > 0) {
+                badge.setNumber(Integer.parseInt(datos.get(position).getCantidadMensajes()));
+            }
+        }
+    }
+    private int getPosition(String codest){
+        for (int i = 0 ; i < datos.size() ;  i++){
+            if (datos.get(i).getCodigo().equals(codest)){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+
+
+
 }

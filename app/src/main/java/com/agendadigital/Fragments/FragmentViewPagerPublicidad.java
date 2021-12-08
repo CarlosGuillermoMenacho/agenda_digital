@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -43,15 +45,12 @@ public class FragmentViewPagerPublicidad extends Fragment {
     private ArrayList<Publicidad> publicidad;
     private int codigoEmpresa;
 
-    public FragmentViewPagerPublicidad() {
-
-    }
-
-
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setHasOptionsMenu(true);
+
         adm = new AdminSQLite(getContext(), "agenda", null, 1);
         if (getArguments() != null ) {
             codigoEmpresa = getArguments().getInt("codigoEmpresa");
@@ -89,6 +88,20 @@ public class FragmentViewPagerPublicidad extends Fragment {
             recyclerViewPublicidades.setAdapter(data);
         }
     }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem dark = menu.findItem(R.id.action_darkTheme);
+        MenuItem light = menu.findItem(R.id.action_lightTheme);
+        if ( dark != null) {
+            dark.setVisible(false);
+        }
+        if ( light != null) {
+            light.setVisible(false);
+        }
+    }
+
 }
 
 

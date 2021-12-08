@@ -19,8 +19,9 @@
     <string name="agendaDigital">Agenda Digital</string>
     <string name="kardexPago">Kardex de Pago</string>
     <string name="boletines">Boletines</string>
+    <string name="practicoAlumno">Practicos Alumno</string>
+    <string name="calendario">Calendario</string>
     <string name="licencias">Licencias</string>
-
     <string name="lista_de_alumnos">Lista de Alumnos</string>
     <string name="cambiarCuenta">Cambiar Cuenta</string>
 
@@ -68,11 +69,24 @@
     <string name="textEstudiante">Estudiante</string>
 
     <string name="registroIngreso">Registro Ingreso</string>
-    <string name="registroSalida">Registro Ingreso</string>
+    <string name="registroSalida">Registro Salida</string>
     <string name="textDirector">Director</string>
     <string name="PersonalAdministrativo">Personal Administrativo</string>
     <string name="RegistroUsuario">Registro Usuario</string>
     <string name="textAdministrativo">Administrativo</string>
     <string name="licenciaSolicitadas">Licencias Solicitadas</string>
+    <string name="boletinNotas">Boletin de Notas</string>
+    <string name="envio_de_mensajes">Envio de Mensajes</string>
+    <string name="curso">Curso</string>
+    <string name="paralelo">Paralelo</string>
+    <string name="materia">Materia</string>
+    <string name="mensaje">mensaje</string>
+    <string name="lista_colegios">Lista de Colegios</string>
+    <string name="nombre_del_curso">Nombre del Curso</string>
+    <string name="enviar">Enviar</string>
+    <string name="escribe_aqu_tu_mensaje">Escribe aquí tu mensaje...</string>
+    <string name="estudiante">Estudiante</string>
+    <string name="cerrar">Cerrar</string>
+    <string name="lista_de_cursos">Lista de Cursos</string>
 
 </resources>

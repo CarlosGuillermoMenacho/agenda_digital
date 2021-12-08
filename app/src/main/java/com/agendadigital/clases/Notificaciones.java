@@ -17,6 +17,8 @@ public class Notificaciones {
         return notificaciones.get(pos);
     }
 
+
+
     public int size(){
        return this.notificaciones.size();
     }

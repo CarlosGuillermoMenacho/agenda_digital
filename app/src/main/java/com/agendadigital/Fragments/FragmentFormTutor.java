@@ -1,16 +1,18 @@
 package com.agendadigital.Fragments;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -18,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
@@ -28,7 +31,6 @@ import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.User;
-import com.agendadigital.clases.Utils;
 import com.agendadigital.services.Service;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -56,6 +58,7 @@ public class FragmentFormTutor extends Fragment{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -64,7 +67,14 @@ public class FragmentFormTutor extends Fragment{
         View vista = inflater.inflate(R.layout.fragment_form_tutor, container, false);
         hacerCast(vista);
         oncliks();
-
+        etCedula.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    hideKeyboard(v);
+                }
+            }
+        });
 
         return vista;
     }
@@ -131,12 +141,14 @@ public class FragmentFormTutor extends Fragment{
 
                                 JSONArray datosArrayfact_pend = jsonObject.getJSONArray("alumnos");
                                 //BaseDeDato.execSQL("delete from alumno");
+
+                                ArrayList<String[]> codAlumnos = new ArrayList<>();
                                 for (int i = 0; i < datosArrayfact_pend.length(); i++) {
                                     ContentValues Registros1 = new ContentValues();
                                     ContentValues Registros2 = new ContentValues();
                                     JSONObject jsonObjectClientes = datosArrayfact_pend.getJSONObject(i);
                                     Registros1.put("codigo", jsonObjectClientes.getInt("codigo"));
-                                    //codi=" "+jsonObjectClientes.getInt("codigo");
+                                    codAlumnos.add(new String[]{jsonObjectClientes.getString("codigo"), jsonObjectClientes.getString("ip")});
                                     Registros1.put("nombre", jsonObjectClientes.getString("nombre"));
                                     Registros1.put("curso", jsonObjectClientes.getString("curso"));
                                     Registros1.put("cod_cur", jsonObjectClientes.getInt("cod_cur"));
@@ -154,6 +166,7 @@ public class FragmentFormTutor extends Fragment{
                                     BaseDeDato.insert("alu_tut", null, Registros2);
                                 }
 
+                                obtenerMaterias(codAlumnos,codigo);
                                 builder.setMessage("Se habilitó exitosamente...");
                                 builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
                                     @Override
@@ -209,6 +222,69 @@ public class FragmentFormTutor extends Fragment{
             Toast.makeText(getContext(),"Faltan datos...",Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void obtenerMaterias(ArrayList<String[]> codAlumnos, final String codigo) {
+        for (int i = 0; i < codAlumnos.size(); i++) {
+            final String codAlu = codAlumnos.get(i)[0];
+            String url = codAlumnos.get(i)[1];
+            final AdminSQLite adm = new AdminSQLite(getContext(), "agenda", null,1);
+            adm.saveMaterias(codAlu,"director","Director");
+            adm.saveMaterias(codAlu,"administracion","Administración");
+            adm.saveMaterias(codAlu,"caja","Caja");
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, "http://"+url+ "/agendadigital/getmaterias.php", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        String status = jsonObject.getString("status");
+                        if (status.equals("ok")){
+                            JSONArray materias = jsonObject.getJSONArray("materias");
+
+                            for (int i = 0; i < materias.length(); i++){
+                                JSONArray fila = materias.getJSONArray(i);
+                                String codmat = fila.getString(0);
+                                String nombre = fila.getString(1);
+                                adm.saveMaterias(codAlu,codmat,nombre);
+                            }
+                            JSONArray mensajes = jsonObject.getJSONArray("mensajes");
+                            for (int i = 0; i < mensajes.length(); i++){
+                                JSONArray fila = mensajes.getJSONArray(i);
+                                String id = fila.getString(0);
+                                String codest = fila.getString(1);
+                                String msg = fila.getString(2);
+                                String emisor = fila.getString(3);
+                                String codtut = fila.getString(4);
+                                String fecha = fila.getString(5);
+                                String hora = fila.getString(6);
+                                String estado = fila.getString(7);
+                                String tipo = fila.getString(8);
+                                String nombre = fila.getString(9);
+                                adm.savemsgAnterior(id,codest,msg,emisor,codtut,fecha,hora,estado,tipo,nombre);
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            }){
+                @Override
+                protected Map<String, String> getParams() {
+                    Map<String, String> params = new HashMap<>();
+                    params.put("codigo", codAlu);
+                    params.put("codtut", codigo);
+                    return params;
+                }
+            };
+            stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            MySingleton.getInstance(getContext()).addToRequest(stringRequest);
+        }
+
+    }
     private boolean validar() {
         cedula = etCedula.getText().toString();
         telefono = etTelefono.getText().toString();
@@ -229,5 +305,24 @@ public class FragmentFormTutor extends Fragment{
        btnHabilitar = vista.findViewById(R.id.btnHabilitarformtutor);
        etCedula = vista.findViewById(R.id.etCedulaformtutor);
        etTelefono = vista.findViewById(R.id.etTelefonoformtutor);
+    }
+
+
+    public void hideKeyboard(View view) {
+        InputMethodManager inputMethodManager =(InputMethodManager)getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem dark = menu.findItem(R.id.action_darkTheme);
+        MenuItem light = menu.findItem(R.id.action_lightTheme);
+        if ( dark != null) {
+            dark.setVisible(false);
+        }
+        if ( light != null) {
+            light.setVisible(false);
+        }
     }
 }

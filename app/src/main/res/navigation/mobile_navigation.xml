@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@id/fragmentAgendaDigital">
+    app:startDestination="@id/nav_home">
 
     <fragment
         android:id="@+id/nav_home"
@@ -14,13 +14,6 @@
             android:id="@+id/action_nav_home_to_fragmentFormAfiliacion2"
             app:destination="@id/fragmentFormAfiliacion" />
     </fragment>
-
-    <!--<fragment
-        android:id="@+id/lista_alu_Fragment"
-        android:name="com.agendadigital.Fragments.FragmentKardex"
-        android:label="Kardex de Pago"
-        tools:layout="@layout/fragment_lista_alu"/>-->
-
 
     <!--Navigation Drawer-->
     <fragment
@@ -96,7 +89,7 @@
     <fragment
         android:id="@+id/fragmentBoletin"
         android:name="com.agendadigital.Fragments.FragmentBoletin"
-        android:label="fragment_boletin2"
+        android:label="Boletin"
         tools:layout="@layout/fragment_boletin2" />
     <fragment
         android:id="@+id/fragmentListaAlumnos"
@@ -105,6 +98,11 @@
         tools:layout="@layout/fragment_lista_alumnos" />
     <fragment
         android:id="@+id/fragmentTabDinamico"
+        android:name="com.agendadigital.Fragments.FragmentTabDinamico"
+        android:label="Notificaciones"
+        tools:layout="@layout/fragment_tab_dinamico"/>
+    <fragment
+        android:id="@+id/fragmentTabDinamicosEst"
         android:name="com.agendadigital.Fragments.FragmentTabDinamico"
         android:label="Notificaciones"
         tools:layout="@layout/fragment_tab_dinamico"/>
@@ -122,7 +120,7 @@
     <fragment
         android:id="@+id/fragmentPublicidad"
         android:name="com.agendadigital.Fragments.FragmentPublicidad"
-        android:label="FragmentPublicidad"
+        android:label="Publicidad"
         tools:layout="@layout/fragment_publicidad"/>
 
     <fragment
@@ -164,11 +162,83 @@
     <fragment
         android:id="@+id/fragmentIngreso"
         android:name="com.agendadigital.Fragments.FragmentIngreso"
-        android:label="fragment_ingreso"
+        android:label="Ingreso"
         tools:layout="@layout/fragment_ingreso" />
     <fragment
         android:id="@+id/fragmentSalida"
         android:name="com.agendadigital.Fragments.FragmentSalida"
-        android:label="fragment_salida"
+        android:label="Salida"
         tools:layout="@layout/fragment_salida" />
+    <fragment
+        android:id="@+id/fragmentFormMsgProf"
+        android:name="com.agendadigital.Fragments.FragmentFormMsgProf"
+        android:label="Envio de Mensajes"
+        tools:layout="@layout/fragment_form_msg_prof" />
+    <fragment
+        android:id="@+id/fragment_Lista_Colegios_Prof"
+        android:name="com.agendadigital.Fragments.Fragment_Lista_Colegios_Prof"
+        android:label="Lista de Colegios"
+        tools:layout="@layout/fragment_lista_colegios_prof" />
+    <fragment
+        android:id="@+id/lista_Colegios_Fragment"
+        android:name="com.agendadigital.Fragments.Lista_Colegios_Fragment"
+        android:label="Ingreso de Estudiantes"
+        tools:layout="@layout/fragment_lista_colegios" />
+    <fragment
+        android:id="@+id/lista_Colegios_Director_Fragment"
+        android:name="com.agendadigital.Fragments.Lista_Colegios_Director_Fragment"
+        android:label="Agenda Digital"
+        tools:layout="@layout/fragment_lista_colegios_director" />
+    <fragment
+        android:id="@+id/lista_Cursos_Dir_Fragment"
+        android:name="com.agendadigital.Fragments.Lista_Cursos_Dir_Fragment"
+        android:label="Agenda Digital"
+        tools:layout="@layout/fragment_lista_cursos_director" />
+    <fragment
+        android:id="@+id/fragment_sendMsg_Dir"
+        android:name="com.agendadigital.Fragments.Fragment_sendMsg_Dir"
+        android:label="Agenda Digital"
+        tools:layout="@layout/fragment_send_msg__dir" />
+    <fragment
+        android:id="@+id/lista_Colegios_Salida_Fragment"
+        android:name="com.agendadigital.Fragments.Lista_Colegios_Salida_Fragment"
+        android:label="Salida de Estudiantes"
+        tools:layout="@layout/fragment_lista_colegios_salida" />
+
+    <fragment
+        android:id="@+id/fragmentWebView"
+        android:name="com.agendadigital.Fragments.WebViewPractico"
+        android:label="Practicos Alumno"
+        tools:layout="@layout/fragment_practico_alumno2" />
+
+    <fragment
+        android:id="@+id/fragmentPracticoAlumnoItem"
+        android:name="com.agendadigital.Fragments.FragmentPracticoAlumno"
+        android:label="Practicos Alumno"
+        tools:layout="@layout/fragment_practico_alumno" />
+
+    <fragment
+    android:id="@+id/fragmentWebViewCalendario"
+    android:name="com.agendadigital.Fragments.WebViewCalendario"
+    android:label="Calendario Escolar"
+    tools:layout="@layout/fragment_web_view_calendario" />
+
+    <fragment
+        android:id="@+id/fragmentCalendarioItem"
+        android:name="com.agendadigital.Fragments.CalendarioFragment"
+        android:label="Calendario Escolar"
+        tools:layout="@layout/fragment_calendario" />
+
+    <fragment
+        android:id="@+id/fragmentWebViewEvaluacion"
+        android:name="com.agendadigital.Fragments.WebViewEvaluacion"
+        android:label="Evaluaciones"
+        tools:layout="@layout/fragment_web_view_evaluacion" />
+
+    <fragment
+        android:id="@+id/fragmentEvaluacionItem"
+        android:name="com.agendadigital.Fragments.FragmentEvaluacion"
+        android:label="Evaluaciones"
+        tools:layout="@layout/fragment_evaluacion" />
+
 </navigation>

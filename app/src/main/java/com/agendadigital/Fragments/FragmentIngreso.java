@@ -1,10 +1,9 @@
 package com.agendadigital.Fragments;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
@@ -28,11 +27,9 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.agendadigital.R;
-import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Constants;
 import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
-import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -56,19 +53,22 @@ public class FragmentIngreso extends Fragment {
     private Button btnHabilitar;
     private Button btnBuscar;
     private EditText codigo;
-    private String cod_prof,clave_prof,cod_cur,cod_par,dia_s,hora_ing,hora_sal,d_ip;
+    private String cod_prof,dia_s,hora_ing,hora_sal,d_ip;
     Bitmap fotobm;
     private ImageView ivfoto;
-    private TextView alumno,atraso,horario,hoy;
-    private Spinner tipo,agenda;
+    private TextView alumno;
+    private TextView horario;
+    private TextView hoy;
     private int anio,mes,dia,tipo_hor,agenda_hoy;
 
     Calendar c = Calendar.getInstance();
-    DatePickerDialog dpd;
+    @SuppressLint("SimpleDateFormat")
     String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+    @SuppressLint("SimpleDateFormat")
     String date2 = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
     //Date f_hoy = new SimpleDateFormat("dd-MM-yyyy").parse(date);
 
+    @SuppressLint("SimpleDateFormat")
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
     String h_actual = simpleDateFormat.format(new Date());
 
@@ -104,23 +104,24 @@ public class FragmentIngreso extends Fragment {
                 mes=c.get(Calendar.MONTH);
                 dia=c.get(Calendar.DAY_OF_MONTH);
                 dia_s=diaSemana(dia,mes,anio);
-                Buscar(v);
+                Buscar();
             }
         });
         btnHabilitar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Grabar(v);
+                Grabar();
             }
         });
     }
+    @SuppressLint("SetTextI18n")
     public void mostrarfechaAct(){
         hoy.setText("Fecha actual: "+date);
     }
 
 
-    private void Grabar(final View v) {
+    private void Grabar() {
         if (validarDatos()){
             d_ip= Globals.colegio.getIp();
 
@@ -147,7 +148,7 @@ public class FragmentIngreso extends Fragment {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                    // Navigation.findNavController(v).navigate(R.id.nav_home);
-                                    envMensaje(cod_prof,"...", Globals.user.getCodigo());
+                                    envMensaje();
                                 }
                             });
                         } else {
@@ -197,7 +198,8 @@ public class FragmentIngreso extends Fragment {
         }
     }
 
-    private void envMensaje(final String codigo, String msg,final String cod_emi) {
+    private void envMensaje() {
+        String msg;
         if (agenda_hoy == 1) {
             msg = "Hora de entrada: " + h_actual + " SI trajo agenda. Hoy sale a: " + hora_sal;
         }else{
@@ -208,14 +210,16 @@ public class FragmentIngreso extends Fragment {
         final JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("codEst",cod_prof);
-            jsonObject.put("codEmit", Globals.user.getCodigo());
-            jsonObject.put("msg",msg);
+            jsonObject.put("codEmit", "Administracion");
+            jsonObject.put("nombre",Globals.user.getNombre());
+            jsonObject.put("msg", msg);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, "http://"+d_ip+"/agenda/mensaje", new Response.Listener<String>() {
+        String url = "http://"+d_ip+"/agenda/mensajeIngreso";
+        //String url = "http://192.168.100.96:3000/agenda/mensajeIngreso";
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
 
@@ -232,8 +236,8 @@ public class FragmentIngreso extends Fragment {
             }
 
             @Override
-            public byte[] getBody() throws AuthFailureError {
-                return jsonObject==null? null : jsonObject.toString().getBytes();
+            public byte[] getBody() {
+                return jsonObject.toString().getBytes();
             }
         };
         stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT,
@@ -245,9 +249,6 @@ public class FragmentIngreso extends Fragment {
     String diaSemana (int dia, int mes, int ano)
     {
         String letraD="";
-        /*Calendar c = Calendar.getInstance();
-        c.set(ano, mes, dia, 0, 0, 0);
-        nD=c.get(Calendar.DAY_OF_WEEK);*/
         TimeZone timezone = TimeZone.getDefault();
         Calendar calendar = new GregorianCalendar(timezone);
         calendar.set(ano, mes, dia);
@@ -272,7 +273,7 @@ public class FragmentIngreso extends Fragment {
 
         return letraD;
     }
-    private void Buscar(final View v) {
+    private void Buscar() {
         if (validarDatos()){
             d_ip= Globals.colegio.getIp();
             h_actual = simpleDateFormat.format(new Date());
@@ -282,7 +283,10 @@ public class FragmentIngreso extends Fragment {
                 progressDialog.setCancelable(false);
                 progressDialog.setIndeterminate(false);
                 progressDialog.show();
-                StringRequest stringRequest = new StringRequest(Request.Method.POST,"http://"+d_ip + "/agendadigital/get_dat_alumno.php", new Response.Listener<String>() {
+                String url = "http://"+d_ip + "/agendadigital/get_dat_alumno.php";
+                //String url = "http://192.168.100.96:3000/agendadigital/get_dat_alumno.php";
+                StringRequest stringRequest = new StringRequest(Request.Method.POST,url, new Response.Listener<String>() {
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onResponse(String response) {
                         progressDialog.dismiss();
@@ -291,19 +295,18 @@ public class FragmentIngreso extends Fragment {
                             JSONObject jsonObject = new JSONObject(response);
                             String status = jsonObject.getString("status");
                             if (status.equals("ok")) {
-                                String nombre2 = jsonObject.getString("nombre");
                                 String foto = jsonObject.getString("foto");
-                                cod_cur=jsonObject.getString("cod_cur");
-                                cod_par=jsonObject.getString("cod_par");
                                 hora_ing=jsonObject.getString("hora_ing");
                                 hora_sal=jsonObject.getString("hora_sal");
 
                                 alumno.setText(jsonObject.getString("nombre"));
                                 horario.setText("Hora: "+h_actual+" Entrada: "+hora_ing+" Salida: "+hora_sal);
-                                String base64 = foto.split(",")[1];
-                                byte[] decode = Base64.decode(base64);
-                                fotobm = BitmapFactory.decodeByteArray(decode, 0, decode.length);
-                                ivfoto.setImageBitmap(fotobm);
+                                if (!foto.isEmpty()){
+                                    String base64 = foto.split(",")[1];
+                                    byte[] decode = Base64.decode(base64);
+                                    fotobm = BitmapFactory.decodeByteArray(decode, 0, decode.length);
+                                    ivfoto.setImageBitmap(fotobm);
+                                }
                             } else {
                                 builder.setMessage("El usuario no existe...");
                                 builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
@@ -346,11 +349,6 @@ public class FragmentIngreso extends Fragment {
         }
     }
 
-    private boolean existe() {
-        AdminSQLite adm = new AdminSQLite(getContext(),"agenda",null,1);
-        Cursor cursor = adm.profesor(cod_prof);
-        return cursor.moveToFirst();
-    }
 
     private boolean validarDatos() {
         cod_prof = codigo.getText().toString();
@@ -364,17 +362,16 @@ public class FragmentIngreso extends Fragment {
         codigo = vista.findViewById(R.id.etcodigoformprofesor);
         alumno = vista.findViewById(R.id.tvAlumno);
         horario = vista.findViewById(R.id.tvHorario);
-        atraso = vista.findViewById(R.id.tvatraso);
         ivfoto = vista.findViewById(R.id.ivFoto);
         hoy=vista.findViewById(R.id.tvfecha);
-        tipo = vista.findViewById(R.id.spSelector1);
+        Spinner tipo = vista.findViewById(R.id.spSelector1);
         String[] opciones = new String[]{"NORMAL","INVIERNO"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), R.layout.item_spinner,opciones);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.item_spinner,opciones);
         tipo.setAdapter(adapter);
         tipo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                onitemSelected(position,view);
+                onitemSelected(position);
             }
 
             @Override
@@ -382,14 +379,14 @@ public class FragmentIngreso extends Fragment {
 
             }
         });
-        agenda = vista.findViewById(R.id.spSelector2);
+        Spinner agenda = vista.findViewById(R.id.spSelector2);
         String[] opciones2 = new String[]{"SI","NO"};
-        ArrayAdapter<String> adapter2 = new ArrayAdapter<>(getContext(), R.layout.item_spinner,opciones2);
+        ArrayAdapter<String> adapter2 = new ArrayAdapter<>(requireContext(), R.layout.item_spinner,opciones2);
         agenda.setAdapter(adapter2);
         agenda.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                onitemSelected2(position,view);
+                onitemSelected2(position);
             }
 
             @Override
@@ -399,7 +396,7 @@ public class FragmentIngreso extends Fragment {
         });
 
     }
-    private void onitemSelected2(int position,View view) {
+    private void onitemSelected2(int position) {
         switch (position){
             case 0:
                 agenda_hoy=1;
@@ -409,7 +406,7 @@ public class FragmentIngreso extends Fragment {
                 break;
         }
     }
-    private void onitemSelected(int position,View view) {
+    private void onitemSelected(int position) {
         switch (position){
             case 0:
                 tipo_hor=1;
@@ -419,5 +416,7 @@ public class FragmentIngreso extends Fragment {
                 break;
         }
     }
+
+
 
 }

@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_background_personalizado"
     tools:context=".Fragments.FragmentIngreso">
 
     <LinearLayout
@@ -89,6 +88,7 @@
                 android:id="@+id/btnBuscarA"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/text_color_buttons"
                 android:layout_weight="1"
                 android:text="BUSCAR ALUMNO" />
         </LinearLayout>
@@ -120,6 +120,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="grabar"
+                android:textColor="@color/text_color_buttons"
                 android:layout_marginEnd="10dp"
                 tools:ignore="ButtonStyle" />
 
@@ -129,6 +130,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:text="@string/cancelar"
+                android:textColor="@color/text_color_buttons"
                 tools:ignore="ButtonStyle" />
 
         </LinearLayout>

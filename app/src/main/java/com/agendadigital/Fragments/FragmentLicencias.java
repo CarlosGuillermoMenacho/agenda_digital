@@ -10,6 +10,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -20,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
@@ -62,6 +65,12 @@ public class FragmentLicencias extends Fragment {
     private Usuarios usuarios;
     private Licencias licencias;
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View vista = inflater.inflate(layout.fragment_licencias,container,false);
@@ -84,7 +93,7 @@ public class FragmentLicencias extends Fragment {
             @SuppressLint({"SetTextI18n"})
             @Override
             public void onClick(View v) {
-               // btnListo.setVisibility(View.VISIBLE);
+                /*btnListo.setVisibility(View.VISIBLE);*/
                 btnDelete.setVisibility(View.GONE);
                 btnNew.setVisibility(View.GONE);
                 title.setText("Anular Licencia");
@@ -213,9 +222,7 @@ public class FragmentLicencias extends Fragment {
         if (codigos.get(position)[1].equals("tutor")){
             adm.deleteTutor(codigos.get(position)[0]);
         }
-        if (codigos.get(position)[1].equals("profesor")){
-            adm.deleteProfesor(codigos.get(position)[0]);
-        }
+
     }
 
     private void enlaces(View vista) {
@@ -242,7 +249,7 @@ public class FragmentLicencias extends Fragment {
         lista.setAdapter(adapter);
     }
     private void buscarLicencias(final View v,final String cod_tut, final String cod_alu){
-        StringRequest DominioLocal = new StringRequest(Request.Method.POST, Constants.url + "/get_licencias.php", new Response.Listener<String>() {
+        StringRequest DominioLocal = new StringRequest(Request.Method.POST, "http://"+Globals.estudiante.getIp() + "/agendadigital/get_licencias.php", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -310,6 +317,18 @@ public class FragmentLicencias extends Fragment {
         AdminSQLite adm = new AdminSQLite(getContext(),"agenda",null,1);
         Cursor cursor = adm.verif_Lic(cod_lice);
         return cursor.moveToFirst();
+    }
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem dark = menu.findItem(R.id.action_darkTheme);
+        MenuItem light = menu.findItem(R.id.action_lightTheme);
+        if ( dark != null) {
+            dark.setVisible(false);
+        }
+        if ( light != null) {
+            light.setVisible(false);
+        }
     }
 
 }

@@ -2,6 +2,7 @@
 <resources>
 
     <!--Colores Personalizados-->
+
     <color name="text_color_buttons">@color/white_50</color>
     <color name="icon_buttons">@color/white_50</color>
     <color name="colorButtons">@color/color_primary_light</color>

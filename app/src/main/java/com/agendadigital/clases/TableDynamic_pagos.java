@@ -86,7 +86,7 @@ public class TableDynamic_pagos {
     public void cargarNotas(TableLayout tableLayout,Context context){
         tableLayout.removeAllViews();
         ArrayList<String[]> rows =new ArrayList<>();
-        AdminSQLite datos = new AdminSQLite(context,"dbReader",null,1);
+        AdminSQLite datos = new AdminSQLite(context,"agenda",null,1);
         SQLiteDatabase database = datos.getWritableDatabase();
 
         String[] campos = new String[] {"descri", "nota1","nota2", "nota3"};
@@ -117,7 +117,7 @@ public class TableDynamic_pagos {
     public void cargarPagos(TableLayout tableLayout,Context context){
         tableLayout.removeAllViews();
         ArrayList<String[]> rows =new ArrayList<>();
-        AdminSQLite datos = new AdminSQLite(context,"dbReader",null,1);
+        AdminSQLite datos = new AdminSQLite(context,"agenda",null,1);
         SQLiteDatabase database = datos.getWritableDatabase();
 
         String[] campos = new String[] {"detalle", "fecha","recnum", "haber"};
