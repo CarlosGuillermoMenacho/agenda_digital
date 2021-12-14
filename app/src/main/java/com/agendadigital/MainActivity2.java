@@ -632,6 +632,7 @@ public class MainActivity2 extends AppCompatActivity {
             getApplication().sendBroadcast(filter);
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.putExtra("restartService","1");
+            Toast.makeText(getApplicationContext(),"Iniciando...",Toast.LENGTH_SHORT).show();
             startActivity(intent);
         }
     }
