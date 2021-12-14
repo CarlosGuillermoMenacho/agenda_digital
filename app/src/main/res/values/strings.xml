@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <string name="action_lightTheme">Tema claro(Selecionado)</string>
     <string name="action_darkTheme">Tema Oscuro</string>
@@ -42,7 +42,7 @@
     <string name="ingreseCodigo">Ingrese su Código</string>
     <string name="ingreseClave">Ingrese su clave</string>
     <string name="telefono">Teléfono</string>
-    <string name="profesor">Profesor</string>
+    <string name="profesor" tools:ignore="Typos">Profesor</string>
     <string name="codigo">Código</string>
     <string name="clave">Clave</string>
     <string name="habilitar">Habilitar</string>
@@ -84,9 +84,27 @@
     <string name="lista_colegios">Lista de Colegios</string>
     <string name="nombre_del_curso">Nombre del Curso</string>
     <string name="enviar">Enviar</string>
-    <string name="escribe_aqu_tu_mensaje">Escribe aquí tu mensaje...</string>
+    <string name="escribe_aqu_tu_mensaje" tools:ignore="TypographyEllipsis">Escribe aquí tu mensaje...</string>
     <string name="estudiante">Estudiante</string>
     <string name="cerrar">Cerrar</string>
     <string name="lista_de_cursos">Lista de Cursos</string>
+    <string name="inciar_sessi_n">Inciar Sessión</string>
+    <string name="c_digo">Código</string>
+    <string name="docente">Docente</string>
+    <string name="iniciar_sesi_n_como">Iniciar Sesión como:</string>
+    <string name="administraci_n">Administración</string>
+    <string name="administrador">Administrador</string>
+    <string name="doc">docente</string>
+    <string name="cod_doc" tools:ignore="TypographyEllipsis">Código de docente...</string>
+    <string name="tut">tutor</string>
+    <string name="cedula" tools:ignore="TypographyEllipsis">Cédula...</string>
+    <string name="celular" tools:ignore="TypographyEllipsis">Celular...</string>
+    <string name="clave_a" tools:ignore="TypographyEllipsis">Clave...</string>
+    <string name="alumn">alumno</string>
+    <string name="usuario" tools:ignore="TypographyEllipsis">Usuario...</string>
+    <string name="adm">adm</string>
+    <string name="codigo_a" tools:ignore="TypographyEllipsis">Código...</string>
+    <string name="inicia_como">Iniciar sesión como: </string>
+    <string name="cerrar_sesi_n">Cerrar Sesión</string>
 
 </resources>

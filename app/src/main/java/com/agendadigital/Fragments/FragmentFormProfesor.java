@@ -25,7 +25,6 @@ import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.User;
-import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;

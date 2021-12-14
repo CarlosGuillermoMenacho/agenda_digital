@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -26,7 +25,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
-import com.agendadigital.MainActivity;
 import com.agendadigital.R;
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Constants;
@@ -34,7 +32,6 @@ import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.Licencia;
 import com.agendadigital.clases.Licencias;
 import com.agendadigital.clases.MySingleton;
-import com.agendadigital.clases.User;
 import com.agendadigital.clases.Usuarios;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -329,6 +326,7 @@ public class FragmentLicencias extends Fragment {
         if ( light != null) {
             light.setVisible(false);
         }
+
     }
 
 }

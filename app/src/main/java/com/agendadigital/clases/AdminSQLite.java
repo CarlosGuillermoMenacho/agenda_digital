@@ -235,7 +235,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
         getWritableDatabase().execSQL("delete from personal where codigo='"+codigo+"'");
     }
     public void saveTutor(ArrayList<String> valores){
-        getWritableDatabase().execSQL("insert into tutor values('"+valores.get(0)+"','"+valores.get(1)+"','"+valores.get(2)+"','"+valores.get(3)+"','"+valores.get(4)+"',0)");
+        getWritableDatabase().execSQL("insert into tutor values('"+valores.get(0)+"','"+valores.get(1)+"','"+valores.get(2)+"',1,'"+valores.get(3)+"','"+valores.get(4)+"')");
 /*        userActivo(valores.get(0),"tutor");*/
     }
     public void saveLicencia(int id,int codigo,int cod_tut,String f_sol,String hora,String f_ini,String f_fin,String obs){

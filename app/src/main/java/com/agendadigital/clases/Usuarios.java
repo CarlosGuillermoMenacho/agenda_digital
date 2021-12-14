@@ -5,7 +5,7 @@ import android.content.Context;
 import java.util.ArrayList;
 
 public class Usuarios {
-    private ArrayList<User> usuarios;
+    private final ArrayList<User> usuarios;
 
     public Usuarios(Context context) {
         AdminSQLite adm = new AdminSQLite(context,"agenda",null,1);

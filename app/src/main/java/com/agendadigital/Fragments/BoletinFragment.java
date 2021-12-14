@@ -172,12 +172,13 @@ public class BoletinFragment extends Fragment {
         super.onPrepareOptionsMenu(menu);
         MenuItem dark = menu.findItem(R.id.action_darkTheme);
         MenuItem light = menu.findItem(R.id.action_lightTheme);
-
         if ( dark != null) {
             dark.setVisible(false);
         }
         if ( light != null) {
             light.setVisible(false);
         }
+
+
     }
 }
