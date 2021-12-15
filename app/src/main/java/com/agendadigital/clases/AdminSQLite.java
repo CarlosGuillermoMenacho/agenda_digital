@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.agendadigital.core.shared.domain.database.FeedReaderContract;
+
 import androidx.annotation.Nullable;
 
 import org.json.JSONException;
@@ -90,7 +92,8 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL("create table emp_ptos_ubic(cod_emp int, cod_pto int, ubica varchar, estado int)");
         db.execSQL("create table emp_pub(cod_emp int, cod_pub int, img varchar, estado int)");
         db.execSQL("create table emp_rubro( cod_rub int, descrip varchar, estado int)");
-
+        db.execSQL(FeedReaderContract.FeedContact.SQL_CREATE_TABLE);
+        db.execSQL(FeedReaderContract.FeedMessage.SQL_CREATE_TABLE);
         /*db.execSQL("insert into materias values('1','1','Matemáticas')");
         db.execSQL("insert into materias values('1','2','Física')");
         db.execSQL("insert into materias values('1','3','Lenguaje')");
@@ -320,32 +323,32 @@ public class AdminSQLite extends SQLiteOpenHelper {
         if (tutores.moveToFirst()){
             do {
                 ususarios.add(new User(tutores.getString(0),tutores.getString(1),
-                        tutores.getString(2),"tutor"));
+                        tutores.getString(2), User.UserType.Tutor));
             }while (tutores.moveToNext());
         }
         if (estudiant.moveToFirst())
         {
             do {
-                ususarios.add(new User(estudiant.getString(0),estudiant.getString(1),estudiant.getString(2),"estudiante"));
+                ususarios.add(new User(estudiant.getString(0),estudiant.getString(1),estudiant.getString(2), User.UserType.Student));
             }while (estudiant.moveToNext());
         }
         if (profesores.moveToFirst())
         {
             do {
                 ususarios.add(new User(profesores.getString(0),profesores.getString(1),
-                         profesores.getString(2),"profesor"));
+                         profesores.getString(2), User.UserType.Teacher));
             }while (profesores.moveToNext());
         }
         if (directores.moveToFirst())
         {
             do {
-                ususarios.add(new User(directores.getString(0),directores.getString(1),directores.getString(2),"director"));
+                ususarios.add(new User(directores.getString(0),directores.getString(1),directores.getString(2), User.UserType.Director));
             }while (directores.moveToNext());
         }
         if (personal.moveToFirst())
         {
             do {
-                ususarios.add(new User(personal.getString(0),personal.getString(1),personal.getString(2),"personal"));
+                ususarios.add(new User(personal.getString(0),personal.getString(1),personal.getString(2), User.UserType.Staff));
             }while (personal.moveToNext());
         }
         return  ususarios;
@@ -368,7 +371,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
     public void saveEstudiante(ArrayList<String> valores){
         getWritableDatabase().execSQL("insert into estudiante values('" + valores.get(0)+"' , '" + valores.get(1) +"', '"+valores.get(8)+"', '"+valores.get(3)+"'," +
                 "'"+valores.get(4)+"', '"+valores.get(5)+"', '"+valores.get(6)+"', '"+valores.get(7)+"', '"+valores.get(2)+"', '"+valores.get(9)+"', 0)");
-        userActivo(valores.get(0),"estudiante");
+        userActivo(valores.get(0), User.UserType.Student);
     }
 
 
@@ -384,7 +387,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
     public void tutor_alu(String tutor, String alumno){
         getWritableDatabase().execSQL("insert into alu_tut values('"+tutor+"','"+alumno+"')");
     }
-    public void userActivo(String codigo, String tipo){
+    public void userActivo(String codigo, User.UserType tipo){
         getWritableDatabase().execSQL("update tutor set activo = 0");
         getWritableDatabase().execSQL("update estudiante set activo = 0");
         getWritableDatabase().execSQL("update profesor set activo = 0");
@@ -392,90 +395,49 @@ public class AdminSQLite extends SQLiteOpenHelper {
         getWritableDatabase().execSQL("update personal set activo = 0");
 
         switch (tipo) {
-            case "tutor":
+            case Tutor:
                 getWritableDatabase().execSQL("update tutor set activo = 1 where codigo = " + codigo);
                 break;
-            case "estudiante":
+            case Student:
                 getWritableDatabase().execSQL("update estudiante set activo = 1 where codigo = " + codigo);
                 break;
-            case "profesor":
+            case Teacher:
                 getWritableDatabase().execSQL("update profesor set activo = 1 where codigo = '" + codigo+"'");
                 break;
-            case "director":
+            case Director:
                 getWritableDatabase().execSQL("update director set activo = 1 where cod_dir = " + codigo);
                 break;
-            case "personal":
+            case Staff:
                 getWritableDatabase().execSQL("update personal set activo = 1 where codigo = " + codigo);
                 break;
         }
     }
-    public void actUltTipo(String tipo){
-        getWritableDatabase().execSQL("update ult_usr set tipo = '"+tipo+"' where id=1");
-    }
-    public User getUltUsr(){
-        @SuppressLint("Recycle") Cursor cursor = getReadableDatabase().rawQuery("select * from ult_usr",null);
-        if (cursor.moveToFirst()&&cursor.getCount()==1){
-            return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2),cursor.getString(3));
-        }
-        return new User();
-    }
-    public User getNombreTipo(String tipo){
-        Cursor cursor;
-        switch (tipo) {
-            case "tutor":
-                cursor = getReadableDatabase().rawQuery("select * from tutor", null);
-                if (cursor.moveToFirst()&&cursor.getCount()==1){
-                    return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2),cursor.getString(3));
-                }                break;
-            case "estudiante":
-                cursor = getReadableDatabase().rawQuery("select * from estudiante", null);
-                if (cursor.moveToFirst()&&cursor.getCount()==1){
-                    return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2),cursor.getString(3));
-                }                break;
-            case "profesor":
-                cursor = getReadableDatabase().rawQuery("select * from profesor", null);
-                if (cursor.moveToFirst()&&cursor.getCount()==1){
-                    return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2),cursor.getString(3));
-                }                break;
-            case "director":
-                cursor = getReadableDatabase().rawQuery("select * from director", null);
-                if (cursor.moveToFirst()&&cursor.getCount()==1){
-                    return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2),cursor.getString(3));
-                }                break;
-            case "personal":
-                cursor = getReadableDatabase().rawQuery("select * from personal", null);
-                if (cursor.moveToFirst()&&cursor.getCount()==1){
-                    return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2),cursor.getString(3));
-                }                break;
 
-        }
-        return new User();
-    }
     public User getProfActivo(){
         @SuppressLint("Recycle") Cursor cursor = getReadableDatabase().rawQuery("select * from profesor where activo = 1",null);
         if (cursor.moveToFirst()&&cursor.getCount()==1){
-            return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2),"profesor");
+            return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2), User.UserType.Teacher);
         }
         return new User();
     }
     public User getDirActivo(){
         @SuppressLint("Recycle") Cursor cursor = getReadableDatabase().rawQuery("select * from director where activo = 1",null);
         if (cursor.moveToFirst()&&cursor.getCount()==1){
-            return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2),"director");
+            return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2), User.UserType.Director);
         }
         return new User();
     }
     public User getEstActivo(){
         @SuppressLint("Recycle") Cursor cursor = getReadableDatabase().rawQuery("select * from estudiante where activo = 1",null);
         if (cursor.moveToFirst()&&cursor.getCount()==1){
-            return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2),"estudiante2");
+            return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2), User.UserType.Student);
         }
         return new User();
     }
     public User getPerActivo(){
         @SuppressLint("Recycle") Cursor cursor = getReadableDatabase().rawQuery("select * from personal where activo = 1",null);
         if (cursor.moveToFirst()&&cursor.getCount()==1){
-            return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2),"personal");
+            return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2), User.UserType.Staff);
         }
         return new User();
     }
@@ -483,29 +445,28 @@ public class AdminSQLite extends SQLiteOpenHelper {
 
         @SuppressLint("Recycle") Cursor cursor = getReadableDatabase().rawQuery("select * from tutor where activo = 1",null);
         if (cursor.moveToFirst()&&cursor.getCount()==1){
-            return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2),"tutor");
+            return new User(cursor.getString(0),cursor.getString(1), cursor.getString(2), User.UserType.Tutor);
         }
 
         @SuppressLint("Recycle") Cursor cursor1 = getReadableDatabase().rawQuery("select * from estudiante where activo = 1",null);
         if (cursor1.moveToFirst()&&cursor1.getCount()==1){
-            return new User(cursor1.getString(0),cursor1.getString(1), cursor1.getString(2),"estudiante");
+            return new User(cursor1.getString(0),cursor1.getString(1), cursor1.getString(2), User.UserType.Student);
         }
 
         @SuppressLint("Recycle") Cursor cursor2 = getReadableDatabase().rawQuery("select * from director where activo = 1",null);
         if (cursor2.moveToFirst()&&cursor2.getCount()==1){
-            return new User(cursor2.getString(0),cursor2.getString(1), cursor2.getString(2),"director");
+            return new User(cursor2.getString(0),cursor2.getString(1), cursor2.getString(2), User.UserType.Director);
         }
 
         @SuppressLint("Recycle") Cursor cursor3 = getReadableDatabase().rawQuery("select * from profesor where activo = 1",null);
         if (cursor3.moveToFirst()&&cursor3.getCount()==1){
-            return new User(cursor3.getString(0),cursor3.getString(1), cursor3.getString(2),"profesor");
+            return new User(cursor3.getString(0),cursor3.getString(1), cursor3.getString(2), User.UserType.Teacher);
         }
 
         @SuppressLint("Recycle") Cursor cursor4 = getReadableDatabase().rawQuery("select * from personal where activo = 1",null);
         if (cursor4.moveToFirst()&&cursor4.getCount()==1){
-            return new User(cursor4.getString(0),cursor4.getString(1), cursor4.getString(2),"personal");
+            return new User(cursor4.getString(0),cursor4.getString(1), cursor4.getString(2), User.UserType.Staff);
         }
-
         return new User();
     }
 

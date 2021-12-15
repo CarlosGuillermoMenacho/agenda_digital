@@ -8,7 +8,8 @@
     <color name="colorButtons">@color/color_primary_light</color>
     <color name="colorListaAlumnos">@color/rojo</color>
     <color name="colorBackgroundDrawer">@color/color_primary_light</color>
-
+    <color name="black">#000000</color>
+    <color name="main_color_gray">#7d7d7d</color>
     <color name="rojo">#df242c</color>
     <color name="blanco">#fff</color>
     <color name="colorTextView">#000</color>
@@ -57,5 +58,17 @@
     <!--Color on secondary (light), color on background (light),-->
     <!--color on surface (light)-->
     <color name="black_900">#000000</color>
+    <color name="off_white">#fffafafa</color>
 
+    <color name="default_chat_message_background_color_rcv">@color/white</color>
+    <color name="default_chat_message_background_color_send">@color/white</color>
+
+    <color name="default_bubble_color_rcv">@color/black</color>
+    <color name="default_bubble_color_send">@color/white</color>
+
+    <color name="default_tstamp_color_rcv">@color/off_white</color>
+    <color name="default_tstamp_color_send">@color/main_color_gray</color>
+
+    <color name="default_message_color_rcv">@color/white</color>
+    <color name="default_message_color_send">@color/black</color>
 </resources>

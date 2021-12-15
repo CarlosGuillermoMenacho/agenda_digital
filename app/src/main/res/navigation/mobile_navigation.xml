@@ -14,7 +14,22 @@
             android:id="@+id/action_nav_home_to_fragmentFormAfiliacion2"
             app:destination="@id/fragmentFormAfiliacion" />
     </fragment>
+    <fragment
+        android:id="@+id/fragment_chat"
+        android:name="com.agendadigital.views.modules.chats.ChatFragment"
+        android:label="Chat"
+        tools:layout="@layout/fragment_chat" >
+    </fragment>
 
+    <fragment
+        android:id="@+id/fragment_contacts"
+        android:name="com.agendadigital.views.modules.contacts.ContactFragment"
+        android:label="Chat"
+        tools:layout="@layout/fragment_contacts">
+        <action
+            android:id="@+id/action_fragment_contacts_to_fragment_chat"
+            app:destination="@id/fragment_chat" />
+    </fragment>
     <!--Navigation Drawer-->
     <fragment
         android:id="@+id/fragment_Registro_Ingreso"
@@ -27,7 +42,7 @@
         android:label="Registro Salida"
         tools:layout="@layout/fragment_salida"/>
     <fragment
-        android:id="@+id/nav_gallery"
+        android:id="@+id/fragment_lista_alumnos"
         android:name="com.agendadigital.Fragments.FragmentAgendaDigital"
         android:label="@string/agendaDigital"
         tools:layout="@layout/fragment_lista_alumnos" />

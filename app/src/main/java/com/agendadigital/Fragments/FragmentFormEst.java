@@ -28,6 +28,7 @@ import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.User;
 import com.agendadigital.clases.Utils;
+import com.agendadigital.core.shared.infrastructure.Firebase;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -142,7 +143,7 @@ public class FragmentFormEst extends Fragment {
 
 
                                 adminSQLite.saveEstudiante(valores);
-                                Globals.user = new User(codigo,nombre,foto,"estudiante");
+                                Globals.user = new User(codigo,nombre,foto, User.UserType.Student);
 
                                 builder.setMessage("Se habilitó exitosamente...");
                                 builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
@@ -179,6 +180,7 @@ public class FragmentFormEst extends Fragment {
                         Map<String, String> params = new HashMap<>();
                         params.put("codigo", codEstudiante);
                         params.put("clave", claveEstudiante);
+                        params.put("token", Firebase.getInstance().getToken());
                         return params;
                     }
                 };

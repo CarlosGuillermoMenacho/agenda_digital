@@ -1,5 +1,5 @@
 <resources>
-
+    <string name="default_input_hint">Escribe algo</string>
     <string name="action_lightTheme">Tema claro(Selecionado)</string>
     <string name="action_darkTheme">Tema Oscuro</string>
 
@@ -88,5 +88,6 @@
     <string name="estudiante">Estudiante</string>
     <string name="cerrar">Cerrar</string>
     <string name="lista_de_cursos">Lista de Cursos</string>
+    <string name="chat">Chat</string>
 
 </resources>

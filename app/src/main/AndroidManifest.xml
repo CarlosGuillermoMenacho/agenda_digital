@@ -48,7 +48,17 @@
             android:enabled="true"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance" />
-
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/backgroud_splash" />
+        <service
+            android:name=".core.services.FirebaseService"
+            android:exported="false"
+            android:stopWithTask="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
         <receiver
             android:name=".services.restarter.RestartServiceBroadcastReceiver"
             android:enabled="true"

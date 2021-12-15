@@ -30,10 +30,13 @@ import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.Menus;
 import com.agendadigital.clases.User;
 import com.agendadigital.clases.Usuarios;
+import com.agendadigital.core.services.FirebaseService;
+import com.agendadigital.core.shared.infrastructure.Firebase;
 import com.agendadigital.services.Service;
-import com.github.nkzawa.socketio.client.Socket;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.agendadigital.R.id;
 import static com.agendadigital.R.layout;
@@ -55,6 +58,15 @@ public class FragmentAfiliacion extends Fragment {
         View vista = inflater.inflate(layout.fragment_afiliacion,container,false);
         adm = new AdminSQLite(getContext(),"agenda",null, 1 );
         Globals.menu = Menus.ADMCUENTA;
+        FirebaseMessaging messaging = FirebaseMessaging.getInstance();
+        AtomicReference<String> t = new AtomicReference<>("");
+        messaging.getToken().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                return;
+            }
+            t.set(task.getResult());
+        });
+        String token = FirebaseService.getToken(vista.getContext());
         enlaces(vista);
         llenarListas();
         onclick();
@@ -67,7 +79,6 @@ public class FragmentAfiliacion extends Fragment {
         btnNew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Navigation.findNavController(v).navigate(id.fragmentFormAfiliacion);
             }
         });
@@ -105,7 +116,7 @@ public class FragmentAfiliacion extends Fragment {
                                 startActivity(intent);
                                 Intent filter = new Intent("restarSockets");
                                 requireActivity().sendBroadcast(filter);
-                            }else if (Globals.user.getCodigo().equals(codigo)){
+                            }else if (Globals.user.getCodigo().equals(codigo)) {
                                 Globals.user = null;
                                 Intent intent = new Intent(getContext(), MainActivity.class);
                                 intent.putExtra("servicio","1");
@@ -171,9 +182,6 @@ public class FragmentAfiliacion extends Fragment {
         });
     }
 
-/*    getWritableDatabase().execSQL("delete from tutor where codigo="+codigo);
-    getWritableDatabase().execSQL("delete from alu_tut where tutor = "+codigo);
-    getWritableDatabase().execSQL("delete from notificaciones where cod_tutor = "+codigo);*/
     private ServiceConnection serviceConnection  = new ServiceConnection() {
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
@@ -207,9 +215,11 @@ public class FragmentAfiliacion extends Fragment {
         }
     }
 
-
     private void enlaces(View vista) {
         btnNew = vista.findViewById(id.btnNewUser);
+
+            btnNew.setVisibility(View.VISIBLE);
+
         btnDelete = vista.findViewById(id.btnDeleteUser);
         btnListo = vista.findViewById(id.btnListoafiliacion);
         title = vista.findViewById(id.textCambiarCuenta);
@@ -226,8 +236,8 @@ public class FragmentAfiliacion extends Fragment {
 
         for (int i = 0 ; i < arraUser.size(); i++){
 
-            codigos.add(new String[]{arraUser.get(i).getCodigo(),arraUser.get(i).getTipo()});
-            nombres.add(arraUser.get(i).getTipo().toUpperCase()+": "+arraUser.get(i).getNombre());
+            codigos.add(new String[]{arraUser.get(i).getCodigo(),arraUser.get(i).getTipo().toString()});
+            nombres.add(arraUser.get(i).getTipo().toString().toUpperCase()+": "+arraUser.get(i).getNombre());
 
         }
 

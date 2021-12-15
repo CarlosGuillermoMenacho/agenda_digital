@@ -22,9 +22,4 @@ public class Globals {
     public static ArrayList<String> tabsActivos = new ArrayList<>();
     public static Colegio colegio = new Colegio(); //En esta variable se almacenará el Estudiante seleccionado
     public static Cursos curso;
-
-
-
-
-
 }

@@ -13,27 +13,22 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-
 import com.agendadigital.R;
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Constants;
 import com.agendadigital.clases.ConstantsGlobals;
-import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
-import com.agendadigital.clases.User;
+import com.agendadigital.core.shared.infrastructure.Firebase;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -126,7 +121,6 @@ public class FragmentFormAdm extends Fragment {
                                     adminSQLite.saveColAdm(codAdm,nombreCol,turno,codCol,ip,estado);
                                 }
 
-
                                 builder.setMessage("Se habilitó exitosamente...");
                                 builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
                                     @Override
@@ -162,6 +156,7 @@ public class FragmentFormAdm extends Fragment {
                         Map<String, String> params = new HashMap<>();
                         params.put("codigo", cod_personal);
                         params.put("clave", clave_personal);
+                        params.put("token", Firebase.getInstance().getToken());
                         return params;
                     }
                 };

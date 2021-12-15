@@ -28,6 +28,7 @@ import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.User;
 import com.agendadigital.clases.Utils;
+import com.agendadigital.core.shared.infrastructure.Firebase;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -124,7 +125,7 @@ public class FragmentFormDirector extends Fragment {
                                 valores.add(foto);
                                 adminSQLite.saveDirector(valores);
 
-                                Globals.user = new User(codigo,nombre,foto,"director");
+                                Globals.user = new User(codigo,nombre,foto, User.UserType.Director);
 
                                 JSONArray datosArrayfact_pend = jsonObject.getJSONArray("colegios");
                                 //BaseDeDato.execSQL("delete from alumno");
@@ -181,6 +182,7 @@ public class FragmentFormDirector extends Fragment {
                         Map<String, String> params = new HashMap<>();
                         params.put("codigo", cod_dir);
                         params.put("clave", clave_dir);
+                        params.put("token", Firebase.getInstance().getToken());
                         return params;
                     }
                 };

@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,11 +21,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.LongDef;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.agendadigital.R;
+import com.agendadigital.core.services.login.UserDto;
+import com.agendadigital.core.shared.infrastructure.Firebase;
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Constants;
 import com.agendadigital.clases.ConstantsGlobals;
@@ -37,6 +41,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,11 +54,11 @@ import java.util.Map;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
 public class FragmentFormTutor extends Fragment{
+
+    private final String TAG = "FragmentFormTutor";
     private Button btnCancelar, btnHabilitar;
     private EditText etCedula,etTelefono;
     private String cedula, telefono;
-
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -137,7 +142,7 @@ public class FragmentFormTutor extends Fragment{
                                 valores.add(telefono);
                                 adminSQLite.saveTutor(valores);
 
-                                Globals.user = new User(codigo, nombre, fotot, "tutor");
+                                Globals.user = new User(codigo, nombre, fotot, User.UserType.Tutor);
 
                                 JSONArray datosArrayfact_pend = jsonObject.getJSONArray("alumnos");
                                 //BaseDeDato.execSQL("delete from alumno");
@@ -207,6 +212,38 @@ public class FragmentFormTutor extends Fragment{
                 };
                 stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                 MySingleton.getInstance(getContext()).addToRequest(stringRequest);
+                StringRequest requestToken = new StringRequest(Request.Method.POST, "http://localhost:3000/token", new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        progressDialog.dismiss();
+                        try {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                            JSONObject jsonObject = new JSONObject(response);
+                            Log.d(TAG, "RequestToken Response: " + jsonObject.toString());
+                            builder.show();
+                        } catch (JSONException e) {
+                            Toast.makeText(getContext(), "Error al procesar los datos...", Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        progressDialog.dismiss();
+                        Toast.makeText(getContext(),"Error en la red...",Toast.LENGTH_SHORT).show();
+                    }
+                }){
+                    @Override
+                    protected Map<String, String> getParams() {
+                        UserDto.LoginUserRequest loginUserRequest = new UserDto.LoginUserRequest(cedula, 3, Firebase.getInstance().getToken());
+                        Map<String, String> params = new HashMap<>();
+                        Log.d(TAG, "getParams: " + new Gson().toJson(loginUserRequest));
+                        params.put("token", new Gson().toJson(loginUserRequest));
+                        return params;
+                    }
+                };
+                requestToken.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                MySingleton.getInstance(getContext()).addToRequest(requestToken);
             }else{
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setMessage("El usuario ya se encuentra habilitado en este dispositivo...");
@@ -221,6 +258,8 @@ public class FragmentFormTutor extends Fragment{
         }else{
             Toast.makeText(getContext(),"Faltan datos...",Toast.LENGTH_SHORT).show();
         }
+
+
     }
 
     private void obtenerMaterias(ArrayList<String[]> codAlumnos, final String codigo) {
