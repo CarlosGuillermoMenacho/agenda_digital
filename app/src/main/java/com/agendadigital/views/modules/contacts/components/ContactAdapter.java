@@ -83,7 +83,7 @@ public class ContactAdapter  extends RecyclerView.Adapter<ContactAdapter.Contact
         }
 
         public void set(ContactEntity contactEntity){
-            tvName.setText(contactEntity.getId().concat(":").concat(contactEntity.getName()));
+            tvName.setText(contactEntity.getName());
             tvTypeContact.setText(contactEntity.getTypeContact().toString());
         }
 

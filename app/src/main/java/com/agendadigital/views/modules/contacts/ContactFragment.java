@@ -1,6 +1,7 @@
 package com.agendadigital.views.modules.contacts;
 
 import android.content.ContentValues;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,12 +10,20 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.agendadigital.R;
+import com.agendadigital.clases.Constants;
+import com.agendadigital.clases.ConstantsGlobals;
+import com.agendadigital.clases.MySingleton;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.core.services.contacts.ContactDto;
 import com.agendadigital.core.shared.infrastructure.AsyncHttpRest;
 import com.agendadigital.views.modules.contacts.components.ContactAdapter;
 import com.agendadigital.clases.Globals;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -23,12 +32,15 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import cz.msebera.android.httpclient.Header;
+
+import static android.widget.LinearLayout.HORIZONTAL;
 
 public class ContactFragment extends Fragment {
 
@@ -45,8 +57,11 @@ public class ContactFragment extends Fragment {
         viewFragment = inflater.inflate(R.layout.fragment_contacts, container, false);
         contactRepository = new ContactRepository(viewFragment.getContext());
         RecyclerView rvContactList = viewFragment.findViewById(R.id.rvContactList);
+        DividerItemDecoration itemDecoration = new DividerItemDecoration(viewFragment.getContext(), DividerItemDecoration.HORIZONTAL);
+        Drawable mDivider = ContextCompat.getDrawable(viewFragment.getContext(), R.drawable.divider);
+        itemDecoration.setDrawable(mDivider);
         rvContactList.setLayoutManager(new LinearLayoutManager(viewFragment.getContext()));
-        rvContactList.addItemDecoration(new DividerItemDecoration(viewFragment.getContext(), DividerItemDecoration.HORIZONTAL));
+//        rvContactList.addItemDecoration(itemDecoration);
         pbContacts = viewFragment.findViewById(R.id.pbContacts);
         contactAdapter = new ContactAdapter();
         rvContactList.setAdapter(contactAdapter);
@@ -83,18 +98,17 @@ public class ContactFragment extends Fragment {
     }
 
     private void getContactsFromServer() throws UnsupportedEncodingException, JSONException {
-        JSONObject params = new JSONObject();
-        ContactDto.CreateContactRequest createContactRequest = new ContactDto.CreateContactRequest(Globals.user.getCodigo(), Globals.user.getTipo().getValue());
-        params.put("userId", new Gson().toJson(createContactRequest));
 
-        AsyncHttpRest.post(viewFragment.getContext(), "/contacts", params, new JsonHttpResponseHandler(){
+        JSONObject jsonObject = new JSONObject();
+        ContactDto.CreateContactRequest contactRequest = new ContactDto.CreateContactRequest(Globals.user.getCodigo(), Globals.user.getTipo().getValue());
+        jsonObject.put("user", new JSONObject(contactRequest.toString()));
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,ConstantsGlobals.urlChatServer + "/contacts", jsonObject, new Response.Listener<JSONObject>() {
             @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                super.onSuccess(statusCode, headers, response);
-                Log.d(TAG, "onSuccess: JSONObject" + response);
+            public void onResponse(JSONObject response) {
                 try {
                     List<ContactDto.CreateContactResponse> contactEntityList = new Gson().fromJson(response.getString("contacts"), new TypeToken<List<ContactDto.CreateContactResponse>>() {
-                            }.getType());
+                    }.getType());
                     pbContacts.setMax(contactEntityList.size());
                     int index = 0;
 //                    db.beginTransaction();
@@ -108,7 +122,6 @@ public class ContactFragment extends Fragment {
 //                        long rowsInserted = db.insert(FeedReaderContract.FeedContact.TABLE_NAME, null, values);
                         if(rowsInserted == -1) {
                             Toast.makeText(viewFragment.getContext(), contact.getName(), Toast.LENGTH_SHORT).show();
-                            throw new Exception("Error guardando el contacto : ".concat(contact.getName()));
                         }else {
                             contactAdapter.add(new ContactEntity(contact.getId(), contact.getName(), ContactEntity.ContactType.setValue(contact.getTypeContact())));
                             pbContacts.setProgress(index++);
@@ -116,22 +129,21 @@ public class ContactFragment extends Fragment {
                     }
                     pbContacts.setVisibility(View.INVISIBLE);
                     Toast.makeText(viewFragment.getContext(), "Contactos sincronizados (" + contactEntityList.size() + ")", Toast.LENGTH_SHORT).show();
-                    //                    db.endTransaction();
 
-                } catch (JSONException e) {
-                    Toast.makeText(viewFragment.getContext(), "Error al sincronizar los contactos.", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
                 } catch (Exception e) {
-                    Toast.makeText(viewFragment.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
+                Log.d(TAG, "onResponse: " + response);
             }
 
+        }, new Response.ErrorListener() {
             @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
-                Log.d(TAG, "onFailure:" + throwable);
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, "onErrorResponse: " + error.getMessage());
             }
         });
+
+        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
     }
 }

@@ -1,7 +1,11 @@
 package com.agendadigital.core.services.login;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class UserDto {
-    public static class LoginUserRequest {
+
+    public static class LoginUserRequest implements java.io.Serializable {
         private String userId;
         private int userType;
         private String firebaseToken;
@@ -34,6 +38,24 @@ public class UserDto {
 
         public void setFirebaseToken(String firebaseToken) {
             this.firebaseToken = firebaseToken;
+        }
+
+        @Override
+        public String toString() {
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("userId", userId);
+                jsonObject.put("userType", userType);
+                jsonObject.put("firebaseToken", firebaseToken);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            try {
+                return jsonObject.toString(4);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return "";
         }
     }
 

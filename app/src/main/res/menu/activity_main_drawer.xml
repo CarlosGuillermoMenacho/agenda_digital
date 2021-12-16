@@ -80,7 +80,7 @@
             android:icon="@drawable/ic_agenda"
             android:title="@string/calendario" />
         <item
-            android:id="@+id/fragmentChat"
+            android:id="@+id/fragmentContacts"
             android:icon="@drawable/ic_agenda"
             android:title="@string/chat" />
         <item

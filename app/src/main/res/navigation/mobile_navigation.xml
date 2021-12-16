@@ -15,20 +15,20 @@
             app:destination="@id/fragmentFormAfiliacion" />
     </fragment>
     <fragment
-        android:id="@+id/fragment_chat"
+        android:id="@+id/fragmentChat"
         android:name="com.agendadigital.views.modules.chats.ChatFragment"
         android:label="Chat"
         tools:layout="@layout/fragment_chat" >
     </fragment>
 
     <fragment
-        android:id="@+id/fragment_contacts"
+        android:id="@+id/fragmentContacts"
         android:name="com.agendadigital.views.modules.contacts.ContactFragment"
         android:label="Chat"
         tools:layout="@layout/fragment_contacts">
         <action
             android:id="@+id/action_fragment_contacts_to_fragment_chat"
-            app:destination="@id/fragment_chat" />
+            app:destination="@id/fragmentChat" />
     </fragment>
     <!--Navigation Drawer-->
     <fragment

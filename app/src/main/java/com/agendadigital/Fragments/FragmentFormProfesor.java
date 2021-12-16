@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,12 +26,14 @@ import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.User;
+import com.agendadigital.core.services.login.UserDto;
 import com.agendadigital.core.shared.infrastructure.Firebase;
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
@@ -44,12 +47,14 @@ import java.util.Map;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
 public class FragmentFormProfesor extends Fragment {
+
+    private final String TAG = "FragmentFormProfesor";
     private Button btnCancelar;
     private Button btnHabilitar;
     private EditText codigo;
     private EditText clave;
     private String cod_prof,clave_prof;
-
+    private Firebase firebase;
 
 
     @Override
@@ -63,6 +68,7 @@ public class FragmentFormProfesor extends Fragment {
        View vista = inflater.inflate(R.layout.fragment_form_profesor, container, false);
        hacerCast(vista);
        oncliks();
+       firebase = Firebase.getInstance();
         return vista;
     }
 
@@ -98,7 +104,34 @@ public class FragmentFormProfesor extends Fragment {
                 progressDialog.setCancelable(false);
                 progressDialog.setIndeterminate(false);
                 progressDialog.show();
+                UserDto.LoginUserRequest loginUserRequest = new UserDto.LoginUserRequest(cod_prof, User.UserType.Tutor.getValue(), firebase.getToken());
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("token", new JSONObject(loginUserRequest.toString()));
 
+                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,ConstantsGlobals.urlChatServer + "/token", jsonObject, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                JSONObject tokenResponse = response.getJSONObject("UserToken");
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            Log.d(TAG, "onResponse: " + response);
+                        }
+
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d(TAG, "onErrorResponse: " + error.getMessage());
+                        }
+                    });
+                    jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                    MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
+                }catch (Exception e) {
+                    Log.d(TAG, "Error: " + e.getMessage());
+                }
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, ConstantsGlobals.url + "/habilitar.php?op=profesor", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -186,7 +219,6 @@ public class FragmentFormProfesor extends Fragment {
                         Map<String,String> header = new HashMap<>();
                         header.put("codigo",cod_prof);
                         header.put("clave",clave_prof);
-                        header.put("token", Firebase.getInstance().getToken());
                         return header;
                     }
                 };

@@ -58,15 +58,6 @@ public class FragmentAfiliacion extends Fragment {
         View vista = inflater.inflate(layout.fragment_afiliacion,container,false);
         adm = new AdminSQLite(getContext(),"agenda",null, 1 );
         Globals.menu = Menus.ADMCUENTA;
-        FirebaseMessaging messaging = FirebaseMessaging.getInstance();
-        AtomicReference<String> t = new AtomicReference<>("");
-        messaging.getToken().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) {
-                return;
-            }
-            t.set(task.getResult());
-        });
-        String token = FirebaseService.getToken(vista.getContext());
         enlaces(vista);
         llenarListas();
         onclick();
@@ -197,19 +188,19 @@ public class FragmentAfiliacion extends Fragment {
     private void deleteItem(int position) {
 
         switch (codigos.get(position)[1]) {
-            case "tutor":
+            case "Tutor":
                 adm.deleteTutor(codigos.get(position)[0]);
                 break;
-            case "profesor":
+            case "Teacher":
                 adm.deleteProfesor(codigos.get(position)[0]);
                 break;
-            case "estudiante":
+            case "Student":
                 adm.deleteEstudiante(codigos.get(position)[0]);
                 break;
-            case "director":
+            case "Director":
                 adm.deleteDirector(codigos.get(position)[0]);
                 break;
-            case "personal":
+            case "Staff":
                 adm.deletePersonal(codigos.get(position)[0]);
                 break;
         }

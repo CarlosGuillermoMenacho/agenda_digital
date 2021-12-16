@@ -27,28 +27,40 @@
             android:id="@+id/tvName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tvShowMessage"
+            android:layout_width="277dp"
+            android:layout_height="29dp"
+            android:layout_below="@+id/tvName"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginEnd="-3dp"
+            android:layout_toStartOf="@+id/badge" />
 
         <com.nex3z.notificationbadge.NotificationBadge
             android:id="@+id/badge"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_alignTop="@id/tvName"
-            android:visibility="visible"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="2dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="21dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="21dp"
+            android:visibility="visible"
             app:nbBackground="@drawable/badge_personalizado" />
 
         <TextView
             android:id="@+id/tvTypeContact"
-            android:layout_width="match_parent"
+            android:layout_width="310dp"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/tvName"
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="5dp"
-            android:textSize="12sp"/>
+            android:textSize="12sp" />
 
 
     </RelativeLayout>

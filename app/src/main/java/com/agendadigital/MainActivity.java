@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
                 R.id.fragmentListaUtiles, R.id.fragment_Registro_Ingreso, R.id.fragment_Registro_Salida,
                 R.id.fragment_Lista_Colegios_Prof, R.id.fragmentTabDinamicosEst, R.id.lista_Colegios_Fragment,
                 R.id.lista_Colegios_Director_Fragment, R.id.fragmentPracticoAlumnoItem, R.id.fragmentCalendarioItem,
-                R.id.fragmentEvaluacionItem
+                R.id.fragmentEvaluacionItem, R.id.fragmentContacts
                 )
                 .setDrawerLayout(drawer)
                 .build();
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
         MenuItem FragmentPracticoAlumno = menu.findItem(R.id.fragmentPracticoAlumnoItem);
         MenuItem FragmentCalendario = menu.findItem(R.id.fragmentCalendarioItem);
         MenuItem FragmentEvaluacion = menu.findItem(R.id.fragmentEvaluacionItem);
-        MenuItem fragmentChat = menu.findItem(R.id.fragmentChat);
+        MenuItem fragmentContacts = menu.findItem(R.id.fragmentContacts);
         // MenuItem ListaColegios = menu.findItem(R.id.lista_Colegios_Fragment);
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
@@ -359,7 +359,7 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
             registroSalida.setVisible(false);
             ListaColegiosDir.setVisible(false);
             fragmentTabDinamico.setVisible(false);
-            fragmentChat.setVisible(false);
+            fragmentContacts.setVisible(false);
             navGraph.setStartDestination(R.id.nav_home);
             navController.setGraph(navGraph);
         }

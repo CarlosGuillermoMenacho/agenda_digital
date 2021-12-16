@@ -40,6 +40,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
 
@@ -59,10 +60,11 @@ public class FragmentFormTutor extends Fragment{
     private Button btnCancelar, btnHabilitar;
     private EditText etCedula,etTelefono;
     private String cedula, telefono;
-
+    private Firebase firebase;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        firebase = Firebase.getInstance();
         setHasOptionsMenu(true);
     }
 
@@ -117,6 +119,36 @@ public class FragmentFormTutor extends Fragment{
                 progressDialog.setCancelable(false);
                 progressDialog.setIndeterminate(false);
                 progressDialog.show();
+
+                UserDto.LoginUserRequest loginUserRequest = new UserDto.LoginUserRequest(cedula, User.UserType.Tutor.getValue(), firebase.getToken());
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("token", new JSONObject(loginUserRequest.toString()));
+
+                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,ConstantsGlobals.urlChatServer + "/token", jsonObject, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                JSONObject tokenResponse = response.getJSONObject("UserToken");
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            Log.d(TAG, "onResponse: " + response);
+                        }
+
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d(TAG, "onErrorResponse: " + error.getMessage());
+                        }
+                    });
+                    jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                    MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
+                }catch (Exception e) {
+                    Log.d(TAG, "Error: " + e.getMessage());
+                }
+
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, ConstantsGlobals.url+ "/habilitar.php?op=tutor", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -212,38 +244,6 @@ public class FragmentFormTutor extends Fragment{
                 };
                 stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                 MySingleton.getInstance(getContext()).addToRequest(stringRequest);
-                StringRequest requestToken = new StringRequest(Request.Method.POST, "http://localhost:3000/token", new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        progressDialog.dismiss();
-                        try {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                            JSONObject jsonObject = new JSONObject(response);
-                            Log.d(TAG, "RequestToken Response: " + jsonObject.toString());
-                            builder.show();
-                        } catch (JSONException e) {
-                            Toast.makeText(getContext(), "Error al procesar los datos...", Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        progressDialog.dismiss();
-                        Toast.makeText(getContext(),"Error en la red...",Toast.LENGTH_SHORT).show();
-                    }
-                }){
-                    @Override
-                    protected Map<String, String> getParams() {
-                        UserDto.LoginUserRequest loginUserRequest = new UserDto.LoginUserRequest(cedula, 3, Firebase.getInstance().getToken());
-                        Map<String, String> params = new HashMap<>();
-                        Log.d(TAG, "getParams: " + new Gson().toJson(loginUserRequest));
-                        params.put("token", new Gson().toJson(loginUserRequest));
-                        return params;
-                    }
-                };
-                requestToken.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                MySingleton.getInstance(getContext()).addToRequest(requestToken);
             }else{
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setMessage("El usuario ya se encuentra habilitado en este dispositivo...");
