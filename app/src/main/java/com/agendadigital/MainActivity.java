@@ -1,7 +1,10 @@
 package com.agendadigital;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
@@ -36,11 +39,15 @@ import com.agendadigital.Fragments.FragmentListaAlumnos;
 import com.agendadigital.Interfaces.Comunicador;
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Globals;
+import com.agendadigital.clases.User;
+import com.agendadigital.clases.Usuarios;
 import com.agendadigital.core.shared.infrastructure.Firebase;
 import com.agendadigital.services.ProcessMainClass;
 import com.agendadigital.services.restarter.RestartServiceBroadcastReceiver;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity  implements Comunicador {
 
@@ -48,11 +55,14 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
     NavigationView sNavigationView;
     TextView nameUser;
     ImageView imgUser;
+    private AdminSQLite adm;
+    private ArrayList<String[]> codigos;
 
     @Override
     protected void onPause() {
         super.onPause();
         Globals.tabsActivos.clear();
+
     }
 
     @Override
@@ -65,10 +75,11 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
         FirebaseApp.initializeApp(this);
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         sNavigationView = findViewById(R.id.nav_view);
-
+        adm = new AdminSQLite(getApplicationContext(),"agenda",null, 1 );
         View hview = sNavigationView.getHeaderView(0);
         nameUser = hview.findViewById(R.id.tvUser);
         imgUser = hview.findViewById(R.id.ivUser);
+/*        Globals.user = adm.getUltUsr();*/
 
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.fragmentAgendaDigital, R.id.fragmentBoletin,
@@ -80,18 +91,88 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
                 )
                 .setDrawerLayout(drawer)
                 .build();
-        navigation();
-    }
 
+
+    navigation();
+
+
+
+    }
+    private void llenarListas() {
+
+        Usuarios usuarios = new Usuarios(getApplicationContext());
+        codigos = new ArrayList<>();
+
+        ArrayList<User> arraUser = new ArrayList<>(usuarios.getUsuarios());
+
+        for (int i = 0 ; i < arraUser.size(); i++){
+            codigos.add(new String[]{arraUser.get(i).getCodigo(),arraUser.get(i).getTipo().toString()});
+        }
+    }
+    private void deleteItem() {
+
+        switch (codigos.get(0)[1]) {
+            case "tutor":
+                adm.deleteTutor(codigos.get(0)[0]);
+                break;
+            case "profesor":
+                adm.deleteProfesor(codigos.get(0)[0]);
+                break;
+            case "estudiante":
+                adm.deleteEstudiante(codigos.get(0)[0]);
+                break;
+            case "director":
+                adm.deleteDirector(codigos.get(0)[0]);
+                break;
+            case "personal":
+                adm.deletePersonal(codigos.get(0)[0]);
+                break;
+        }
+    }
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_lightTheme:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
                 break;
             case R.id.action_darkTheme:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
+                break;
+            case R.id.sessionStop:
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setMessage("¿Desea eliminar esta cuenta?");
+                builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        String codigo = codigos.get(0)[0];
+                        deleteItem();
+
+                        llenarListas();
+
+                        if (codigos.isEmpty()){
+                            Globals.user = null;
+
+                            Intent intent = new Intent(getApplicationContext(), MainActivity2.class);
+                            intent.putExtra("servicio","1");
+                            startActivity(intent);
+
+
+                        }else if (Globals.user.getCodigo().equals(codigo)){
+                            Globals.user = null;
+                            Intent intent = new Intent(getApplicationContext(), MainActivity2.class);
+                            intent.putExtra("servicio","1");
+                            startActivity(intent);
+
+
+                        }
+                    }
+                });
+                builder.setNegativeButton("No",null);
+                builder.show();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -122,13 +203,11 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
             }
         }
     }
-
     @Override
     public void enviarDatos(String dato,int fragmnet) {
         Bundle bundle = new Bundle();
         FragmentTransaction fragmentTransaction;
         FragmentManager fragmentManager;
-
         if (fragmnet==R.id.boletinFragment) {
             BoletinFragment boletinFragment = new BoletinFragment();
             bundle.putString("codigo",dato);
@@ -188,6 +267,7 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
             fragmentTransaction.replace(R.id.container_form,fragmentFormAdm);
             fragmentTransaction.commit();
         }
+
     }
 
     private void configTheme() {
@@ -202,9 +282,10 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
         }
         return super.dispatchTouchEvent(ev);
     }
-
     public void navigation(){
+
         AdminSQLite adm = new AdminSQLite(MainActivity.this, "agenda", null, 1);
+
         Menu menu = sNavigationView.getMenu();
         MenuItem agendaDigital = menu.findItem(R.id.fragmentAgendaDigital);
         MenuItem licencias = menu.findItem(R.id.fragmentLicencia);
@@ -221,7 +302,6 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
         MenuItem FragmentPracticoAlumno = menu.findItem(R.id.fragmentPracticoAlumnoItem);
         MenuItem FragmentCalendario = menu.findItem(R.id.fragmentCalendarioItem);
         MenuItem FragmentEvaluacion = menu.findItem(R.id.fragmentEvaluacionItem);
-        MenuItem fragmentContacts = menu.findItem(R.id.fragmentContacts);
         // MenuItem ListaColegios = menu.findItem(R.id.lista_Colegios_Fragment);
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
@@ -240,11 +320,14 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
                     ListaColegiosProf.setVisible(false);
                     fragmentTabDinamicoEst.setVisible(false);
                     ListaColegiosDir.setVisible(false);
+                    //ListaColegios.setVisible(false);
                     navGraph.setStartDestination(R.id.fragmentAgendaDigital);
                     navController.setGraph(navGraph);
+
                     if (Globals.user.getFoto() != null){
                         imgUser.setImageBitmap(Globals.user.getFotoConverter(Globals.user.getFoto()));
                     }
+
                     break;
                 case Student:
                     nameUser.setText(Globals.user.getNombre());
@@ -357,11 +440,12 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
             licencias.setVisible(false);
             registroIngreso.setVisible(false);
             registroSalida.setVisible(false);
+            //ListaColegios.setVisible(false);
             ListaColegiosDir.setVisible(false);
             fragmentTabDinamico.setVisible(false);
-            fragmentContacts.setVisible(false);
             navGraph.setStartDestination(R.id.nav_home);
             navController.setGraph(navGraph);
+
         }
     }
 }

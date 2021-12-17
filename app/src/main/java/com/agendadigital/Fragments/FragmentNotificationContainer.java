@@ -39,7 +39,7 @@ public class FragmentNotificationContainer extends Fragment {
     RecyclerView rvNotificacionesContainer;
     AdminSQLite adm;
 
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Notificacion notificacion1 = new Notificacion();
@@ -157,5 +157,6 @@ public class FragmentNotificationContainer extends Fragment {
         if ( light != null) {
             light.setVisible(false);
         }
+
     }
 }

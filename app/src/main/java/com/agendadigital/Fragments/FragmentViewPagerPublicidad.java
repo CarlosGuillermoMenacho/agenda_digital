@@ -1,8 +1,12 @@
 package com.agendadigital.Fragments;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,39 +14,21 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
-
 import com.agendadigital.R;
-/*import com.agendadigital.clases.AdapterNotificaciones;
-import com.agendadigital.clases.AdapterPublicidad;*/
 import com.agendadigital.clases.AdapterPublicidad;
 import com.agendadigital.clases.AdminSQLite;
-import com.agendadigital.clases.Constants;
-import com.agendadigital.clases.Globals;
-import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.Publicidad;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.util.ArrayList;
+
+/*import com.agendadigital.clases.AdapterNotificaciones;
+import com.agendadigital.clases.AdapterPublicidad;*/
 
 public class FragmentViewPagerPublicidad extends Fragment {
 
     private AdminSQLite adm;
     RecyclerView recyclerViewPublicidades;
 
-    private ArrayList<Publicidad> publicidad;
     private int codigoEmpresa;
 
     @Override
@@ -74,7 +60,7 @@ public class FragmentViewPagerPublicidad extends Fragment {
     }
 
     public void cargarPublicidad(){
-        publicidad = new ArrayList<>();
+        ArrayList<Publicidad> publicidad = new ArrayList<>();
         Cursor cursor = adm.getPublicidad(Integer.toString(codigoEmpresa));
         if (cursor.moveToFirst()) {
             do {
@@ -83,7 +69,7 @@ public class FragmentViewPagerPublicidad extends Fragment {
                         ,cursor.getString(4)));
 
             } while (cursor.moveToNext());
-            AdapterPublicidad data = new AdapterPublicidad(getContext() ,publicidad);
+            AdapterPublicidad data = new AdapterPublicidad(getContext() , publicidad);
             recyclerViewPublicidades.setLayoutManager(new LinearLayoutManager(getContext()));
             recyclerViewPublicidades.setAdapter(data);
         }

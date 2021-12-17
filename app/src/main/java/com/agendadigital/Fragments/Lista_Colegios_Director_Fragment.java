@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,7 +18,6 @@ import androidx.navigation.Navigation;
 import com.agendadigital.R;
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Colegio;
-import com.agendadigital.clases.Estudiante;
 import com.agendadigital.clases.Globals;
 
 import java.util.ArrayList;
@@ -29,7 +27,6 @@ public class Lista_Colegios_Director_Fragment extends Fragment {
 
     private ListView lvListaAlumnosBoletin;
     private AdminSQLite adm;
-    private ArrayList<Estudiante> estudiantes;
     private ArrayList<Colegio> colegios;
 
     @Override

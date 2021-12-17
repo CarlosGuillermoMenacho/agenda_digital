@@ -2,12 +2,6 @@ package com.agendadigital.Fragments;
 
 import android.database.Cursor;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.ViewPager;
-
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,11 +9,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
+
 import com.agendadigital.R;
 import com.agendadigital.clases.AdaptadorViewPager;
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Constants;
-import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -36,7 +34,6 @@ public class FragmentPublicidad extends Fragment {
     private ViewPager viewPagerPublicidad;
     private AdaptadorViewPager adaptadorViewPagerPublicidad;
     private AdminSQLite adm;
-    private TabLayout tabLayoutPublicidad;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,8 +45,7 @@ public class FragmentPublicidad extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         adm = new AdminSQLite(getContext(), "agenda", null, 1);
-        View rootView = inflater.inflate(R.layout.fragment_publicidad, container, false);
-        return rootView;
+        return inflater.inflate(R.layout.fragment_publicidad, container, false);
     }
 
     @Override
@@ -58,7 +54,7 @@ public class FragmentPublicidad extends Fragment {
 
         requestImgPublicidad();
         viewPagerPublicidad = view.findViewById(R.id.viewPagerPublicidad);
-        tabLayoutPublicidad = view.findViewById(R.id.tabLayoutPublicidad);
+        TabLayout tabLayoutPublicidad = view.findViewById(R.id.tabLayoutPublicidad);
 
         adaptadorViewPagerPublicidad = new AdaptadorViewPager(requireActivity().getSupportFragmentManager());
 

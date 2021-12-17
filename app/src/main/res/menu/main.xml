@@ -13,5 +13,9 @@
         android:orderInCategory="200"
         android:title="@string/action_darkTheme"
         app:showAsAction="never" />
-
+    <item
+        android:id="@+id/sessionStop"
+        android:orderInCategory="200"
+        android:title="@string/cerrar_sesi_n"
+        app:showAsAction="never" />
 </menu>

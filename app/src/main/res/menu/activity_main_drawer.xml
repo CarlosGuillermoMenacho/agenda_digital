@@ -88,10 +88,10 @@
             android:icon="@drawable/ic_publicidad"
             android:title="@string/publicidad" />
 
-        <item
+        <!--item
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_afiliacion"
-            android:title="@string/afiliarCuenta" />
+            android:title="@string/afiliarCuenta" /-->
 
 
     </group>
