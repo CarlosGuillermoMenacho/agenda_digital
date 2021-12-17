@@ -128,8 +128,18 @@ public class ContactFragment extends Fragment {
                 e.printStackTrace();
             }
 
-        }, error -> Log.d(TAG, "onErrorResponse: " + error.getMessage()));
+        }, error -> {
+                        String body;
+                        //get status code here
+                        String statusCode = String.valueOf(error.networkResponse.statusCode);
+                        //get response body and parse with appropriate encoding
+                        if(error.networkResponse.data!=null) {
+                            body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
+                            Log.d(TAG, "onErrorResponse: " + body);
+                            Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
 
+                        }
+                    });
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
     }
