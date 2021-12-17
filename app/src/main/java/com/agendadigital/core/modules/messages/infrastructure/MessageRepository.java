@@ -3,15 +3,13 @@ package com.agendadigital.core.modules.messages.infrastructure;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import com.agendadigital.core.shared.domain.database.FeedReaderContract;
 import com.agendadigital.core.shared.domain.database.FeedReaderDbHelper;
-
 import java.util.List;
 
 public class MessageRepository {
-    private SQLiteDatabase repository;
+    private final SQLiteDatabase repository;
 
     public MessageRepository(Context context) {
         repository =new FeedReaderDbHelper(context).getReadableDatabase();
@@ -25,10 +23,10 @@ public class MessageRepository {
         values.put(FeedReaderContract.FeedMessage.COL_DESTINATION_ID, messageEntity.getDestinationId());
         values.put(FeedReaderContract.FeedMessage.COL_DATA, messageEntity.getData());
         values.put(FeedReaderContract.FeedMessage.COL_FOR_GROUP, messageEntity.getForGroup());
-        values.put(FeedReaderContract.FeedMessage.COL_DESTINATION_STATUS, messageEntity.getDestinationStatus().getValue());
+        values.put(FeedReaderContract.FeedMessage.COL_DESTINATION_STATUS, messageEntity.getDestinationState().getValue());
         values.put(FeedReaderContract.FeedMessage.COL_STATUS, messageEntity.getStatus());
         values.put(FeedReaderContract.FeedMessage.COL_CREATED_AT, messageEntity.getCreatedAt().getTime());
-        values.put(FeedReaderContract.FeedMessage.COL_SENDED_AT, messageEntity.getSentAt().getTime());
+        values.put(FeedReaderContract.FeedMessage.COL_SENT_AT, messageEntity.getSentAt().getTime());
         values.put(FeedReaderContract.FeedMessage.COL_RECEIVED_AT, messageEntity.getReceivedAt()==null?null:messageEntity.getReceivedAt().getTime());
         return repository.insert(FeedReaderContract.FeedMessage.TABLE_NAME, null, values);
     }

@@ -10,9 +10,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 import com.agendadigital.MainActivity;
 import com.agendadigital.R;
+import com.agendadigital.clases.Constants;
+import com.agendadigital.clases.ConstantsGlobals;
+import com.agendadigital.clases.MySingleton;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import com.agendadigital.core.modules.messages.infrastructure.MessageRepository;
+import com.agendadigital.core.services.messages.MessageDto;
 import com.agendadigital.core.shared.domain.database.FeedReaderContract;
 import com.agendadigital.core.shared.infrastructure.AsyncHttpRest;
 import com.agendadigital.views.modules.chats.components.adapters.MessageAdapter;
@@ -20,11 +24,16 @@ import com.agendadigital.views.modules.chats.components.fab.SendFloatingActionBu
 import com.agendadigital.views.modules.chats.components.observers.MessageObservable;
 import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.User;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.loopj.android.http.JsonHttpResponseHandler;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -83,7 +92,7 @@ public class ChatFragment extends Fragment {
             List<MessageEntity> messagesToConfirm = new ArrayList<>();
             for (MessageEntity message: messageEntityList) {
                 if (message.getDestinationId().equals(currentUser.getCodigo()) &&
-                        message.getDestinationStatus() == MessageEntity.DestinationStatus.Received) {
+                        message.getDestinationState() == MessageEntity.DestinationState.Received) {
                     messagesToConfirm.add(message);
                 }
             }
@@ -116,7 +125,7 @@ public class ChatFragment extends Fragment {
                                 Log.d(TAG, "onNext: " + messageEntity.toJSON());
                                 try {
                                     confirmAck(messageEntity);
-                                    messageEntity.setDestinationStatus(MessageEntity.DestinationStatus.Received);
+                                    messageEntity.setDestinationState(MessageEntity.DestinationState.Received);
                                     messageAdapter.add(messageEntity);
                                 } catch (UnsupportedEncodingException | JSONException e) {
                                     e.printStackTrace();
@@ -143,55 +152,83 @@ public class ChatFragment extends Fragment {
     private void initSentButton(){
         sendFloatingActionButton = view.findViewById(R.id.sendButton);
         sendFloatingActionButton.setIconDrawable(getResources().getDrawable(R.drawable.ic_send_white_24dp));
-        sendFloatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Date currentTime = new Date(System.currentTimeMillis());
-                if(!etTextMessageToSend.getText().toString().trim().isEmpty()) {
-                    MessageEntity messageSend = new MessageEntity("",
-                            1,
-                            currentUser.getCodigo(),
-                            currentContact.getId(),
-                            etTextMessageToSend.getText().toString(),
-                            currentContact.getTypeContact() == ContactEntity.ContactType.Course ? 1 : 0,
-                            MessageEntity.DestinationStatus.Sent,
-                            1,
-                            currentTime,
-                            currentTime,
-                            null);
-                    JSONObject params = new JSONObject();
-                    try {
-                        Log.i(TAG, "MessageSent: " + messageSend.toJSON());
-                        params.put("message", messageSend.toJSON());
-                        AsyncHttpRest.post(getContext(), "/send-message", params, new JsonHttpResponseHandler() {
-                            @Override
-                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                                super.onSuccess(statusCode, headers, response);
-                                Log.d(TAG, "onSuccess: JSONObject" + response + "->" + messageSend.toJSON());
-                                try {
-                                    messageSend.setId(response.getString("id"));
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                                Log.d(TAG, "onSuccessReceive: " + messageSend.toJSON());
-                                long id = messageRepository.insert(messageSend);
-                                messageAdapter.add(messageSend);
-                                rvMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
-                                messageAdapter.notifyDataSetChanged();
-                            }
+        sendFloatingActionButton.setOnClickListener(v -> {
+            Date currentTime = new Date(System.currentTimeMillis());
+            if(!etTextMessageToSend.getText().toString().trim().isEmpty()) {
+                MessageEntity messageSend = new MessageEntity(
+                        "",
+                        1,
+                        currentUser.getCodigo(),
+                        currentContact.getId(),
+                        etTextMessageToSend.getText().toString(),
+                        currentContact.getTypeContact() == ContactEntity.ContactType.Course ? 1 : 0,
+                        MessageEntity.DestinationState.Create,
+                        1,
+                        currentTime,
+                        currentTime,
+                        null);
+                JSONObject params = new JSONObject();
+                try {
+                    MessageDto.SendMessageRequest sendMessageRequest = new MessageDto.SendMessageRequest(messageSend.getMessagetypeId()
+                            , messageSend.getDeviceFromId()
+                            , messageSend.getDestinationId()
+                            , currentContact.getTypeContact().getValue()
+                            , messageSend.getData(), messageSend.getForGroup(), messageSend.getCreatedAt());
 
-                            @Override
-                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                                super.onFailure(statusCode, headers, responseString, throwable);
-                                Log.d(TAG, "onFailure:" + throwable + "->" + responseString);
-                                Toast.makeText(getContext(), responseString, Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    } catch (JSONException | UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                    etTextMessageToSend.setText("");
+                    Log.d(TAG, "MessageSent: " + sendMessageRequest.toJSON());
+                    params.put("message", new JSONObject(sendMessageRequest.toJSON()));
+
+                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/send-message", params, response -> {
+                        try {
+                            JSONObject messageResponse = response.getJSONObject("message");
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Log.d(TAG, "onResponse: " + response);
+                    }, error -> {
+                        String body;
+                        //get status code here
+                        String statusCode = String.valueOf(error.networkResponse.statusCode);
+                        //get response body and parse with appropriate encoding
+                        if(error.networkResponse.data!=null) {
+                            body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
+                            Log.d(TAG, "onErrorResponse: " + body);
+                            Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+                    jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                    MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
+
+//                        AsyncHttpRest.post(getContext(), "/send-message", params, new JsonHttpResponseHandler() {
+//                            @Override
+//                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+//                                super.onSuccess(statusCode, headers, response);
+//                                Log.d(TAG, "onSuccess: JSONObject" + response + "->" + messageSend.toJSON());
+//                                try {
+//                                    messageSend.setId(response.getString("id"));
+//                                } catch (JSONException e) {
+//                                    e.printStackTrace();
+//                                }
+//                                Log.d(TAG, "onSuccessReceive: " + messageSend.toJSON());
+//                                long id = messageRepository.insert(messageSend);
+//                                messageAdapter.add(messageSend);
+//                                rvMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
+//                                messageAdapter.notifyDataSetChanged();
+//                            }
+//
+//                            @Override
+//                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+//                                super.onFailure(statusCode, headers, responseString, throwable);
+//                                Log.d(TAG, "onFailure:" + throwable + "->" + responseString);
+//                                Toast.makeText(getContext(), responseString, Toast.LENGTH_SHORT).show();
+//                            }
+//                        });
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+                etTextMessageToSend.setText("");
             }
         });
     }
@@ -204,7 +241,7 @@ public class ChatFragment extends Fragment {
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
                 ContentValues contentValues = new ContentValues();
-                contentValues.put("destinationStatus", MessageEntity.DestinationStatus.Read.getValue());
+                contentValues.put("destinationStatus", MessageEntity.DestinationState.Read.getValue());
                 messageRepository.update(contentValues, FeedReaderContract.FeedMessage._ID + "= ?", new String[] { message.getId() });
                 Log.d(TAG, "onSuccess: JSONObject" + response);
             }

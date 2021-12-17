@@ -1,6 +1,6 @@
 package com.agendadigital.core.modules.messages.domain;
 
-import android.icu.text.SimpleDateFormat;
+import java.text.SimpleDateFormat;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,25 +11,25 @@ import androidx.annotation.NonNull;
 
 public class MessageEntity {
     private String id;
-    private int messageTypeId;
+    private int messageType;
     private String deviceFromId;
     private String destinationId;
     private String data;
     private int forGroup;
-    private DestinationStatus destinationStatus;
+    private DestinationState destinationState;
     private int status;
     private Date createdAt;
     private Date sentAt;
     private Date receivedAt;
 
-    public MessageEntity(String id, int messageTypeId, String deviceFromId, String destinationId, String data, int forGroup, DestinationStatus destinationStatus, int status, Date createdAt, Date sentAt, Date receivedAt) {
+    public MessageEntity(String id, int messageType, String deviceFromId, String destinationId, String data, int forGroup, DestinationState destinationState, int status, Date createdAt, Date sentAt, Date receivedAt) {
         this.id = id;
-        this.messageTypeId = messageTypeId;
+        this.messageType = messageType;
         this.deviceFromId = deviceFromId;
         this.destinationId = destinationId;
         this.data = data;
         this.forGroup = forGroup;
-        this.destinationStatus = destinationStatus;
+        this.destinationState = destinationState;
         this.status = status;
         this.createdAt = createdAt;
         this.sentAt = sentAt;
@@ -42,7 +42,7 @@ public class MessageEntity {
 
     public String getId() { return id; }
     public int getMessagetypeId() {
-        return messageTypeId;
+        return messageType;
     }
 
     public String getDeviceFromId() {
@@ -61,12 +61,12 @@ public class MessageEntity {
         return forGroup;
     }
 
-    public void setDestinationStatus(DestinationStatus destinationStatus) {
-        this.destinationStatus = destinationStatus;
+    public void setDestinationState(DestinationState destinationState) {
+        this.destinationState = destinationState;
     }
 
-    public DestinationStatus getDestinationStatus() {
-        return destinationStatus;
+    public DestinationState getDestinationState() {
+        return destinationState;
     }
 
     public int getStatus() {
@@ -90,25 +90,25 @@ public class MessageEntity {
     }
 
     public String toJSON(){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        JSONObject jsonObject= new JSONObject();
-        try {
-            if(id != null) {
-                jsonObject.put("id", id);
-            }
-            jsonObject.put("messageTypeId", messageTypeId);
-            jsonObject.put("deviceFromId", deviceFromId);
-            jsonObject.put("destinationId", destinationId);
-            jsonObject.put("data", data);
-            jsonObject.put("forGroup", forGroup);
-            jsonObject.put("destinationStatus", destinationStatus.getValue());
-            jsonObject.put("status", status);
-            jsonObject.put("createdAt", simpleDateFormat.format(createdAt));
-            jsonObject.put("sendedAt", simpleDateFormat.format(sentAt));
-            jsonObject.put("receivedAt", receivedAt == null?null: simpleDateFormat.format(receivedAt));
-            return jsonObject.toString(4);
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                JSONObject jsonObject= new JSONObject();
+                try {
+                    if(id != null) {
+                        jsonObject.put("id", id);
+                    }
+                    jsonObject.put("messageType", messageType);
+                    jsonObject.put("deviceFromId", deviceFromId);
+                    jsonObject.put("destinationId", destinationId);
+                    jsonObject.put("data", data);
+                    jsonObject.put("forGroup", forGroup);
+                    jsonObject.put("destinationStatus", destinationState.getValue());
+                    jsonObject.put("status", status);
+                    jsonObject.put("createdAt", simpleDateFormat.format(createdAt));
+                    jsonObject.put("sentAt", simpleDateFormat.format(sentAt));
+                    jsonObject.put("receivedAt", receivedAt == null?null: simpleDateFormat.format(receivedAt));
+                    return jsonObject.toString(4);
+                } catch (JSONException e) {
+                    // TODO Auto-generated catch block
             e.printStackTrace();
             return "";
         }
@@ -119,17 +119,17 @@ public class MessageEntity {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         try {
             String id = jsonObject.getString("id");
-            int messageTypeId = jsonObject.getInt("messageTypeId");
+            int messageType = jsonObject.getInt("messageType");
             String deviceFromId = jsonObject.getString("deviceFromId");
             String destinationId = jsonObject.getString("destinationId");
             String data = jsonObject.getString("data");
             int forGroup = jsonObject.getInt("forGroup");
-            DestinationStatus destinationStatus = DestinationStatus.setValue(jsonObject.getInt("destinationStatus"));
+            DestinationState destinationState = DestinationState.setValue(jsonObject.getInt("destinationStatus"));
             int status = jsonObject.getInt("status");
             Date createdAt = simpleDateFormat.parse(jsonObject.getString("createdAt"));
             Date sendedAt = simpleDateFormat.parse( jsonObject.getString("sendedAt"));
             Date receivedAt = jsonObject.has("receivedAt")? simpleDateFormat.parse( jsonObject.getString("receivedAt")):null;
-            return new MessageEntity(id, messageTypeId, deviceFromId, destinationId, data, forGroup, destinationStatus, status, createdAt, sendedAt, receivedAt);
+            return new MessageEntity(id, messageType, deviceFromId, destinationId, data, forGroup, destinationState, status, createdAt, sendedAt, receivedAt);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -142,20 +142,21 @@ public class MessageEntity {
         return deviceFromId + ":" + data;
     }
 
-    public enum DestinationStatus {
-        Sent(0),
-        Received(1),
-        Read(2);
+    public enum DestinationState {
+        Create(0),
+        Sent(1),
+        Received(2),
+        Read(3);
 
         private int value;
-        DestinationStatus(int value) {
+        DestinationState(int value) {
             this.value = value;
         }
 
         public int getValue() {
             return value;
         }
-        public static DestinationStatus setValue(int value) throws Exception {
+        public static DestinationState setValue(int value) throws Exception {
             switch (value){
                 case 0:
                     return Sent;

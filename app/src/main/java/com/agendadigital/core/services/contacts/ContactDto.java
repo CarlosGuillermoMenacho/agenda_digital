@@ -30,8 +30,8 @@ public class ContactDto {
             this.userType = userType;
         }
 
-        @Override
-        public String toString() {
+
+        public String toJSON() {
             JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put("userId", userId);

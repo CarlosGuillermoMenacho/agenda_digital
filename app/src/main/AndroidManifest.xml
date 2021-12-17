@@ -26,7 +26,7 @@
         android:theme="@style/Theme.MyApp"
         android:windowSoftInputMode="stateHidden"
         tools:targetApi="n">
-        <activity android:name=".MainActivity2">
+        <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

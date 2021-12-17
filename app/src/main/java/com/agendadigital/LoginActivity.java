@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,8 +23,13 @@ import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.User;
 import com.agendadigital.clases.Usuarios;
+import com.agendadigital.core.services.login.UserDto;
+import com.agendadigital.core.shared.infrastructure.Firebase;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,7 +38,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity2 extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
+
+    private final String TAG = "LoginActivity";
     private EditText ed_codigo, ed_clave;
     private Button btn_iniciar_sesion,
                    btn_cancelar_sesion,
@@ -43,6 +51,7 @@ public class MainActivity2 extends AppCompatActivity {
     private TextView tv_title;
     private User.UserType userType;
     private AdminSQLite adm;
+    private Firebase firebase;
 
 
     @Override
@@ -58,7 +67,7 @@ public class MainActivity2 extends AppCompatActivity {
         ed_codigo = findViewById(R.id.editText_codigo);
         ed_clave = findViewById(R.id.editText_clave);
         tv_title = findViewById(R.id.textView2);
-
+        firebase = Firebase.getInstance();
         btn_iniciar_sesion.setOnClickListener(v -> {
            String clave = ed_clave.getText().toString();
            String codigo = ed_codigo.getText().toString();
@@ -107,7 +116,7 @@ public class MainActivity2 extends AppCompatActivity {
                 habilitar_tutor();
                 break;
             case Student:
-                 habilitar_alumno();
+                habilitar_alumno();
                 break;
             case Staff:
                 habilitar_administrador();
@@ -129,7 +138,7 @@ public class MainActivity2 extends AppCompatActivity {
 
     private void habilitar_director() {
         if (existe_director()) {
-            final ProgressDialog progressDialog = new ProgressDialog(MainActivity2.this);
+            final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
             progressDialog.setMessage("Validando...");
             progressDialog.setCancelable(false);
             progressDialog.setIndeterminate(false);
@@ -139,7 +148,7 @@ public class MainActivity2 extends AppCompatActivity {
                 progressDialog.dismiss();
                 try {
                     ArrayList<Colegio> listacolegios = new ArrayList<>();
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity2.this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                     JSONObject jsonObject = new JSONObject(response);
                     String status = jsonObject.getString("status");
                     if (status.equals("ok")) {
@@ -181,13 +190,7 @@ public class MainActivity2 extends AppCompatActivity {
                         obtenerCursos(listacolegios);
                         builder.setMessage("Se habilitó exitosamente...");
                         builder.setPositiveButton("Aceptar", (dialog, which) -> {
-                            Usuarios u = new Usuarios(getApplicationContext());
-                            adm.userActivo(u.getUsuarios().get(0).getCodigo(),u.getUsuarios().get(0).getTipo());
-                            Intent filter = new Intent("restarSockets");
-                            getApplication().sendBroadcast(filter);
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                            intent.putExtra("restartService","1");
-                            startActivity(intent);
+                            redirectToMainActivity();
                         });
                     } else {
                         builder.setMessage("El usuario no existe...");
@@ -210,6 +213,7 @@ public class MainActivity2 extends AppCompatActivity {
                     Map<String, String> params = new HashMap<>();
                     params.put("codigo", ed_codigo.getText().toString());
                     params.put("clave", ed_clave.getText().toString());
+                    params.put("token", firebase.getToken());
                     return params;
                 }
             };
@@ -217,7 +221,7 @@ public class MainActivity2 extends AppCompatActivity {
             stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
             MySingleton.getInstance(getApplicationContext()).addToRequest(stringRequest);
         }else{
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity2.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
             builder.setMessage("El usuario ya se encuentra habilitado en este dispositivo...");
             builder.setPositiveButton("Aceptar", (dialog, which) -> {
 
@@ -281,7 +285,7 @@ public class MainActivity2 extends AppCompatActivity {
 
     private void habilitar_docente() {
         if (existe_docente()) {
-            final ProgressDialog progressDialog = new ProgressDialog(MainActivity2.this);
+            final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
             progressDialog.setMessage("Validando...");
             progressDialog.setCancelable(false);
             progressDialog.setIndeterminate(false);
@@ -290,7 +294,7 @@ public class MainActivity2 extends AppCompatActivity {
             StringRequest stringRequest = new StringRequest(Request.Method.POST, ConstantsGlobals.url + "/habilitar.php?op=profesor", response -> {
                 progressDialog.dismiss();
                 try {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity2.this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                     JSONObject jsonObject = new JSONObject(response);
                     String status = jsonObject.getString("status");
                     if (status.equals("ok")) {
@@ -339,13 +343,7 @@ public class MainActivity2 extends AppCompatActivity {
 
                         builder.setMessage("Se ha habilitado exitosamente...");
                         builder.setPositiveButton("Aceptar", (dialog, which) -> {
-                            Usuarios u = new Usuarios(getApplicationContext());
-                            adm.userActivo(u.getUsuarios().get(0).getCodigo(),u.getUsuarios().get(0).getTipo());
-                            Intent filter = new Intent("restarSockets");
-                            getApplication().sendBroadcast(filter);
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                            intent.putExtra("restartService","1");
-                            startActivity(intent);
+                             redirectToMainActivity();
                         });
                     } else {
                         builder.setMessage("El usuario no existe...");
@@ -368,6 +366,7 @@ public class MainActivity2 extends AppCompatActivity {
                     Map<String,String> header = new HashMap<>();
                     header.put("codigo",ed_codigo.getText().toString());
                     header.put("clave",ed_clave.getText().toString());
+                    header.put("token", firebase.getToken());
                     return header;
                 }
             };
@@ -376,7 +375,7 @@ public class MainActivity2 extends AppCompatActivity {
             MySingleton.getInstance(getApplicationContext()).addToRequest(stringRequest);
 
         }else{
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity2.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
             builder.setMessage("El usuario ya se encuentra habilitado en este dispositivo...");
             builder.setPositiveButton("Aceptar", (dialog, which) -> {
 
@@ -462,7 +461,7 @@ public class MainActivity2 extends AppCompatActivity {
 
     private void habilitar_administrador() {
         if (existe_administrador()) {
-            final ProgressDialog progressDialog = new ProgressDialog(MainActivity2.this);
+            final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
             progressDialog.setMessage("Validando...");
             progressDialog.setCancelable(false);
             progressDialog.setIndeterminate(false);
@@ -471,7 +470,7 @@ public class MainActivity2 extends AppCompatActivity {
             StringRequest stringRequest = new StringRequest(Request.Method.POST, ConstantsGlobals.url + "/habilitar.php?op=adm", response -> {
                 progressDialog.dismiss();
                 try {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity2.this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                     JSONObject jsonObject = new JSONObject(response);
                     String status = jsonObject.getString("status");
                     if (status.equals("ok")) {
@@ -502,13 +501,7 @@ public class MainActivity2 extends AppCompatActivity {
 
                         builder.setMessage("Se habilitó exitosamente...");
                         builder.setPositiveButton("Aceptar", (dialog, which) -> {
-                            Usuarios u = new Usuarios(getApplicationContext());
-                            adm.userActivo(u.getUsuarios().get(0).getCodigo(),u.getUsuarios().get(0).getTipo());
-                            Intent filter = new Intent("restarSockets");
-                            getApplication().sendBroadcast(filter);
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                            intent.putExtra("restartService","1");
-                            startActivity(intent);
+                            redirectToMainActivity();
                         });
                     } else {
                         builder.setMessage("El usuario no existe...");
@@ -531,6 +524,7 @@ public class MainActivity2 extends AppCompatActivity {
                     Map<String, String> params = new HashMap<>();
                     params.put("codigo", ed_codigo.getText().toString());
                     params.put("clave", ed_clave.getText().toString());
+                    params.put("token", firebase.getToken());
                     return params;
                 }
             };
@@ -538,7 +532,7 @@ public class MainActivity2 extends AppCompatActivity {
             stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
             MySingleton.getInstance(getApplicationContext()).addToRequest(stringRequest);
         }else{
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity2.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
             builder.setMessage("El usuario ya se encuentra habilitado en este dispositivo...");
             builder.setPositiveButton("Aceptar", (dialog, which) -> {
 
@@ -565,7 +559,7 @@ public class MainActivity2 extends AppCompatActivity {
 
     private void habilitar_alumno() {
         if(existe_Alumn()){
-            final ProgressDialog progressDialog = new ProgressDialog(MainActivity2.this);
+            final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
             progressDialog.setMessage("Validando...");
             progressDialog.setCancelable(false);
             progressDialog.setIndeterminate(false);
@@ -574,7 +568,7 @@ public class MainActivity2 extends AppCompatActivity {
             StringRequest stringRequest = new StringRequest(Request.Method.POST, ConstantsGlobals.url + "/habilitar.php?op=est", response -> {
                 progressDialog.dismiss();
                 try {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity2.this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                     JSONObject jsonObject = new JSONObject(response);
                     String status = jsonObject.getString("status");
                     if (status.equals("ok")) {
@@ -617,13 +611,9 @@ public class MainActivity2 extends AppCompatActivity {
                     } else {
                         builder.setMessage("El usuario no existe...");
                         builder.setPositiveButton("Aceptar", (dialog, which) -> {
-                            Usuarios u = new Usuarios(getApplicationContext());
-                            adm.userActivo(u.getUsuarios().get(0).getCodigo(),u.getUsuarios().get(0).getTipo());
-                            Intent filter = new Intent("restarSockets");
-                            getApplication().sendBroadcast(filter);
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                            intent.putExtra("restartService","1");
-                            startActivity(intent);
+                            redirectToMainActivity();
+
+
                         });
                     }
                     builder.show();
@@ -641,6 +631,7 @@ public class MainActivity2 extends AppCompatActivity {
                     Map<String, String> params = new HashMap<>();
                     params.put("codigo", ed_codigo.getText().toString());
                     params.put("clave", ed_clave.getText().toString());
+                    params.put("token", firebase.getToken());
                     return params;
                 }
             };
@@ -648,7 +639,7 @@ public class MainActivity2 extends AppCompatActivity {
             stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
             MySingleton.getInstance(getApplicationContext()).addToRequest(stringRequest);
         }else{
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity2.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
             builder.setMessage("El usuario ya se encuentra habilitado en este dispositivo...");
             builder.setPositiveButton("Aceptar", (dialog, which) -> {
                 Usuarios u = new Usuarios(getApplicationContext());
@@ -669,9 +660,9 @@ public class MainActivity2 extends AppCompatActivity {
         return !cursor.moveToFirst();
     }
 
-    private void habilitar_tutor() {
-        if (existe()){
-            final ProgressDialog progressDialog = new ProgressDialog(MainActivity2.this);
+    private boolean habilitar_tutor() {
+        if (existe()) {
+            final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
             progressDialog.setMessage("Validando...");
             progressDialog.setCancelable(false);
             progressDialog.setIndeterminate(false);
@@ -679,7 +670,7 @@ public class MainActivity2 extends AppCompatActivity {
             StringRequest stringRequest = new StringRequest(Request.Method.POST, ConstantsGlobals.url+ "/habilitar.php?op=tutor", response -> {
                 progressDialog.dismiss();
                 try {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity2.this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                     JSONObject jsonObject = new JSONObject(response);
                     String status = jsonObject.getString("status");
                     if (status.equals("ok")) {
@@ -731,13 +722,8 @@ public class MainActivity2 extends AppCompatActivity {
                         obtenerMaterias(codAlumnos,codigo);
                         builder.setMessage("Se habilitó exitosamente...");
                         builder.setPositiveButton("Aceptar", (dialog, which) -> {
-                            Usuarios u = new Usuarios(getApplicationContext());
-                            adm.userActivo(u.getUsuarios().get(0).getCodigo(),u.getUsuarios().get(0).getTipo());
-                            Intent filter = new Intent("restarSockets");
-                            getApplication().sendBroadcast(filter);
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                            intent.putExtra("restartService","1");
-                            startActivity(intent);
+
+                            redirectToMainActivity();
                         });
                     } else {
                         builder.setMessage("El usuario NO existe...");
@@ -746,6 +732,7 @@ public class MainActivity2 extends AppCompatActivity {
                         });
                     }
                     builder.show();
+
                 } catch (JSONException e) {
                     Toast.makeText(getApplicationContext(), "Error al procesar los datos...", Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
@@ -759,13 +746,14 @@ public class MainActivity2 extends AppCompatActivity {
                     Map<String, String> params = new HashMap<>();
                     params.put("cedula", ed_codigo.getText().toString());
                     params.put("telefono", ed_clave.getText().toString());
+                    params.put("token", firebase.getToken());
                     return params;
                 }
             };
             stringRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
             MySingleton.getInstance(getApplicationContext()).addToRequest(stringRequest);
         }else{
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity2.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
             builder.setMessage("El usuario ya se encuentra habilitado en este dispositivo...");
             builder.setPositiveButton("Aceptar", (dialog, which) -> {
                 Intent intent = new Intent(getApplicationContext(),MainActivity.class);
@@ -773,7 +761,9 @@ public class MainActivity2 extends AppCompatActivity {
 
             });
             builder.show();
+            return true;
         }
+        return true;
     }
 
     private boolean existealu(int cod_alu) {
@@ -893,6 +883,44 @@ public class MainActivity2 extends AppCompatActivity {
                 visivility_form(View.VISIBLE);
                 break;
         }
+    }
+
+    private void redirectToMainActivity(){
+        UserDto.LoginUserRequest loginUserRequest = new UserDto.LoginUserRequest(Globals.user.getCodigo(), Globals.user.getTipo().getValue(), firebase.getToken());
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("token", new JSONObject(loginUserRequest.toString()));
+
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,ConstantsGlobals.urlChatServer + "/token", jsonObject, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        JSONObject tokenResponse = response.getJSONObject("UserToken");
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.d(TAG, "onResponse: " + response);
+                }
+
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.d(TAG, "onErrorResponse: " + error.getMessage());
+                }
+            });
+            jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            MySingleton.getInstance(getApplicationContext()).addToRequest(jsonObjectRequest);
+        }catch (Exception e) {
+            Log.d(TAG, "Error: " + e.getMessage());
+        }
+        Usuarios u = new Usuarios(getApplicationContext());
+        adm.userActivo(u.getUsuarios().get(0).getCodigo(),u.getUsuarios().get(0).getTipo());
+        Intent filter = new Intent("restarSockets");
+        getApplication().sendBroadcast(filter);
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.putExtra("restartService","1");
+        startActivity(intent);
     }
 
     private void visivility_form(int visible) {

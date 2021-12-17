@@ -3,7 +3,6 @@ package com.agendadigital;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,7 +13,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,7 +39,6 @@ import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.User;
 import com.agendadigital.clases.Usuarios;
-import com.agendadigital.core.shared.infrastructure.Firebase;
 import com.agendadigital.services.ProcessMainClass;
 import com.agendadigital.services.restarter.RestartServiceBroadcastReceiver;
 import com.google.android.material.navigation.NavigationView;
@@ -112,19 +109,19 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
     private void deleteItem() {
 
         switch (codigos.get(0)[1]) {
-            case "tutor":
+            case "Tutor":
                 adm.deleteTutor(codigos.get(0)[0]);
                 break;
-            case "profesor":
+            case "Teacher":
                 adm.deleteProfesor(codigos.get(0)[0]);
                 break;
-            case "estudiante":
+            case "Student":
                 adm.deleteEstudiante(codigos.get(0)[0]);
                 break;
-            case "director":
+            case "Director":
                 adm.deleteDirector(codigos.get(0)[0]);
                 break;
-            case "personal":
+            case "Staff":
                 adm.deletePersonal(codigos.get(0)[0]);
                 break;
         }
@@ -144,31 +141,22 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
             case R.id.sessionStop:
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setMessage("¿Desea eliminar esta cuenta?");
-                builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                builder.setPositiveButton("Si", (dialog, which) -> {
+                    llenarListas();
+                    String codigo = codigos.get(0)[0];
+                    deleteItem();
 
-                        String codigo = codigos.get(0)[0];
-                        deleteItem();
+                    if (codigos.isEmpty()){
+                        Globals.user = null;
 
-                        llenarListas();
-
-                        if (codigos.isEmpty()){
-                            Globals.user = null;
-
-                            Intent intent = new Intent(getApplicationContext(), MainActivity2.class);
-                            intent.putExtra("servicio","1");
-                            startActivity(intent);
-
-
-                        }else if (Globals.user.getCodigo().equals(codigo)){
-                            Globals.user = null;
-                            Intent intent = new Intent(getApplicationContext(), MainActivity2.class);
-                            intent.putExtra("servicio","1");
-                            startActivity(intent);
-
-
-                        }
+                        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                        intent.putExtra("servicio","1");
+                        startActivity(intent);
+                    }else if (Globals.user.getCodigo().equals(codigo)){
+                        Globals.user = null;
+                        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                        intent.putExtra("servicio","1");
+                        startActivity(intent);
                     }
                 });
                 builder.setNegativeButton("No",null);

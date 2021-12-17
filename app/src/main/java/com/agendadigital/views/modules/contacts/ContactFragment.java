@@ -66,6 +66,7 @@ public class ContactFragment extends Fragment {
         contactAdapter = new ContactAdapter();
         rvContactList.setAdapter(contactAdapter);
         try {
+            //contactRepository.deleteAll();
             getContactsFromDatabase();
             if (contactEntityList.size() == 0) {
                 getContactsFromServer();
@@ -97,51 +98,37 @@ public class ContactFragment extends Fragment {
         pbContacts.setVisibility(View.INVISIBLE);
     }
 
-    private void getContactsFromServer() throws UnsupportedEncodingException, JSONException {
+    private void getContactsFromServer() throws JSONException {
 
         JSONObject jsonObject = new JSONObject();
         ContactDto.CreateContactRequest contactRequest = new ContactDto.CreateContactRequest(Globals.user.getCodigo(), Globals.user.getTipo().getValue());
-        jsonObject.put("user", new JSONObject(contactRequest.toString()));
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,ConstantsGlobals.urlChatServer + "/contacts", jsonObject, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    List<ContactDto.CreateContactResponse> contactEntityList = new Gson().fromJson(response.getString("contacts"), new TypeToken<List<ContactDto.CreateContactResponse>>() {
-                    }.getType());
-                    pbContacts.setMax(contactEntityList.size());
-                    int index = 0;
-//                    db.beginTransaction();
-                    pbContacts.setVisibility(View.VISIBLE);
-                    for (ContactDto.CreateContactResponse contact: contactEntityList) {
-                        ContentValues values = new ContentValues();
-                        long rowsInserted = contactRepository.insert(new ContactEntity(contact.getId(), contact.getName(), ContactEntity.ContactType.setValue(contact.getTypeContact())));
-//                        values.put(FeedReaderContract.FeedContact._ID, contact.getId());
-//                        values.put(FeedReaderContract.FeedContact.COL_NAME, contact.getName());
-//                        values.put(FeedReaderContract.FeedContact.COL_TYPE_CONTACT, contact.getTypeContact());
-//                        long rowsInserted = db.insert(FeedReaderContract.FeedContact.TABLE_NAME, null, values);
-                        if(rowsInserted == -1) {
-                            Toast.makeText(viewFragment.getContext(), contact.getName(), Toast.LENGTH_SHORT).show();
-                        }else {
-                            contactAdapter.add(new ContactEntity(contact.getId(), contact.getName(), ContactEntity.ContactType.setValue(contact.getTypeContact())));
-                            pbContacts.setProgress(index++);
-                        }
+        jsonObject.put("user", new JSONObject(contactRequest.toJSON()));
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,ConstantsGlobals.urlChatServer + "/contacts", jsonObject, response -> {
+            Log.d(TAG, "onResponse: " + response);
+            try {
+                List<ContactDto.CreateContactResponse> contactEntityList = new Gson().fromJson(response.getString("contacts"), new TypeToken<List<ContactDto.CreateContactResponse>>() {
+                }.getType());
+                pbContacts.setMax(contactEntityList.size());
+                int index = 0;
+                pbContacts.setVisibility(View.VISIBLE);
+                for (ContactDto.CreateContactResponse contact: contactEntityList) {
+                    long rowsInserted = contactRepository.insert(new ContactEntity(contact.getId(), contact.getName(), ContactEntity.ContactType.setValue(contact.getTypeContact())));
+                    if(rowsInserted == -1) {
+                        Toast.makeText(viewFragment.getContext(), contact.getName(), Toast.LENGTH_SHORT).show();
+                    }else {
+                        contactAdapter.add(new ContactEntity(contact.getId(), contact.getName(), ContactEntity.ContactType.setValue(contact.getTypeContact())));
+                        pbContacts.setProgress(index++);
                     }
-                    pbContacts.setVisibility(View.INVISIBLE);
-                    Toast.makeText(viewFragment.getContext(), "Contactos sincronizados (" + contactEntityList.size() + ")", Toast.LENGTH_SHORT).show();
-
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
-                Log.d(TAG, "onResponse: " + response);
+                pbContacts.setVisibility(View.INVISIBLE);
+                Toast.makeText(viewFragment.getContext(), "Contactos sincronizados (" + contactEntityList.size() + ")", Toast.LENGTH_SHORT).show();
+
+            } catch (Exception e) {
+                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
             }
 
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, "onErrorResponse: " + error.getMessage());
-            }
-        });
+        }, error -> Log.d(TAG, "onErrorResponse: " + error.getMessage()));
 
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);

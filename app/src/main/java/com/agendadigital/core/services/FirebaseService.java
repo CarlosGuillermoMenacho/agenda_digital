@@ -62,14 +62,14 @@ public class FirebaseService extends FirebaseMessagingService {
                 String destinationId = (dataMessage.get("destinationId"));
                 String data = dataMessage.get("data");
                 int forGroup = Integer.valueOf(dataMessage.get("forGroup"));
-                MessageEntity.DestinationStatus destinationStatus = MessageEntity.DestinationStatus.Received;
+                MessageEntity.DestinationState destinationState = MessageEntity.DestinationState.Received;
                 int status = Integer.valueOf(dataMessage.get("status"));
                 Date createdAt = dateFormat.parse(dataMessage.get("createdAt"));
                 Date sendedAt = dateFormat.parse(dataMessage.get("sendedAt"));
                 long receivedAt = System.currentTimeMillis();
                 String notificationBody = dataMessage.get("notificationBody");
 
-                MessageEntity messageEntity = new MessageEntity(id, messageTypeId, deviceFromId, destinationId, data, forGroup, destinationStatus, status, createdAt, sendedAt, new Date(receivedAt));
+                MessageEntity messageEntity = new MessageEntity(id, messageTypeId, deviceFromId, destinationId, data, forGroup, destinationState, status, createdAt, sendedAt, new Date(receivedAt));
                 if (!isAppOnForeground(getApplicationContext())) {
                     showNotification(messageEntity, notificationBody);
                 }
@@ -143,10 +143,10 @@ public class FirebaseService extends FirebaseMessagingService {
                 values.put(FeedReaderContract.FeedMessage.COL_DESTINATION_ID, messageEntity.getDestinationId());
                 values.put(FeedReaderContract.FeedMessage.COL_DATA, messageEntity.getData());
                 values.put(FeedReaderContract.FeedMessage.COL_FOR_GROUP, messageEntity.getForGroup());
-                values.put(FeedReaderContract.FeedMessage.COL_DESTINATION_STATUS, messageEntity.getDestinationStatus().getValue());
+                values.put(FeedReaderContract.FeedMessage.COL_DESTINATION_STATUS, messageEntity.getDestinationState().getValue());
                 values.put(FeedReaderContract.FeedMessage.COL_STATUS, messageEntity.getStatus());
                 values.put(FeedReaderContract.FeedMessage.COL_CREATED_AT, messageEntity.getCreatedAt().getTime());
-                values.put(FeedReaderContract.FeedMessage.COL_SENDED_AT, messageEntity.getSentAt().getTime());
+                values.put(FeedReaderContract.FeedMessage.COL_SENT_AT, messageEntity.getSentAt().getTime());
                 values.put(FeedReaderContract.FeedMessage.COL_RECEIVED_AT, messageEntity.getReceivedAt().getTime());
                 db.insert(FeedReaderContract.FeedMessage.TABLE_NAME, null, values);
         }

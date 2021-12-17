@@ -120,35 +120,6 @@ public class FragmentFormTutor extends Fragment{
                 progressDialog.setIndeterminate(false);
                 progressDialog.show();
 
-                UserDto.LoginUserRequest loginUserRequest = new UserDto.LoginUserRequest(cedula, User.UserType.Tutor.getValue(), firebase.getToken());
-                try {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("token", new JSONObject(loginUserRequest.toString()));
-
-                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,ConstantsGlobals.urlChatServer + "/token", jsonObject, new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                JSONObject tokenResponse = response.getJSONObject("UserToken");
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            Log.d(TAG, "onResponse: " + response);
-                        }
-
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.d(TAG, "onErrorResponse: " + error.getMessage());
-                        }
-                    });
-                    jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                    MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
-                }catch (Exception e) {
-                    Log.d(TAG, "Error: " + e.getMessage());
-                }
-
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, ConstantsGlobals.url+ "/habilitar.php?op=tutor", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {

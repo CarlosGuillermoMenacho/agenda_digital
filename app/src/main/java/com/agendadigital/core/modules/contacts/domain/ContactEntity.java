@@ -46,9 +46,12 @@ public class ContactEntity implements Serializable {
     }
 
     public enum ContactType {
-        Course(1),
-        Teacher(2),
-        Tutor(3);
+        Tutor(1),
+        Student(2),
+        Teacher(3),
+        Director(4),
+        Staff(5),
+        Course(6);
 
         private final int value;
 
@@ -62,11 +65,17 @@ public class ContactEntity implements Serializable {
         public static ContactType setValue(int value) throws Exception {
             switch (value){
                 case 1:
-                    return Course;
-                case 2:
-                    return Teacher;
-                case 3:
                     return Tutor;
+                case 2:
+                    return Student;
+                case 3:
+                    return Teacher;
+                case 4:
+                    return Director;
+                case 5:
+                    return Staff;
+                case 6:
+                    return Course;
                 default:
                     throw new Exception("TypeContact inválido.");
             }

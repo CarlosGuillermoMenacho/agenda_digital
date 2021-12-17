@@ -24,7 +24,7 @@ public class FeedReaderContract {
         public static final String COL_DESTINATION_STATUS = "destinationStatus";
         public static final String COL_STATUS = "status";
         public static final String COL_CREATED_AT = "createdAt";
-        public static final String COL_SENDED_AT = "sendedAt";
+        public static final String COL_SENT_AT = "sentAt";
         public static final String COL_RECEIVED_AT = "receivedAt";
 
         public static final String SQL_CREATE_TABLE =
@@ -38,7 +38,7 @@ public class FeedReaderContract {
                         FeedMessage.COL_DESTINATION_STATUS + " INTEGER," +
                         FeedMessage.COL_STATUS + " INTEGER," +
                         FeedMessage.COL_CREATED_AT + " DATE," +
-                        FeedMessage.COL_SENDED_AT + " DATE," +
+                        FeedMessage.COL_SENT_AT + " DATE," +
                         FeedMessage.COL_RECEIVED_AT + " DATE)"
                 ;
 
@@ -55,7 +55,7 @@ public class FeedReaderContract {
                 FeedMessage.COL_DESTINATION_STATUS,
                 FeedMessage.COL_STATUS,
                 FeedMessage.COL_CREATED_AT,
-                FeedMessage.COL_SENDED_AT,
+                FeedMessage.COL_SENT_AT,
                 FeedMessage.COL_RECEIVED_AT
         };
 
@@ -72,12 +72,12 @@ public class FeedReaderContract {
                 String destinationId = cursor.getString(cursor.getColumnIndexOrThrow(COL_DESTINATION_ID));
                 String data = cursor.getString(cursor.getColumnIndexOrThrow(COL_DATA));
                 int forGroup = cursor.getInt(cursor.getColumnIndexOrThrow(COL_FOR_GROUP));
-                MessageEntity.DestinationStatus destionationStatus = MessageEntity.DestinationStatus.setValue(cursor.getInt(cursor.getColumnIndexOrThrow(COL_DESTINATION_STATUS)));
+                MessageEntity.DestinationState destionationState = MessageEntity.DestinationState.setValue(cursor.getInt(cursor.getColumnIndexOrThrow(COL_DESTINATION_STATUS)));
                 int status = cursor.getInt(cursor.getColumnIndexOrThrow(COL_STATUS));
                 Date createdAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(COL_CREATED_AT)));
-                Date sendedAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(COL_SENDED_AT)));
+                Date sentAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(COL_SENT_AT)));
                 Date receivedAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(COL_RECEIVED_AT)));
-                notificationEntities.add(new MessageEntity(id, messageTypeId, deviceFromId, destinationId, data, forGroup, destionationStatus, status, createdAt, sendedAt, receivedAt));
+                notificationEntities.add(new MessageEntity(id, messageTypeId, deviceFromId, destinationId, data, forGroup, destionationState, status, createdAt, sentAt, receivedAt));
             }
             return notificationEntities;
         }
