@@ -18,11 +18,11 @@ public class AsyncHttpRest {
 //    private static final String BASE_URL = "http://192.168.100.65:3000/";
     private static AsyncHttpClient client = new AsyncHttpClient();
 
-    public static void post(Context context, String url, JSONObject params, AsyncHttpResponseHandler responseHandler) throws UnsupportedEncodingException {
+    public static void post(Context context, String url, JSONObject params, AsyncHttpResponseHandler responseHandler)  {
         StringEntity stringEntity = new StringEntity(params.toString(), "UTF-8");
-        stringEntity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json;charset=utf-8"));
-        client.addHeader("Accept", "application/json");
-        client.addHeader("Content-Type", "application/json;charset=utf-8");
+//        stringEntity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json;charset=utf-8"));
+//        client.addHeader("Accept", "application/json");
+//        client.addHeader("Content-Type", "application/json;charset=utf-8");
 
         client.post(context, getAbsoluteUrl(url), stringEntity,"application/json;charset=utf-8", responseHandler);
         //client.post(context, getAbsoluteUrl(url), stringEntity,"application/json;charset=utf-8", responseHandler);

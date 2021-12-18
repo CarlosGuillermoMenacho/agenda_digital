@@ -1,6 +1,7 @@
 package com.agendadigital.core.services.messages;
 
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
+import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,17 +14,19 @@ public class MessageDto {
     public static class SendMessageRequest {
         private int messageType;
         private String deviceFromId;
+        private int deviceFromType;
         private String destinationId;
-        private int destinationUserType;
+        private int destinationType;
         private String data;
         private int forGroup;
         private Date createdAt;
 
-        public SendMessageRequest(int messageType, String deviceFromId, String destinationId, int destinationUserType, String data, int forGroup, Date createdAt) {
+        public SendMessageRequest(int messageType, String deviceFromId, int deviceFromType, String destinationId, int destinationType, String data, int forGroup, Date createdAt) {
             this.messageType = messageType;
             this.deviceFromId = deviceFromId;
+            this.deviceFromType = deviceFromType;
             this.destinationId = destinationId;
-            this.destinationUserType = destinationUserType;
+            this.destinationType = destinationType;
             this.data = data;
             this.forGroup = forGroup;
             this.createdAt = createdAt;
@@ -45,6 +48,14 @@ public class MessageDto {
             this.deviceFromId = deviceFromId;
         }
 
+        public int getDeviceFromType() {
+            return deviceFromType;
+        }
+
+        public void setDeviceFromType(int deviceFromType) {
+            this.deviceFromType = deviceFromType;
+        }
+
         public String getDestinationId() {
             return destinationId;
         }
@@ -53,12 +64,12 @@ public class MessageDto {
             this.destinationId = destinationId;
         }
 
-        public int getDestinationUserType() {
-            return destinationUserType;
+        public int getDestinationType() {
+            return destinationType;
         }
 
-        public void setDestinationUserType(int destinationUserType) {
-            this.destinationUserType = destinationUserType;
+        public void setDestinationType(int destinationType) {
+            this.destinationType = destinationType;
         }
 
         public String getData() {
@@ -86,16 +97,16 @@ public class MessageDto {
         }
 
         public String toJSON(){
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             JSONObject jsonObject= new JSONObject();
             try {
                 jsonObject.put("messageType", messageType);
                 jsonObject.put("deviceFromId", deviceFromId);
+                jsonObject.put("deviceFromType", deviceFromType);
                 jsonObject.put("destinationId", destinationId);
-                jsonObject.put("destinationUserType", destinationUserType);
+                jsonObject.put("destinationType", destinationType);
                 jsonObject.put("data", data);
                 jsonObject.put("forGroup", forGroup);
-                jsonObject.put("createdAt", simpleDateFormat.format(createdAt));
+                jsonObject.put("createdAt", DateFormatter.format(createdAt));
                 return jsonObject.toString(4);
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
@@ -175,6 +186,14 @@ public class MessageDto {
 
         public void setReceivedAt(String receivedAt) {
             this.receivedAt = receivedAt;
+        }
+
+        public String toJSON() throws JSONException {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", id);
+            jsonObject.put("destinationState", destinationState);
+            jsonObject.put("receivedAt", receivedAt);
+            return jsonObject.toString(4);
         }
     }
 

@@ -2,8 +2,6 @@ package com.agendadigital.core.modules.login.domain;
 
 import android.provider.BaseColumns;
 
-import com.agendadigital.core.shared.domain.database.FeedReaderContract;
-
 public class UserBase implements BaseColumns {
     public static final String TABLE_NAME = "users";
     public static final String COL_NAME = "name";

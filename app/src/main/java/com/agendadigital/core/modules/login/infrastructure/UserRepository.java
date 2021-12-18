@@ -4,15 +4,16 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
+import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.core.modules.login.domain.UserBase;
 import com.agendadigital.core.modules.login.domain.UserEntity;
-import com.agendadigital.core.shared.domain.database.FeedReaderDbHelper;
 
 public class UserRepository {
     private final SQLiteDatabase repository;
 
     public UserRepository(Context context) {
-        repository =new FeedReaderDbHelper(context).getReadableDatabase();
+        repository =new AdminSQLite(context, "dbReader", null, 1).getReadableDatabase();
     }
 
     public long insert(UserEntity newUser) {

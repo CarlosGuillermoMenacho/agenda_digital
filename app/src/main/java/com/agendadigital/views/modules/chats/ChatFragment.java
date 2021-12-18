@@ -14,11 +14,12 @@ import com.agendadigital.clases.Constants;
 import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
+import com.agendadigital.core.modules.messages.domain.MessageBase;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import com.agendadigital.core.modules.messages.infrastructure.MessageRepository;
 import com.agendadigital.core.services.messages.MessageDto;
-import com.agendadigital.core.shared.domain.database.FeedReaderContract;
 import com.agendadigital.core.shared.infrastructure.AsyncHttpRest;
+import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
 import com.agendadigital.views.modules.chats.components.adapters.MessageAdapter;
 import com.agendadigital.views.modules.chats.components.fab.SendFloatingActionButton;
 import com.agendadigital.views.modules.chats.components.observers.MessageObservable;
@@ -29,14 +30,21 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -53,10 +61,8 @@ public class ChatFragment extends Fragment {
     private View view;
     private ContactEntity currentContact;
     private EditText etTextMessageToSend;
-
-    private RecyclerView rvMessages;
     private MessageAdapter messageAdapter;
-    private MessageObservable messageObservable = new MessageObservable();
+    private final MessageObservable messageObservable = new MessageObservable();
     private List<MessageEntity> messageEntityList = new ArrayList<>();
 
     private MessageRepository messageRepository;
@@ -68,8 +74,10 @@ public class ChatFragment extends Fragment {
 
         view = inflater.inflate(R.layout.fragment_chat, container, false);
         Bundle bundle = getArguments();
-        currentContact= (ContactEntity) bundle.getSerializable("contact");
-        ((MainActivity)getActivity()).getSupportActionBar().setTitle(currentContact.toString());
+        if (bundle != null) {
+            currentContact = (ContactEntity) bundle.getSerializable("contact");
+            ((MainActivity) getActivity()).getSupportActionBar().setTitle(currentContact.toString());
+        }
         init();
         initSentButton();
         initRecyclerView();
@@ -83,7 +91,7 @@ public class ChatFragment extends Fragment {
     }
 
     private void initRecyclerView(){
-        rvMessages = view.findViewById(R.id.rvMessagesList);
+        RecyclerView rvMessages = view.findViewById(R.id.rvMessagesList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(view.getContext());
         layoutManager.setStackFromEnd(true);
         rvMessages.setLayoutManager(layoutManager);
@@ -99,6 +107,7 @@ public class ChatFragment extends Fragment {
             if(messagesToConfirm.size() > 0){
                 for (MessageEntity messageToConfirm: messagesToConfirm
                 ) {
+                    messageToConfirm.setDestinationState(MessageEntity.DestinationState.Read);
                     confirmAck(messageToConfirm);
                 }
             }
@@ -122,10 +131,10 @@ public class ChatFragment extends Fragment {
                         @Override
                         public void onNext(MessageEntity messageEntity) {
                             if(messageEntity.getDestinationId().equals(currentUser.getCodigo())){
-                                Log.d(TAG, "onNext: " + messageEntity.toJSON());
                                 try {
+                                    Log.d(TAG, "onNext: " + messageEntity.toJSON());
+                                    messageEntity.setDestinationState(MessageEntity.DestinationState.Read);
                                     confirmAck(messageEntity);
-                                    messageEntity.setDestinationState(MessageEntity.DestinationState.Received);
                                     messageAdapter.add(messageEntity);
                                 } catch (UnsupportedEncodingException | JSONException e) {
                                     e.printStackTrace();
@@ -155,11 +164,12 @@ public class ChatFragment extends Fragment {
         sendFloatingActionButton.setOnClickListener(v -> {
             Date currentTime = new Date(System.currentTimeMillis());
             if(!etTextMessageToSend.getText().toString().trim().isEmpty()) {
-                MessageEntity messageSend = new MessageEntity(
-                        "",
+                MessageEntity messageSend = new MessageEntity("-1",
                         1,
                         currentUser.getCodigo(),
+                        currentUser.getTipo(),
                         currentContact.getId(),
+                        currentContact.getTypeContact(),
                         etTextMessageToSend.getText().toString(),
                         currentContact.getTypeContact() == ContactEntity.ContactType.Course ? 1 : 0,
                         MessageEntity.DestinationState.Create,
@@ -169,62 +179,50 @@ public class ChatFragment extends Fragment {
                         null);
                 JSONObject params = new JSONObject();
                 try {
-                    MessageDto.SendMessageRequest sendMessageRequest = new MessageDto.SendMessageRequest(messageSend.getMessagetypeId()
+                    MessageDto.SendMessageRequest sendMessageRequest = new MessageDto.SendMessageRequest(messageSend.getMessageType()
                             , messageSend.getDeviceFromId()
+                            , messageSend.getDeviceFromType().getValue()
                             , messageSend.getDestinationId()
-                            , currentContact.getTypeContact().getValue()
+                            , messageSend.getDestinationType().getValue()
                             , messageSend.getData(), messageSend.getForGroup(), messageSend.getCreatedAt());
 
                     Log.d(TAG, "MessageSent: " + sendMessageRequest.toJSON());
                     params.put("message", new JSONObject(sendMessageRequest.toJSON()));
 
+                    messageSend.setId(UUID.randomUUID().toString());
+                    messageRepository.insert(messageSend);
+                    messageAdapter.add(messageSend);
+
                     JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/send-message", params, response -> {
                         try {
-                            JSONObject messageResponse = response.getJSONObject("message");
+                            MessageDto.SendMessageResponse sendMessageResponse = new Gson().fromJson(response.getString("message"),
+                                                                                                    new TypeToken<MessageDto.SendMessageResponse>() {}
+                                                                                                        .getType());
 
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(MessageBase._ID, sendMessageResponse.getId());
+                            contentValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Sent.getValue());
+                            contentValues.put(MessageBase.COL_SENT_AT, currentTime.getTime());
+                            messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { messageSend.getId() });
+
+                            messageSend.setDestinationState(MessageEntity.DestinationState.Sent);
+                            messageAdapter.updateDestinationState(messageSend);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                         Log.d(TAG, "onResponse: " + response);
                     }, error -> {
                         String body;
-                        //get status code here
                         String statusCode = String.valueOf(error.networkResponse.statusCode);
-                        //get response body and parse with appropriate encoding
                         if(error.networkResponse.data!=null) {
                             body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
                             Log.d(TAG, "onErrorResponse: " + body);
                             Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
-
                         }
                     });
                     jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                     MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
 
-//                        AsyncHttpRest.post(getContext(), "/send-message", params, new JsonHttpResponseHandler() {
-//                            @Override
-//                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-//                                super.onSuccess(statusCode, headers, response);
-//                                Log.d(TAG, "onSuccess: JSONObject" + response + "->" + messageSend.toJSON());
-//                                try {
-//                                    messageSend.setId(response.getString("id"));
-//                                } catch (JSONException e) {
-//                                    e.printStackTrace();
-//                                }
-//                                Log.d(TAG, "onSuccessReceive: " + messageSend.toJSON());
-//                                long id = messageRepository.insert(messageSend);
-//                                messageAdapter.add(messageSend);
-//                                rvMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
-//                                messageAdapter.notifyDataSetChanged();
-//                            }
-//
-//                            @Override
-//                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-//                                super.onFailure(statusCode, headers, responseString, throwable);
-//                                Log.d(TAG, "onFailure:" + throwable + "->" + responseString);
-//                                Toast.makeText(getContext(), responseString, Toast.LENGTH_SHORT).show();
-//                            }
-//                        });
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -235,22 +233,40 @@ public class ChatFragment extends Fragment {
 
     private void confirmAck(MessageEntity message) throws UnsupportedEncodingException, JSONException {
         JSONObject params = new JSONObject();
-        params.put("message", message.toJSON());
-        AsyncHttpRest.post(getContext(), "/confirm-message", params, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                super.onSuccess(statusCode, headers, response);
-                ContentValues contentValues = new ContentValues();
-                contentValues.put("destinationStatus", MessageEntity.DestinationState.Read.getValue());
-                messageRepository.update(contentValues, FeedReaderContract.FeedMessage._ID + "= ?", new String[] { message.getId() });
-                Log.d(TAG, "onSuccess: JSONObject" + response);
-            }
+        MessageDto.ConfirmMessageRequest confirmMessageRequest = new MessageDto.ConfirmMessageRequest(message.getId(), message.getDestinationState().getValue(), DateFormatter.format(message.getReceivedAt()));
+        params.put("message", new JSONObject(confirmMessageRequest.toJSON()));
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
-                Log.d(TAG, "onFailure:" + throwable);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/send-message", params, response -> {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Read.getValue());
+            messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { message.getId() });
+        }, error -> {
+            String body;
+            String statusCode = String.valueOf(error.networkResponse.statusCode);
+            if(error.networkResponse.data!=null) {
+                body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
+                Log.d(TAG, "onErrorResponse: " + body);
+                Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
             }
         });
+        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
+
+//        AsyncHttpRest.post(getContext(), "/confirm-message", params, new JsonHttpResponseHandler() {
+//            @Override
+//            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+//                super.onSuccess(statusCode, headers, response);
+//                ContentValues contentValues = new ContentValues();
+//                contentValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Read.getValue());
+//                messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { message.getId() });
+//                Log.d(TAG, "onSuccess: JSONObject" + response);
+//            }
+//
+//            @Override
+//            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+//                super.onFailure(statusCode, headers, responseString, throwable);
+//                Log.d(TAG, "onFailure:" + throwable);
+//            }
+//        });
     }
 }

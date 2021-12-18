@@ -49,7 +49,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-        holder.set(messageEntities.get(position));
+        holder.set(messageEntities.get(position), getItemViewType(position));
     }
 
     @Override
@@ -67,5 +67,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
     public void set(List<MessageEntity> notificationEntities) {
         this.messageEntities = notificationEntities;
         notifyDataSetChanged();
+    }
+
+    public void updateDestinationState(MessageEntity messageSend) {
+        for (MessageEntity message: this.messageEntities) {
+            if (message.getId().equals(messageSend.getId())) {
+                message.setDestinationState(messageSend.getDestinationState());
+                notifyDataSetChanged();
+                break;
+            }
+        }
     }
 }
