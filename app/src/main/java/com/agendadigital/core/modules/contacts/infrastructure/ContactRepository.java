@@ -4,11 +4,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.core.modules.contacts.domain.ContactBase;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
+import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ContactRepository {
@@ -22,7 +23,10 @@ public class ContactRepository {
         ContentValues values = new ContentValues();
         values.put(ContactBase._ID, contactEntity.getId());
         values.put(ContactBase.COL_NAME, contactEntity.getName());
-        values.put(ContactBase.COL_TYPE_CONTACT, contactEntity.getTypeContact().getValue());
+        values.put(ContactBase.COL_TYPE_CONTACT, contactEntity.getContactType().getValue());
+        values.put(ContactBase.COL_UNREAD_MESSAGES, contactEntity.getUnreadMessages());
+        values.put(ContactBase.COL_LAST_MESSAGE_DATA, contactEntity.getLastMessageData());
+        values.put(ContactBase.COL_LAST_MESSAGE_RECEIVED_AT, contactEntity.getLastMessageReceived() == null?null: contactEntity.getLastMessageReceived().getTime());
         return repository.insert(ContactBase.TABLE_NAME, null, values);
     }
 
@@ -42,7 +46,10 @@ public class ContactRepository {
             String name = cursor.getString(cursor.getColumnIndexOrThrow(ContactBase.COL_NAME));
             int typeContact = cursor.getInt(cursor.getColumnIndexOrThrow(ContactBase.COL_TYPE_CONTACT));
             ContactEntity.ContactType contactTypeEnum = ContactEntity.ContactType.setValue(typeContact);
-            contactEntityList.add(new ContactEntity(id, name, contactTypeEnum));
+            int unreadMessages = cursor.getInt(cursor.getColumnIndexOrThrow(ContactBase.COL_UNREAD_MESSAGES));
+            String lastMessageData = cursor.getString(cursor.getColumnIndexOrThrow(ContactBase.COL_LAST_MESSAGE_DATA));
+            Date lastMessageReceivedAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(ContactBase.COL_LAST_MESSAGE_RECEIVED_AT)));
+            contactEntityList.add(new ContactEntity(id, name, contactTypeEnum, unreadMessages, lastMessageData, lastMessageReceivedAt));
         }
         cursor.close();
         return contactEntityList;
@@ -59,9 +66,33 @@ public class ContactRepository {
             String name = cursor.getString(cursor.getColumnIndexOrThrow(ContactBase.COL_NAME));
             int contactType = cursor.getInt(cursor.getColumnIndexOrThrow(ContactBase.COL_TYPE_CONTACT));
             ContactEntity.ContactType contactTypeEnum = ContactEntity.ContactType.setValue(contactType);
-            contactEntity = new ContactEntity(id, name, contactTypeEnum);
+            int unreadMessages = cursor.getInt(cursor.getColumnIndexOrThrow(ContactBase.COL_UNREAD_MESSAGES));
+            String lastMessageData = cursor.getString(cursor.getColumnIndexOrThrow(ContactBase.COL_LAST_MESSAGE_DATA));
+            Date lastMessageReceivedAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(ContactBase.COL_LAST_MESSAGE_RECEIVED_AT)));
+            contactEntity = new ContactEntity(id, name, contactTypeEnum, unreadMessages, lastMessageData, lastMessageReceivedAt);
         }
         cursor.close();
         return contactEntity;
+    }
+
+    public ContactEntity updateUnreadMessagesAndLastMessage(MessageEntity messageEntity) throws Exception {
+        ContactEntity contactEntity = findByIdAndType(messageEntity.getDeviceFromId(), messageEntity.getDeviceFromType().getValue());
+        contactEntity.setUnreadMessages(contactEntity.getUnreadMessages() + 1);
+        contactEntity.setLastMessageData(messageEntity.getData());
+        contactEntity.setLastMessageReceived(messageEntity.getReceivedAt());
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ContactBase.COL_UNREAD_MESSAGES, contactEntity.getUnreadMessages());
+        contentValues.put(ContactBase.COL_LAST_MESSAGE_DATA, messageEntity.getData());
+        contentValues.put(ContactBase.COL_LAST_MESSAGE_RECEIVED_AT, messageEntity.getReceivedAt().getTime());
+        repository.update(ContactBase.TABLE_NAME, contentValues, ContactBase._ID + "= ? and " + ContactBase.COL_TYPE_CONTACT + "=?",
+                new String[] { messageEntity.getDeviceFromId(), String.valueOf(messageEntity.getDeviceFromType().getValue()) });
+        return contactEntity;
+    }
+
+    public void resetUnreadMessages(ContactEntity currentContact) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ContactBase.COL_UNREAD_MESSAGES, 0);
+        repository.update(ContactBase.TABLE_NAME, contentValues, ContactBase._ID + "= ? and " + ContactBase.COL_TYPE_CONTACT + "=?",
+                new String[] { currentContact.getId(), String.valueOf(currentContact.getContactType().getValue()) });
     }
 }

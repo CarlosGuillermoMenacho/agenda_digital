@@ -47,12 +47,12 @@ public class ContactDto {
     public static class CreateContactResponse {
         private String id;
         private String name;
-        private int typeContact;
+        private int contactType;
 
-        public CreateContactResponse(String id, String name, int typeContact) {
+        public CreateContactResponse(String id, String name, int contactType) {
             this.id = id;
             this.name = name;
-            this.typeContact = typeContact;
+            this.contactType = contactType;
         }
 
         public String getId() {
@@ -71,12 +71,12 @@ public class ContactDto {
             this.name = name;
         }
 
-        public int getTypeContact() {
-            return typeContact;
+        public int getContactType() {
+            return contactType;
         }
 
-        public void setTypeContact(int typeContact) {
-            this.typeContact = typeContact;
+        public void setContactType(int contactType) {
+            this.contactType = contactType;
         }
     }
 }

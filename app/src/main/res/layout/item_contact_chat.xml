@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/size_item_alumno"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvPhoto"
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        app:cardCornerRadius="100dp">
+
+        <ImageView
+            android:id="@+id/ivPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_user"
+            android:layout_gravity="center"/>
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/tvContactName"
+        android:layout_width="0dp"
+        android:layout_height="24dp"
+        android:layout_marginRight="14dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:layout_toStartOf="@id/tvContactLastReceivedMessage"
+        android:layout_toEndOf="@id/cvPhoto" />
+
+    <TextView
+        android:id="@+id/tvContactLastMessage"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:layout_below="@id/tvContactName"
+        android:layout_toStartOf="@id/tvContactLastReceivedMessage"
+        android:layout_toEndOf="@id/cvPhoto"
+        android:ellipsize="end"
+        android:maxLines="1" />
+
+    <TextView
+        android:id="@+id/tvContactType"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:layout_below="@id/tvContactLastMessage"
+        android:layout_toStartOf="@id/tvContactLastReceivedMessage"
+        android:layout_toEndOf="@id/cvPhoto" />
+
+    <TextView
+        android:id="@+id/tvContactLastReceivedMessage"
+        android:layout_width="48dp"
+        android:layout_height="24dp"
+        android:layout_alignParentEnd="true"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvContactUnreadMessages"
+        android:layout_width="36dp"
+        android:layout_height="match_parent"
+        app:cardCornerRadius="25dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="7dp"
+        android:layout_marginLeft="7dp"
+        android:foregroundGravity="center"
+        android:layout_below="@id/tvContactLastReceivedMessage"
+        android:layout_alignParentEnd="true"
+        android:layout_centerInParent="true"
+        android:layout_toStartOf="@id/tvContactLastMessage">
+        <TextView
+            android:id="@+id/tvContactUnreadMessages"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:background="@color/red"
+            android:textColor="@android:color/white"/>
+    </androidx.cardview.widget.CardView>
+</RelativeLayout>

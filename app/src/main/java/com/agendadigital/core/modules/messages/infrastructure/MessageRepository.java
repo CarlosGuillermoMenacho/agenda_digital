@@ -40,6 +40,34 @@ public class MessageRepository {
         return repository.insert(MessageBase.TABLE_NAME, null, values);
     }
 
+    public MessageEntity findLastMessageReceivedByContact(ContactEntity contactEntity) throws Exception {
+        Cursor cursor = repository.query(MessageBase.TABLE_NAME,
+                                        MessageBase.SQL_SELECT_ALL,
+                                        MessageBase.COL_DEVICE_FROM_ID + "=? and " + MessageBase.COL_DEVICE_FROM_TYPE + "=?",
+                new String[] {contactEntity.getId(), String.valueOf(contactEntity.getContactType().getValue())},
+                null,
+                null, MessageBase.sortOrder);
+        MessageEntity messageEntity = null;
+        if (cursor.moveToFirst()){
+            String id = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase._ID));
+            int messageTypeId = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_MESSAGE_TYPE));
+            String deviceFromId = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DEVICE_FROM_ID));
+            int deviceFromType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DEVICE_FROM_TYPE));
+            String destinationId = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_ID));
+            int destinationType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_TYPE));
+            String data = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DATA));
+            int forGroup = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_FOR_GROUP));
+            MessageEntity.DestinationState destionationState = MessageEntity.DestinationState.setValue(cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_STATE)));
+            int status = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_STATE));
+            Date createdAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_CREATED_AT)));
+            Date sentAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_SENT_AT)));
+            Date receivedAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_RECEIVED_AT)));
+            messageEntity = new MessageEntity(id, messageTypeId, deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, forGroup, destionationState, status, createdAt, sentAt, receivedAt);
+        }
+        cursor.close();
+        return messageEntity;
+    }
+
     public List<MessageEntity> findAll(String contactId) throws Exception {
         Cursor cursor = repository.query(
                 MessageBase.TABLE_NAME,   // The table to query

@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="default_input_hint">Escribe algo</string>
+    <string name="default_input_hint">Mensaje</string>
     <string name="action_lightTheme">Tema claro(Selecionado)</string>
     <string name="action_darkTheme">Tema Oscuro</string>
 
@@ -107,5 +107,7 @@
     <string name="codigo_a" tools:ignore="TypographyEllipsis">Código...</string>
     <string name="inicia_como">Iniciar sesión como: </string>
     <string name="cerrar_sesi_n">Cerrar Sesión</string>
+    <string name="attachFile">File</string>
+    <string name="attachImage">Image</string>
 
 </resources>

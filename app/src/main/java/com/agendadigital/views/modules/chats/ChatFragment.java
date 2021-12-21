@@ -4,9 +4,12 @@ import android.content.ContentValues;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
+
 import android.widget.Toast;
 import com.agendadigital.MainActivity;
 import com.agendadigital.R;
@@ -14,11 +17,11 @@ import com.agendadigital.clases.Constants;
 import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
+import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.core.modules.messages.domain.MessageBase;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import com.agendadigital.core.modules.messages.infrastructure.MessageRepository;
 import com.agendadigital.core.services.messages.MessageDto;
-import com.agendadigital.core.shared.infrastructure.AsyncHttpRest;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
 import com.agendadigital.views.modules.chats.components.adapters.MessageAdapter;
 import com.agendadigital.views.modules.chats.components.fab.SendFloatingActionButton;
@@ -27,28 +30,24 @@ import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.User;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.loopj.android.http.JsonHttpResponseHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
-
+import androidx.annotation.NonNull;
+import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.appcompat.view.menu.MenuPopupHelper;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import cz.msebera.android.httpclient.Header;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -61,6 +60,7 @@ public class ChatFragment extends Fragment {
     private View view;
     private ContactEntity currentContact;
     private EditText etTextMessageToSend;
+    private ImageButton btAttach;
     private MessageAdapter messageAdapter;
     private final MessageObservable messageObservable = new MessageObservable();
     private List<MessageEntity> messageEntityList = new ArrayList<>();
@@ -76,20 +76,47 @@ public class ChatFragment extends Fragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             currentContact = (ContactEntity) bundle.getSerializable("contact");
+            new ContactRepository(view.getContext()).resetUnreadMessages(currentContact);
             ((MainActivity) getActivity()).getSupportActionBar().setTitle(currentContact.toString());
         }
         init();
         initSentButton();
         initRecyclerView();
+        initAttachButton();
         return view;
     }
 
+    
+    
     private void init(){
         messageRepository = new MessageRepository(view.getContext());
+        btAttach = view.findViewById(R.id.btAttach);
         etTextMessageToSend = view.findViewById(R.id.etTextMessageToSend);
         currentUser = Globals.user;
     }
-
+    
+    private void initAttachButton() {
+        btAttach.setOnClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(view.getContext(), v);
+            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(@NonNull MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.fileAttach:
+                            Toast.makeText(view.getContext(), "FileAttach", Toast.LENGTH_SHORT).show();
+                            break;
+                        case R.id.imageAttach:
+                            Toast.makeText(view.getContext(), "ImageAttach", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                    return ChatFragment.super.onOptionsItemSelected(item);
+                }
+            });
+            popupMenu.inflate(R.menu.popup_attachments);
+            popupMenu.show();
+        });
+    }
+    
     private void initRecyclerView(){
         RecyclerView rvMessages = view.findViewById(R.id.rvMessagesList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(view.getContext());
@@ -169,9 +196,9 @@ public class ChatFragment extends Fragment {
                         currentUser.getCodigo(),
                         currentUser.getTipo(),
                         currentContact.getId(),
-                        currentContact.getTypeContact(),
+                        currentContact.getContactType(),
                         etTextMessageToSend.getText().toString(),
-                        currentContact.getTypeContact() == ContactEntity.ContactType.Course ? 1 : 0,
+                        currentContact.getContactType() == ContactEntity.ContactType.Course ? 1 : 0,
                         MessageEntity.DestinationState.Create,
                         1,
                         currentTime,
@@ -251,22 +278,7 @@ public class ChatFragment extends Fragment {
         });
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
-
-//        AsyncHttpRest.post(getContext(), "/confirm-message", params, new JsonHttpResponseHandler() {
-//            @Override
-//            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-//                super.onSuccess(statusCode, headers, response);
-//                ContentValues contentValues = new ContentValues();
-//                contentValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Read.getValue());
-//                messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { message.getId() });
-//                Log.d(TAG, "onSuccess: JSONObject" + response);
-//            }
-//
-//            @Override
-//            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-//                super.onFailure(statusCode, headers, responseString, throwable);
-//                Log.d(TAG, "onFailure:" + throwable);
-//            }
-//        });
     }
+
+    
 }

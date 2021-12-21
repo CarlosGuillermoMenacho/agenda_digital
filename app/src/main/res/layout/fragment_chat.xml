@@ -42,27 +42,40 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
         app:cardBackgroundColor="@color/white"
-        app:cardCornerRadius="2dp"
+        app:cardCornerRadius="48dp"
         app:cardElevation="1dp"
         app:contentPadding="2dp">
-
-        <EditText
-            android:id="@+id/etTextMessageToSend"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            android:background="@null"
-            android:hint="@string/default_input_hint"
-            android:inputType="text"
-            android:maxLines="5"
-            android:minHeight="48dp"
-            android:paddingBottom="4dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingTop="4dp"
-            android:textColor="@color/black"
-            android:textColorHint="@color/main_color_gray"
-            android:textSize="@dimen/default_input_text_size" />
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/etTextMessageToSend"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:background="@null"
+                android:hint="@string/default_input_hint"
+                android:inputType="text"
+                android:maxLines="5"
+                android:minHeight="48dp"
+                android:paddingBottom="4dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="4dp"
+                android:layout_marginRight="8dp"
+                android:layout_weight="1"
+                android:textColor="@color/black"
+                android:textColorHint="@color/main_color_gray"
+                android:textSize="@dimen/default_input_text_size" />
+            <ImageButton
+                android:id="@+id/btAttach"
+                android:layout_width="44dp"
+                android:layout_height="match_parent"
 
+                android:background="@android:color/transparent"
+                android:src="@drawable/attach"
+                android:layout_weight="0"/>
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
 </RelativeLayout>

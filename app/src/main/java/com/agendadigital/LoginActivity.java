@@ -722,8 +722,7 @@ public class LoginActivity extends AppCompatActivity {
                         obtenerMaterias(codAlumnos,codigo);
                         builder.setMessage("Se habilitó exitosamente...");
                         builder.setPositiveButton("Aceptar", (dialog, which) -> {
-
-                            redirectToMainActivity();
+                        redirectToMainActivity();
                         });
                     } else {
                         builder.setMessage("El usuario NO existe...");

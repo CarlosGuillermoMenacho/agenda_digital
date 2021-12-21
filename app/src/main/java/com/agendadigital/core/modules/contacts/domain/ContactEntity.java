@@ -1,6 +1,10 @@
 package com.agendadigital.core.modules.contacts.domain;
 
+import com.agendadigital.core.modules.messages.domain.MessageEntity;
+
 import java.io.Serializable;
+import java.util.Comparator;
+import java.util.Date;
 
 import androidx.annotation.NonNull;
 
@@ -8,11 +12,17 @@ public class ContactEntity implements Serializable {
     private String id;
     private String name;
     private ContactType contactType;
+    private int unreadMessages;
+    private String lastMessageData;
+    private Date lastMessageReceived;
 
-    public ContactEntity(String id, String name, ContactType contactType) {
+    public ContactEntity(String id, String name, ContactType contactType, int unreadMessages, String lastMessageData, Date lastMessageReceived) {
         this.id = id;
         this.name = name;
         this.contactType = contactType;
+        this.unreadMessages = unreadMessages;
+        this.lastMessageData = lastMessageData;
+        this.lastMessageReceived = lastMessageReceived;
     }
 
     public String getId() {
@@ -31,13 +41,51 @@ public class ContactEntity implements Serializable {
         this.name = name;
     }
 
-    public ContactType getTypeContact() {
+    public ContactType getContactType() {
         return contactType;
     }
 
-    public void setTypeContact(ContactType contactType) {
+    public void setContactType(ContactType contactType) {
         this.contactType = contactType;
     }
+
+    public int getUnreadMessages() {
+        return unreadMessages;
+    }
+
+    public void setUnreadMessages(int unreadMessages) {
+        this.unreadMessages = unreadMessages;
+    }
+
+    public String getLastMessageData() {
+        return lastMessageData;
+    }
+
+    public void setLastMessageData(String lastMessageData) {
+        this.lastMessageData = lastMessageData;
+    }
+
+    public Date getLastMessageReceived() {
+        return lastMessageReceived;
+    }
+
+    public void setLastMessageReceived(Date lastMessageReceived) {
+        this.lastMessageReceived = lastMessageReceived;
+    }
+
+    public static Comparator<ContactEntity> contactUnreadMessagesAndReceivedAt = new Comparator<ContactEntity>() {
+        @Override
+        public int compare(ContactEntity o1, ContactEntity o2) {
+            return (o2.getUnreadMessages() - o1.getUnreadMessages());
+        }
+    };
+
+    public static Comparator<ContactEntity> ContactLastReceivedMessages = new Comparator<ContactEntity>() {
+        @Override
+        public int compare(ContactEntity o1, ContactEntity o2) {
+            return o2.getLastMessageReceived().compareTo(o1.getLastMessageReceived());
+        }
+    };
 
     @NonNull
     @Override
@@ -77,7 +125,7 @@ public class ContactEntity implements Serializable {
                 case 6:
                     return Course;
                 default:
-                    throw new Exception("TypeContact inválido.");
+                    throw new Exception("TypeContact inválido." + value);
             }
         }
     }

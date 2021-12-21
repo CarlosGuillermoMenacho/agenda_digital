@@ -15,10 +15,13 @@ import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
+import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import com.agendadigital.core.services.contacts.ContactDto;
 import com.agendadigital.core.shared.infrastructure.AsyncHttpRest;
+import com.agendadigital.views.modules.chats.components.observers.MessageObservable;
 import com.agendadigital.views.modules.contacts.components.ContactAdapter;
 import com.agendadigital.clases.Globals;
+import com.agendadigital.views.modules.contacts.components.observers.ContactObservable;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -30,7 +33,10 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -39,6 +45,10 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import cz.msebera.android.httpclient.Header;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 import static android.widget.LinearLayout.HORIZONTAL;
 
@@ -50,6 +60,7 @@ public class ContactFragment extends Fragment {
     private ContactRepository contactRepository;
     private ProgressBar pbContacts;
     private ContactAdapter contactAdapter;
+    private final ContactObservable contactObservable = new ContactObservable();
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -57,14 +68,38 @@ public class ContactFragment extends Fragment {
         viewFragment = inflater.inflate(R.layout.fragment_contacts, container, false);
         contactRepository = new ContactRepository(viewFragment.getContext());
         RecyclerView rvContactList = viewFragment.findViewById(R.id.rvContactList);
-        DividerItemDecoration itemDecoration = new DividerItemDecoration(viewFragment.getContext(), DividerItemDecoration.HORIZONTAL);
-        Drawable mDivider = ContextCompat.getDrawable(viewFragment.getContext(), R.drawable.divider);
-        itemDecoration.setDrawable(mDivider);
-        rvContactList.setLayoutManager(new LinearLayoutManager(viewFragment.getContext()));
-//        rvContactList.addItemDecoration(itemDecoration);
+        DividerItemDecoration itemDecoration = new DividerItemDecoration(viewFragment.getContext(), DividerItemDecoration.VERTICAL);
+        itemDecoration.setDrawable(getResources().getDrawable(R.drawable.divider));
+        rvContactList.setLayoutManager(new LinearLayoutManager(viewFragment.getContext(), LinearLayoutManager.VERTICAL, false));
+        rvContactList.addItemDecoration(itemDecoration);
         pbContacts = viewFragment.findViewById(R.id.pbContacts);
         contactAdapter = new ContactAdapter();
         rvContactList.setAdapter(contactAdapter);
+        contactObservable
+                .getNotificationObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ContactEntity>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        Log.d(TAG, "onSubscribe: ");
+                    }
+
+                    @Override
+                    public void onNext(ContactEntity contactEntity) {
+                        contactAdapter.updateContactMessage(contactEntity);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, "onError: " + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "onComplete: ");
+                    }
+                });
         try {
             //contactRepository.deleteAll();
             getContactsFromDatabase();
@@ -72,13 +107,14 @@ public class ContactFragment extends Fragment {
                 getContactsFromServer();
             }
             contactAdapter.setContactEntityList(contactEntityList);
+//            Collections.sort(contactEntityList, ContactEntity.contactUnreadMessagesAndReceivedAt);
+//            contactAdapter.notifyDataSetChanged();
         } catch (Exception e) {
             e.printStackTrace();
         }
         contactAdapter.setOnItemClickListener(new ContactAdapter.CustomClickListener() {
             @Override
             public void onClick(int position, View v) {
-                Toast.makeText(viewFragment.getContext(), "OnClick", Toast.LENGTH_SHORT).show();
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("contact", contactEntityList.get(position));
                 Navigation.findNavController(requireView()).navigate(R.id.action_fragment_contacts_to_fragment_chat, bundle);
@@ -86,7 +122,6 @@ public class ContactFragment extends Fragment {
 
             @Override
             public void onLongClick(int position, View v) {
-                Toast.makeText(viewFragment.getContext(), "OnLongClick", Toast.LENGTH_SHORT).show();
             }
         });
         return viewFragment;
@@ -94,7 +129,7 @@ public class ContactFragment extends Fragment {
 
     private void getContactsFromDatabase() throws Exception {
         pbContacts.setVisibility(View.VISIBLE);
-        contactEntityList =  contactRepository.findAll();
+        contactEntityList = contactRepository.findAll();
         pbContacts.setVisibility(View.INVISIBLE);
     }
 
@@ -112,11 +147,12 @@ public class ContactFragment extends Fragment {
                 int index = 0;
                 pbContacts.setVisibility(View.VISIBLE);
                 for (ContactDto.CreateContactResponse contact: contactEntityList) {
-                    long rowsInserted = contactRepository.insert(new ContactEntity(contact.getId(), contact.getName(), ContactEntity.ContactType.setValue(contact.getTypeContact())));
+                    ContactEntity newContact = new ContactEntity(contact.getId(), contact.getName(), ContactEntity.ContactType.setValue(contact.getContactType()), 0, "", null);
+                    long rowsInserted = contactRepository.insert(newContact);
                     if(rowsInserted == -1) {
                         Toast.makeText(viewFragment.getContext(), contact.getName(), Toast.LENGTH_SHORT).show();
                     }else {
-                        contactAdapter.add(new ContactEntity(contact.getId(), contact.getName(), ContactEntity.ContactType.setValue(contact.getTypeContact())));
+                        contactAdapter.add(newContact);
                         pbContacts.setProgress(index++);
                     }
                 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/fileAttach"
+        android:title="@string/attachFile"
+        android:icon="@drawable/ic_agenda"/>
+    <item
+        android:id="@+id/imageAttach"
+        android:title="@string/attachImage"
+        android:icon="@drawable/ic_agenda"/>
+</menu>

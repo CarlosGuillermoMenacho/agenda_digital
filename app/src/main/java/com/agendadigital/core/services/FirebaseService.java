@@ -4,12 +4,10 @@ import android.app.ActivityManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.agendadigital.MainActivity;
 import com.agendadigital.R;
@@ -19,12 +17,12 @@ import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.User;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
-import com.agendadigital.core.modules.messages.domain.MessageBase;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import com.agendadigital.core.modules.messages.infrastructure.MessageRepository;
 import com.agendadigital.core.services.messages.MessageDto;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
 import com.agendadigital.views.modules.chats.components.observers.MessageObservable;
+import com.agendadigital.views.modules.contacts.components.observers.ContactObservable;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -48,7 +46,7 @@ public class FirebaseService extends FirebaseMessagingService {
 
     public static String TAG = "FIREBASE_SERVICE";
     private final MessageObservable messageObservable = new MessageObservable();
-
+    private final ContactObservable contactObservable = new ContactObservable();
 //    @Override
 //    public void onNewToken(@NonNull String s) {
 //        super.onNewToken(s);
@@ -79,15 +77,21 @@ public class FirebaseService extends FirebaseMessagingService {
                 String notificationBody = dataMessage.get("notificationBody");
 
                 MessageEntity messageEntity = new MessageEntity(id, messageTypeId, deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, forGroup, destinationState, status, createdAt, sentAt, new Date(receivedAt));
+                new MessageRepository(getApplicationContext()).insert(messageEntity);
+                ContactEntity contact = new ContactRepository(getApplicationContext()).updateUnreadMessagesAndLastMessage(messageEntity);
                 if (!isAppOnForeground(getApplicationContext())) {
                     showNotification(messageEntity, deviceFromType, notificationBody);
                     confirmAck(messageEntity);
+                }else {
+                    messageObservable.getPublisher().onNext(messageEntity);
+                    contactObservable.getPublisher().onNext(contact);
                 }
                 Log.d(TAG, "Message MessageEntity: " + messageEntity.getId());
-                if (!messageEntity.getDeviceFromId().isEmpty() && !messageEntity.getData().isEmpty()) {
-                    new MessageRepository(getApplicationContext()).insert(messageEntity);
-                    messageObservable.getPublisher().onNext(messageEntity);
-                }
+//                if (!messageEntity.getDeviceFromId().isEmpty() && !messageEntity.getData().isEmpty()) {
+//                    new MessageRepository(getApplicationContext()).insert(messageEntity);
+//                    new ContactRepository(getApplicationContext()).updateUnreadMessages(messageEntity);
+//                    messageObservable.getPublisher().onNext(messageEntity);
+//                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -157,32 +161,6 @@ public class FirebaseService extends FirebaseMessagingService {
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         MySingleton.getInstance(getApplicationContext()).addToRequest(jsonObjectRequest);
     }
-//    void save(MessageEntity messageEntity) {
-//        FeedReaderDbHelper dbHelper = new FeedReaderDbHelper(getApplicationContext());
-//        SQLiteDatabase db = dbHelper.getWritableDatabase();
-//        ContentValues values = new ContentValues();
-//
-//        List<MessageEntity> messages = null;
-//        try {
-//            messages = FeedReaderContract.FeedMessage.findAll(db.rawQuery(FeedReaderContract.FeedMessage.SQL_SELECT_FIND_BY_ID(messageEntity.getId()), null));
-//            if (messages == null || messages.size() == 0) {
-//                values.put(FeedReaderContract.FeedMessage._ID, messageEntity.getId());
-//                values.put(FeedReaderContract.FeedMessage.COL_MESSAGE_TYPE_ID, messageEntity.getMessagetypeId());
-//                values.put(FeedReaderContract.FeedMessage.COL_DEVICE_FROM_ID, messageEntity.getDeviceFromId());
-//                values.put(FeedReaderContract.FeedMessage.COL_DESTINATION_ID, messageEntity.getDestinationId());
-//                values.put(FeedReaderContract.FeedMessage.COL_DATA, messageEntity.getData());
-//                values.put(FeedReaderContract.FeedMessage.COL_FOR_GROUP, messageEntity.getForGroup());
-//                values.put(FeedReaderContract.FeedMessage.COL_DESTINATION_STATUS, messageEntity.getDestinationState().getValue());
-//                values.put(FeedReaderContract.FeedMessage.COL_STATE, messageEntity.getState());
-//                values.put(FeedReaderContract.FeedMessage.COL_CREATED_AT, messageEntity.getCreatedAt().getTime());
-//                values.put(FeedReaderContract.FeedMessage.COL_SENT_AT, messageEntity.getSentAt().getTime());
-//                values.put(FeedReaderContract.FeedMessage.COL_RECEIVED_AT, messageEntity.getReceivedAt().getTime());
-//                db.insert(FeedReaderContract.FeedMessage.TABLE_NAME, null, values);
-//        }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     private boolean isAppOnForeground(Context context) {
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);

@@ -5,19 +5,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import com.agendadigital.R;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
+import com.agendadigital.core.modules.messages.domain.MessageEntity;
+import com.agendadigital.core.modules.messages.infrastructure.MessageRepository;
+import com.nex3z.notificationbadge.NotificationBadge;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class ContactAdapter  extends RecyclerView.Adapter<ContactAdapter.ContactViewHolder> {
 
-    private int selectedPosition = RecyclerView.NO_POSITION;
     private CustomClickListener clickListener;
     private List<ContactEntity> contactEntityList;
 
@@ -36,16 +39,18 @@ public class ContactAdapter  extends RecyclerView.Adapter<ContactAdapter.Contact
         LayoutInflater inflater = (LayoutInflater)
                 parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if (inflater != null) {
-            view = inflater.inflate(R.layout.item_contact, parent, false);
+            view = inflater.inflate(R.layout.item_contact_chat, parent, false);
         }
         return new ContactViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ContactViewHolder holder, int position) {
-        holder.set(contactEntityList.get(position));
-//        holder.itemView.setBackgroundColor(selectedPosition == position ? Color.GREEN : Color.TRANSPARENT);
-//        holder.itemView.setSelected(selectedPosition == position);
+        try {
+            holder.set(contactEntityList.get(position));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -60,6 +65,8 @@ public class ContactAdapter  extends RecyclerView.Adapter<ContactAdapter.Contact
 
     public void setContactEntityList(List<ContactEntity> contactEntityList) {
         this.contactEntityList = contactEntityList;
+        Collections.sort(this.contactEntityList, ContactEntity.ContactLastReceivedMessages);
+//        contactAdapter.notifyDataSetChanged();
         notifyDataSetChanged();
     }
 
@@ -67,40 +74,67 @@ public class ContactAdapter  extends RecyclerView.Adapter<ContactAdapter.Contact
         this.clickListener = onItemClickListener;
     }
 
+    public void updateContactMessage(ContactEntity contactEntity) {
+        for (ContactEntity contact: this.contactEntityList) {
+            if(contact.getId().equals(contactEntity.getId()) && contact.getContactType()==contactEntity.getContactType()){
+                contact.setUnreadMessages(contactEntity.getUnreadMessages());
+                contact.setLastMessageData(contactEntity.getLastMessageData());
+                contact.setLastMessageReceived(contactEntity.getLastMessageReceived());
+                Collections.sort(this.contactEntityList, ContactEntity.ContactLastReceivedMessages);
+                notifyDataSetChanged();
+                break;
+            }
+        }
+    }
+
     public class ContactViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
 
-        //private CustomClickListener clickListener;
-        private TextView tvName;
-        private TextView tvTypeContact;
+        private final MessageRepository messageRepository;
+        private final TextView tvName;
+        private final TextView tvTypeContact;
+        private final TextView tvLastMessage;
+        private final TextView tvContactUnreadMessages;
+        private final TextView tvLastReceivedMessage;
+        private final CardView cvContactUnreadMessages;
+//        private final NotificationBadge nbUnreadMessages;
+        private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
         public ContactViewHolder(@NonNull View itemView) {
             super(itemView);
-            //this.clickListener = clickListener;
+            messageRepository = new MessageRepository(itemView.getContext());
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
-            tvName = itemView.findViewById(R.id.tvName);
-            tvTypeContact = itemView.findViewById(R.id.tvTypeContact);
+            tvName = itemView.findViewById(R.id.tvContactName);
+            tvTypeContact = itemView.findViewById(R.id.tvContactType);
+            tvLastMessage = itemView.findViewById(R.id.tvContactLastMessage);
+            tvLastReceivedMessage = itemView.findViewById(R.id.tvContactLastReceivedMessage);
+            tvContactUnreadMessages = itemView.findViewById(R.id.tvContactUnreadMessages);
+            cvContactUnreadMessages = itemView.findViewById(R.id.cvContactUnreadMessages);
         }
 
-        public void set(ContactEntity contactEntity){
+        public void set(ContactEntity contactEntity) throws Exception {
             tvName.setText(contactEntity.getName());
-            tvTypeContact.setText(contactEntity.getTypeContact().toString());
+            tvTypeContact.setText(contactEntity.getContactType().toString());
+            tvLastMessage.setText(contactEntity.getLastMessageData());
+            tvLastReceivedMessage.setText(contactEntity.getLastMessageReceived()!= null? dateFormat.format(contactEntity.getLastMessageReceived()): "");
+            if (contactEntity.getUnreadMessages() > 0) {
+                cvContactUnreadMessages.setVisibility(View.VISIBLE);
+                tvContactUnreadMessages.setVisibility(View.VISIBLE);
+                tvContactUnreadMessages.setText(String.valueOf(contactEntity.getUnreadMessages()));
+            }else {
+                cvContactUnreadMessages.setVisibility(View.GONE);
+                tvContactUnreadMessages.setVisibility(View.GONE);
+            }
         }
 
         @Override
         public void onClick(View v) {
             clickListener.onClick(getAdapterPosition(), v);
-//            notifyItemChanged(selectedPosition);
-//            selectedPosition = getLayoutPosition();
-//            notifyItemChanged(selectedPosition);
         }
 
         @Override
         public boolean onLongClick(View v) {
             clickListener.onLongClick(getAdapterPosition(), v);
-//            notifyItemChanged(selectedPosition);
-//            selectedPosition = getLayoutPosition();
-//            notifyItemChanged(selectedPosition);
             return false;
         }
     }
