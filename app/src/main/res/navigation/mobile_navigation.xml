@@ -85,7 +85,11 @@
         android:id="@+id/fragmentAgendaDigital"
         android:name="com.agendadigital.Fragments.FragmentAgendaDigital"
         android:label="Agenda Digital"
-        tools:layout="@layout/fragment_agenda_digital" />
+        tools:layout="@layout/fragment_agenda_digital">
+        <action android:id="@+id/action_fragmentAgendaDigitalToFragmentChat"
+            app:destination="@id/fragmentChat"/>
+    </fragment>
+
     <fragment
         android:id="@+id/fragmentKardex"
         android:name="com.agendadigital.Fragments.FragmentKardex"

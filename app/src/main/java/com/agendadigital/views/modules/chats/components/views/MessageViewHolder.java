@@ -1,12 +1,17 @@
 package com.agendadigital.views.modules.chats.components.views;
 
 import android.graphics.Color;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.agendadigital.R;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import com.agendadigital.clases.Globals;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 import androidx.annotation.NonNull;
@@ -17,6 +22,8 @@ public class MessageViewHolder extends RecyclerView.ViewHolder {
     private TextView tvTitle;
     private TextView tvBody;
     private TextView tvReceivedAt;
+    private ImageView ivImage;
+    private boolean isImageFitToScreen;
     private MessageView messageView;
 
     public MessageViewHolder(@NonNull View itemView) {
@@ -26,9 +33,25 @@ public class MessageViewHolder extends RecyclerView.ViewHolder {
         tvTitle.setVisibility(View.GONE);
         tvBody = itemView.findViewById(R.id.message_text_view);
         tvReceivedAt = itemView.findViewById(R.id.timestamp_text_view);
+        ivImage = itemView.findViewById(R.id.ivImageMessage);
+        initImageView();
     }
 
-    public void set(MessageEntity messageEntity, int viewType) {
+    private void initImageView() {
+        ivImage.setOnClickListener(v -> {
+            if(isImageFitToScreen) {
+                isImageFitToScreen=false;
+                ivImage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                ivImage.setAdjustViewBounds(true);
+            }else{
+                isImageFitToScreen=true;
+                ivImage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                ivImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            }
+        });
+    }
+
+    public void set(MessageEntity messageEntity, int viewType) throws IOException {
 //        this.messageView.setSender(String.valueOf(messageEntity.getDeviceFromId()));
 //        this.messageView.setMessage(messageEntity.getData());
 //        this.messageView.setTimestamp(new SimpleDateFormat("HH:mm").format(messageEntity.getReceivedAt()));
@@ -37,15 +60,26 @@ public class MessageViewHolder extends RecyclerView.ViewHolder {
         if(messageEntity.getDestinationState() == MessageEntity.DestinationState.Create) {
             this.tvBody.setTextColor(Color.RED);
         } else {
-            if (viewType == 1) {
-                this.tvBody.setTextColor(Color.BLACK);
-            } else if (viewType == 2) {
-                this.tvBody.setTextColor(Color.WHITE);
+            if(messageEntity.getData().isEmpty()) {
+                this.tvBody.setVisibility(View.GONE);
+            }else {
+                this.tvBody.setVisibility(View.VISIBLE);
+                if (viewType == 1) {
+                    this.tvBody.setTextColor(Color.BLACK);
+                } else if (viewType == 2) {
+                    this.tvBody.setTextColor(Color.WHITE);
+                }
             }
         }
         this.tvReceivedAt.setText(new SimpleDateFormat("HH:mm")
                                     .format(messageEntity.getDeviceFromId().equals(Globals.user.getCodigo())?
                                             messageEntity.getCreatedAt():
                                             messageEntity.getReceivedAt()));
+        if (messageEntity.getMessageType().getValue() == MessageEntity.MessageType.Image.getValue()){
+            ivImage.setVisibility(View.VISIBLE);
+            ivImage.setImageBitmap(MediaStore.Images.Media.getBitmap(itemView.getContext().getContentResolver(), Uri.parse(messageEntity.getMultimediaEntity().getLocalUri())));
+        }else{
+            ivImage.setVisibility(View.GONE);
+        }
     }
 }

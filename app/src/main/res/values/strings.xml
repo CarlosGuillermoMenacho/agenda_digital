@@ -109,5 +109,6 @@
     <string name="cerrar_sesi_n">Cerrar Sesión</string>
     <string name="attachFile">File</string>
     <string name="attachImage">Image</string>
+    <string name="attachDocument">Document</string>
 
 </resources>

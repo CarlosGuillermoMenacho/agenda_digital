@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.agendadigital.core.modules.contacts.domain.ContactBase;
 import com.agendadigital.core.modules.messages.domain.MessageBase;
+import com.agendadigital.core.modules.messages.domain.MultimediaBase;
+
 import androidx.annotation.Nullable;
 
 import org.json.JSONException;
@@ -94,6 +96,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL("create table emp_rubro( cod_rub int, descrip varchar, estado int)");
         db.execSQL(ContactBase.SQL_CREATE_TABLE);
         db.execSQL(MessageBase.SQL_CREATE_TABLE);
+        db.execSQL(MultimediaBase.SQL_CREATE_TABLE);
         /*db.execSQL("insert into materias values('1','1','Matemáticas')");
         db.execSQL("insert into materias values('1','2','Física')");
         db.execSQL("insert into materias values('1','3','Lenguaje')");

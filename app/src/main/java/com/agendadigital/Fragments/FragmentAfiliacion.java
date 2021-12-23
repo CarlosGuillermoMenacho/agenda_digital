@@ -30,13 +30,9 @@ import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.Menus;
 import com.agendadigital.clases.User;
 import com.agendadigital.clases.Usuarios;
-import com.agendadigital.core.services.FirebaseService;
-import com.agendadigital.core.shared.infrastructure.Firebase;
 import com.agendadigital.services.Service;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.agendadigital.R.id;
 import static com.agendadigital.R.layout;

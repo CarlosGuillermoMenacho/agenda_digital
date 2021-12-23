@@ -1,13 +1,18 @@
 package com.agendadigital.core.services.messages;
 
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
+import com.agendadigital.core.modules.messages.domain.MultimediaEntity;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class MessageDto {
 
@@ -20,6 +25,7 @@ public class MessageDto {
         private String data;
         private int forGroup;
         private Date createdAt;
+        private MultimediaDto.SendMultimediaRequest multimedia;
 
         public SendMessageRequest(int messageType, String deviceFromId, int deviceFromType, String destinationId, int destinationType, String data, int forGroup, Date createdAt) {
             this.messageType = messageType;
@@ -30,6 +36,7 @@ public class MessageDto {
             this.data = data;
             this.forGroup = forGroup;
             this.createdAt = createdAt;
+            this.multimedia = null;
         }
 
         public int getMessageType() {
@@ -96,6 +103,14 @@ public class MessageDto {
             this.createdAt = createdAt;
         }
 
+        public MultimediaDto.SendMultimediaRequest getMultimedia() {
+            return multimedia;
+        }
+
+        public void setMultimedia(MultimediaDto.SendMultimediaRequest multimedia) {
+            this.multimedia = multimedia;
+        }
+
         public String toJSON(){
             JSONObject jsonObject= new JSONObject();
             try {
@@ -107,13 +122,13 @@ public class MessageDto {
                 jsonObject.put("data", data);
                 jsonObject.put("forGroup", forGroup);
                 jsonObject.put("createdAt", DateFormatter.format(createdAt));
+                jsonObject.put("multimedia", new JSONObject(multimedia.toJSON()));
                 return jsonObject.toString(4);
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
                 return "";
             }
-
         }
     }
 

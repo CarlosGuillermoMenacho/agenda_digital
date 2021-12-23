@@ -1,5 +1,6 @@
 package com.agendadigital.views.modules.chats.components.adapters;
 
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -8,6 +9,7 @@ import com.agendadigital.views.modules.chats.components.views.MessageViewBuilder
 import com.agendadigital.views.modules.chats.components.views.MessageViewHolder;
 import com.agendadigital.clases.Globals;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +51,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-        holder.set(messageEntities.get(position), getItemViewType(position));
+        try {
+            holder.set(messageEntities.get(position), getItemViewType(position));
+        } catch (IOException e) {
+            Log.d("MessageAdapter", "onBindViewHolder: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -77,5 +84,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
                 break;
             }
         }
+    }
+
+    public List<MessageEntity> getMessageEntities() {
+        return messageEntities;
+    }
+
+    public void setMessageEntities(List<MessageEntity> messageEntities) {
+        this.messageEntities = messageEntities;
     }
 }

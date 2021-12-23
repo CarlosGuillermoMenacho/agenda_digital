@@ -4,10 +4,15 @@ import android.app.ActivityManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.agendadigital.MainActivity;
 import com.agendadigital.R;
@@ -18,6 +23,8 @@ import com.agendadigital.clases.User;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
+import com.agendadigital.core.modules.messages.domain.MultimediaBase;
+import com.agendadigital.core.modules.messages.domain.MultimediaEntity;
 import com.agendadigital.core.modules.messages.infrastructure.MessageRepository;
 import com.agendadigital.core.services.messages.MessageDto;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
@@ -26,12 +33,20 @@ import com.agendadigital.views.modules.contacts.components.observers.ContactObse
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -42,11 +57,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-public class FirebaseService extends FirebaseMessagingService {
+public class FirebaseMessagingServiceImplementation extends FirebaseMessagingService {
 
     public static String TAG = "FIREBASE_SERVICE";
     private final MessageObservable messageObservable = new MessageObservable();
     private final ContactObservable contactObservable = new ContactObservable();
+    FirebaseStorage storage;
 //    @Override
 //    public void onNewToken(@NonNull String s) {
 //        super.onNewToken(s);
@@ -55,10 +71,10 @@ public class FirebaseService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
+        storage = FirebaseStorage.getInstance();
         RemoteMessage.Notification notification = remoteMessage.getNotification();
         Map<String, String> dataMessage = remoteMessage.getData();
         Log.d(TAG, String.format("Message data payload: %s", dataMessage.toString()));
-
         if (notification!= null || dataMessage.size() > 0) {
             try {
                 String id = dataMessage.get("id");
@@ -75,24 +91,27 @@ public class FirebaseService extends FirebaseMessagingService {
                 Date sentAt = DateFormatter.parse(dataMessage.get("sentAt"));
                 long receivedAt = System.currentTimeMillis();
                 String notificationBody = dataMessage.get("notificationBody");
-
-                MessageEntity messageEntity = new MessageEntity(id, messageTypeId, deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, forGroup, destinationState, status, createdAt, sentAt, new Date(receivedAt));
-                new MessageRepository(getApplicationContext()).insert(messageEntity);
+                JSONObject multimedia = new JSONObject(dataMessage.get("multimedia"));
+                Log.d(TAG, "onMessageReceived: " + multimedia.toString(4));
+                MessageEntity messageEntity = new MessageEntity(id, MessageEntity.MessageType.setValue(messageTypeId), deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, forGroup, destinationState, status, createdAt, sentAt, new Date(receivedAt));
+                if (messageEntity.getMessageType() != MessageEntity.MessageType.Text) {
+                    messageEntity.setMultimediaEntity(new MultimediaEntity(multimedia.getString("id"), multimedia.getString("messageId"), "", multimedia.getString("firebaseUri")));
+                    downloadFileFromMessage(messageEntity);
+                }else {
+                    new MessageRepository(getApplicationContext()).insert(messageEntity);
+                }
                 ContactEntity contact = new ContactRepository(getApplicationContext()).updateUnreadMessagesAndLastMessage(messageEntity);
                 if (!isAppOnForeground(getApplicationContext())) {
                     showNotification(messageEntity, deviceFromType, notificationBody);
                     confirmAck(messageEntity);
                 }else {
-                    messageObservable.getPublisher().onNext(messageEntity);
+                    if (messageEntity.getMessageType() == MessageEntity.MessageType.Text){
+                        messageObservable.getPublisher().onNext(messageEntity);
+                    }
                     contactObservable.getPublisher().onNext(contact);
                 }
-                Log.d(TAG, "Message MessageEntity: " + messageEntity.getId());
-//                if (!messageEntity.getDeviceFromId().isEmpty() && !messageEntity.getData().isEmpty()) {
-//                    new MessageRepository(getApplicationContext()).insert(messageEntity);
-//                    new ContactRepository(getApplicationContext()).updateUnreadMessages(messageEntity);
-//                    messageObservable.getPublisher().onNext(messageEntity);
-//                }
             } catch (Exception e) {
+                Log.e(TAG, "onMessageReceived: " + e.getMessage(), e.fillInStackTrace());
                 e.printStackTrace();
             }
         }
@@ -117,7 +136,8 @@ public class FirebaseService extends FirebaseMessagingService {
             Intent appIntent = new Intent(getApplicationContext(), MainActivity.class);
             appIntent.putExtra("from", "notification");
             appIntent.putExtra("contactId", messageEntity.getDeviceFromId());
-            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, appIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            appIntent.putExtra("contactType", messageEntity.getDeviceFromType().getValue());
+            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), (int)System.currentTimeMillis(), appIntent, 0);
 
             NotificationCompat.Builder notificationBuilder =
                     new NotificationCompat.Builder(this, "CHANNEL_1");
@@ -143,6 +163,7 @@ public class FirebaseService extends FirebaseMessagingService {
             Log.d(TAG, "showNotification: " + e.getMessage());
         }
     }
+
     private void confirmAck(MessageEntity message) throws UnsupportedEncodingException, JSONException {
         JSONObject params = new JSONObject();
         MessageDto.ConfirmMessageRequest confirmMessageRequest = new MessageDto.ConfirmMessageRequest(message.getId(), message.getDestinationState().getValue(), DateFormatter.format(message.getReceivedAt()));
@@ -160,6 +181,37 @@ public class FirebaseService extends FirebaseMessagingService {
         });
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         MySingleton.getInstance(getApplicationContext()).addToRequest(jsonObjectRequest);
+    }
+
+    private void downloadFileFromMessage(MessageEntity message) throws IOException {
+        StorageReference imageToDownloadReference = storage.getReferenceFromUrl(message.getMultimediaEntity().getFirebaseUri());
+        File localFile = File.createTempFile("images", "jpg");
+        imageToDownloadReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                Log.d(TAG, "onSuccessFile: " + localFile.getPath());
+                try {
+                    Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), Uri.fromFile(localFile));
+                    String localUrl = MediaStore.Images.Media.insertImage(getApplicationContext().getContentResolver(), imageBitmap, message.getMultimediaEntity().getId(), "");
+                    Log.d(TAG, "onSuccessSave: " + localUrl);
+                    message.getMultimediaEntity().setLocalUri(localUrl);
+//                    ContentValues contentValues = new ContentValues();
+//                    contentValues.put(MultimediaBase.COL_LOCAL_URI, localUrl);
+                     new MessageRepository(getApplicationContext()).insert(message);
+                    messageObservable.getPublisher().onNext(message);
+//                    messageRepository.updateMultimedia(contentValues, MultimediaBase._ID + "=?", new String[] {message.getMultimediaEntity().getId()});
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: " + e.getMessage());
+            }
+        });
     }
 
     private boolean isAppOnForeground(Context context) {

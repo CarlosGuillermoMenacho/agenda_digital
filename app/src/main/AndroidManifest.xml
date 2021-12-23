@@ -14,7 +14,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
     <application
         android:configChanges="screenSize|orientation"
         android:icon="@mipmap/ic_launcher"
@@ -56,7 +55,7 @@
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/backgroud_splash" />
         <service
-            android:name=".core.services.FirebaseService"
+            android:name=".core.services.FirebaseMessagingServiceImplementation"
             android:exported="false"
             android:stopWithTask="false">
             <intent-filter>

@@ -1,11 +1,14 @@
 package com.agendadigital;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -16,9 +19,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -39,6 +44,8 @@ import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.User;
 import com.agendadigital.clases.Usuarios;
+import com.agendadigital.core.modules.contacts.domain.ContactEntity;
+import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.services.ProcessMainClass;
 import com.agendadigital.services.restarter.RestartServiceBroadcastReceiver;
 import com.google.android.material.navigation.NavigationView;
@@ -48,6 +55,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity  implements Comunicador {
 
+    private static final String TAG = "MainActivity";
     private AppBarConfiguration mAppBarConfiguration;
     NavigationView sNavigationView;
     TextView nameUser;
@@ -62,6 +70,7 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,11 +98,14 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
                 .setDrawerLayout(drawer)
                 .build();
 
+            navigation();
 
-    navigation();
-
-
-
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[] {
+                    Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, 1);
+            this.finishAffinity();
+        }
     }
     private void llenarListas() {
 
@@ -174,6 +186,8 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
 
     @Override
     public boolean onSupportNavigateUp() {
+
+
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
@@ -188,6 +202,21 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
             } else {
                 ProcessMainClass bck = new ProcessMainClass();
                 bck.launchService(getApplicationContext());
+            }
+        }
+        String from = getIntent().getStringExtra("from");
+        if(from != null && from.equals("notification")){
+            Bundle bundle = new Bundle();
+            try {
+                String contactId = getIntent().getStringExtra("contactId");
+                int contactType = getIntent().getIntExtra("contactType", 0);
+                ContactRepository contactRepository = new ContactRepository(getApplicationContext());
+                ContactEntity currentContactForNotification = contactRepository.findByIdAndType(contactId, contactType);
+                bundle.putSerializable("contact", currentContactForNotification);
+                Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.action_fragmentAgendaDigitalToFragmentChat, bundle);
+            } catch (Exception e) {
+                Log.d(TAG, "onCreate: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }

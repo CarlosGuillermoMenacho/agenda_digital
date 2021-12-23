@@ -1,5 +1,7 @@
 package com.agendadigital.core.modules.messages.domain;
 
+import android.provider.ContactsContract;
+
 import com.agendadigital.clases.User;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
@@ -10,12 +12,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 
 public class MessageEntity {
     private String id;
-    private int messageType;
+    private MessageType messageType;
     private String deviceFromId;
     private User.UserType deviceFromType;
     private String destinationId;
@@ -27,8 +30,9 @@ public class MessageEntity {
     private Date createdAt;
     private Date sentAt;
     private Date receivedAt;
+    private MultimediaEntity multimediaEntity;
 
-    public MessageEntity(String id, int messageType, String deviceFromId, User.UserType deviceFromType, String destinationId, ContactEntity.ContactType destinationType, String data, int forGroup, DestinationState destinationState, int state, Date createdAt, Date sentAt, Date receivedAt) {
+    public MessageEntity(String id, MessageType messageType, String deviceFromId, User.UserType deviceFromType, String destinationId, ContactEntity.ContactType destinationType, String data, int forGroup, DestinationState destinationState, int state, Date createdAt, Date sentAt, Date receivedAt) {
         this.id = id;
         this.messageType = messageType;
         this.deviceFromId = deviceFromId;
@@ -52,11 +56,11 @@ public class MessageEntity {
         this.id = id;
     }
 
-    public int getMessageType() {
+    public MessageType getMessageType() {
         return messageType;
     }
 
-    public void setMessageType(int messageType) {
+    public void setMessageType(MessageType messageType) {
         this.messageType = messageType;
     }
 
@@ -148,6 +152,14 @@ public class MessageEntity {
         this.receivedAt = receivedAt;
     }
 
+    public MultimediaEntity getMultimediaEntity() {
+        return multimediaEntity;
+    }
+
+    public void setMultimediaEntity(MultimediaEntity multimediaEntityList) {
+        this.multimediaEntity = multimediaEntityList;
+    }
+
     public String toJSON() throws JSONException {
             JSONObject jsonObject= new JSONObject();
             if(id != null) {
@@ -201,5 +213,35 @@ public class MessageEntity {
             }
         }
     }
+    public enum MessageType {
+        Text(1),
+        Image(2),
+        Document(3),
+        Video(4);
 
+        private final int value;
+
+        MessageType(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static MessageType setValue (int value) throws Exception {
+            switch (value) {
+                case 1:
+                    return Text;
+                case 2:
+                    return Image;
+                case 3:
+                    return Document;
+                case 4:
+                    return Video;
+                default:
+                    throw new Exception("MessageType doesn't exists");
+            }
+        }
+    }
 }
