@@ -1,11 +1,14 @@
 package com.agendadigital.views.modules.chats;
 
+import android.Manifest;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.MemoryFile;
 import android.provider.MediaStore;
@@ -66,6 +69,7 @@ import java.util.UUID;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -87,10 +91,9 @@ public class ChatFragment extends Fragment {
     private List<MessageEntity> messageEntityList = new ArrayList<>();
 
     private MessageRepository messageRepository;
+    private SendFloatingActionButton sendFloatingActionButton;
 
-    SendFloatingActionButton sendFloatingActionButton;
-
-    FirebaseStorage storage;
+    private FirebaseStorage storage;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -101,6 +104,14 @@ public class ChatFragment extends Fragment {
             currentContact = (ContactEntity) bundle.getSerializable("contact");
             new ContactRepository(view.getContext()).resetUnreadMessages(currentContact);
             ((MainActivity) getActivity()).getSupportActionBar().setTitle(currentContact.toString());
+        }
+        if(ActivityCompat.checkSelfPermission(view.getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(view.getContext(), "Sin permisos de lectura", Toast.LENGTH_SHORT).show();
+            requestPermissions(new String[] {
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+            }, 1);
+        } else {
+            Toast.makeText(view.getContext(), "Permisos de lectura", Toast.LENGTH_SHORT).show();
         }
         init();
         initSentButton();
@@ -120,25 +131,42 @@ public class ChatFragment extends Fragment {
     private void initAttachButton() {
         btAttach.setOnClickListener(v -> {
             PopupMenu popupMenu = new PopupMenu(view.getContext(), v);
-            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(@NonNull MenuItem item) {
+            popupMenu.setOnMenuItemClickListener(item -> {
+                Intent pickIntent;
+                Intent chooserIntent = null;
+                int activityResult = 0;
                     switch (item.getItemId()) {
-                        case R.id.attachDocument:
-                            Toast.makeText(view.getContext(), "FileAttach", Toast.LENGTH_SHORT).show();
-
-                            break;
-                        case R.id.attachImage:
-                            Toast.makeText(view.getContext(), "ImageAttach", Toast.LENGTH_SHORT).show();
-                            Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                            pickIntent.setType("image/*");
-
-                            Intent chooserIntent = Intent.createChooser(pickIntent, "Select Image");
-                            startActivityForResult(chooserIntent, MessageEntity.MessageType.Image.getValue());
-                            break;
-                    }
-                    return ChatFragment.super.onOptionsItemSelected(item);
+                    case R.id.attachDocument:
+                        Toast.makeText(view.getContext(), "FileAttach", Toast.LENGTH_SHORT).show();
+                        pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                        pickIntent.setType("*/*");
+                        pickIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {
+                                "application/msword",
+                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                "text/*",
+                                "application/pdf",
+                                "application/vnd.ms-excel"
+                        });
+                        chooserIntent = Intent.createChooser(pickIntent, "Select a document");
+                        activityResult = MessageEntity.MessageType.Document.getValue();
+                        break;
+                    case R.id.attachImage:
+                        Toast.makeText(view.getContext(), "ImageAttach", Toast.LENGTH_SHORT).show();
+                        pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+                        pickIntent.setType("image/*");
+                        chooserIntent = Intent.createChooser(pickIntent, "Select a image");
+                        activityResult = MessageEntity.MessageType.Image.getValue();
+                        break;
+                    case R.id.attachVideo:
+                        pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                        Toast.makeText(view.getContext(), "VideoAttach", Toast.LENGTH_SHORT).show();
+                        pickIntent.setType("video/*");
+                        chooserIntent = Intent.createChooser(pickIntent, "Select a video");
+                        activityResult = MessageEntity.MessageType.Video.getValue();
+                        break;
                 }
+                startActivityForResult(chooserIntent, activityResult);
+                return ChatFragment.super.onOptionsItemSelected(item);
             });
             popupMenu.inflate(R.menu.popup_attachments);
             popupMenu.show();
@@ -147,31 +175,139 @@ public class ChatFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == MessageEntity.MessageType.Image.getValue()){
-            Uri selectedImage = data.getData();
-            Date currentTime = new Date(System.currentTimeMillis());
-            MessageEntity messageEntity = new MessageEntity(UUID.randomUUID().toString()
-                    , MessageEntity.MessageType.Image
-                    , currentUser.getCodigo()
-                    , currentUser.getTipo()
-                    , currentContact.getId()
-                    , currentContact.getContactType()
-                    , ""
-                    , currentContact.getContactType() == ContactEntity.ContactType.Course?1:0
-                    , MessageEntity.DestinationState.Create
-                    , 1, currentTime, currentTime, null  );
+        assert data != null;
 
-            MultimediaEntity multimediaEntity = new MultimediaEntity(UUID.randomUUID().toString(), messageEntity.getId(), selectedImage.toString(), "");
+        Uri selectedFile = data.getData();
+        String filePath = selectedFile.toString();
+        File file = new File(selectedFile.getPath());
+        Log.d(TAG, "onActivityResultSelectedFile: " + filePath);
+        Date currentTime = new Date(System.currentTimeMillis());
+        MessageEntity messageEntity = new MessageEntity(UUID.randomUUID().toString()
+                , MessageEntity.MessageType.Image
+                , currentUser.getCodigo()
+                , currentUser.getTipo()
+                , currentContact.getId()
+                , currentContact.getContactType()
+                , ""
+                , currentContact.getContactType() == ContactEntity.ContactType.Course?1:0
+                , MessageEntity.DestinationState.Create
+                , 1, currentTime, currentTime, null  );
 
-            StorageReference storageReference = storage.getReference();
-            StorageReference imageReference = storageReference.child("images/" + selectedImage.getLastPathSegment());
+        StorageReference storageReference = storage.getReference();
+        StorageReference fileReference = null;
 
-            UploadTask uploadTask = imageReference.putFile(selectedImage);
-            Task<Uri> urlTask = uploadTask.continueWithTask(task -> {
+        if (requestCode == MessageEntity.MessageType.Image.getValue()) {
+//            Uri selectedImage = data.getData();
+//            Date currentTime = new Date(System.currentTimeMillis());
+//            MessageEntity messageEntity = new MessageEntity(UUID.randomUUID().toString()
+//                    , MessageEntity.MessageType.Image
+//                    , currentUser.getCodigo()
+//                    , currentUser.getTipo()
+//                    , currentContact.getId()
+//                    , currentContact.getContactType()
+//                    , ""
+//                    , currentContact.getContactType() == ContactEntity.ContactType.Course?1:0
+//                    , MessageEntity.DestinationState.Create
+//                    , 1, currentTime, currentTime, null  );
+//
+//            MultimediaEntity multimediaEntity = new MultimediaEntity(UUID.randomUUID().toString(), messageEntity.getId(), selectedImage.toString(), "");
+            messageEntity.setMessageType(MessageEntity.MessageType.Image);
+//            StorageReference storageReference = storage.getReference();
+//            StorageReference imageReference = storageReference.child("images/" + selectedFile.getLastPathSegment());
+//
+//            UploadTask uploadTask = imageReference.putFile(selectedFile);
+            fileReference = storageReference.child("images/" + file.getName());
+
+//            Task<Uri> urlTask = uploadTask.continueWithTask(task -> {
+//                if (!task.isSuccessful()) {
+//                    throw task.getException();
+//                }
+//                return imageReference.getDownloadUrl();
+//            }).addOnCompleteListener(task -> {
+//                Log.d(TAG, "onComplete: " + task.isSuccessful());
+//                if (task.isSuccessful()) {
+//                    Uri downloadUri = task.getResult();
+//                    multimediaEntity.setFirebaseUri(downloadUri.toString());
+//
+//                    messageEntity.setMultimediaEntity(multimediaEntity);
+//                    messageRepository.insert(messageEntity);
+//                    messageAdapter.add(messageEntity);
+//
+//                    JSONObject params = new JSONObject();
+//                    try {
+//                        MessageDto.SendMessageRequest sendMessageRequest = new MessageDto.SendMessageRequest(messageEntity.getMessageType().getValue()
+//                                , messageEntity.getDeviceFromId()
+//                                , messageEntity.getDeviceFromType().getValue()
+//                                , messageEntity.getDestinationId()
+//                                , messageEntity.getDestinationType().getValue()
+//                                , messageEntity.getData(), messageEntity.getForGroup(), messageEntity.getCreatedAt());
+//
+//                        sendMessageRequest.setMultimedia(new MultimediaDto.SendMultimediaRequest(multimediaEntity.getId(), multimediaEntity.getFirebaseUri()));
+//
+//                        Log.d(TAG, "MessageSent: " + sendMessageRequest.toJSON());
+//                        params.put("message", new JSONObject(sendMessageRequest.toJSON()));
+//
+//
+//                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/send-message", params, response -> {
+//                            try {
+//                                MessageDto.SendMessageResponse sendMessageResponse = new Gson().fromJson(response.getString("message"),
+//                                        new TypeToken<MessageDto.SendMessageResponse>() {}
+//                                                .getType());
+//
+//                                ContentValues contentValues = new ContentValues();
+//                                contentValues.put(MessageBase._ID, sendMessageResponse.getId());
+//                                contentValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Sent.getValue());
+//                                contentValues.put(MessageBase.COL_SENT_AT, currentTime.getTime());
+//                                messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { messageEntity.getId() });
+//
+//                                messageEntity.setDestinationState(MessageEntity.DestinationState.Sent);
+//                                messageAdapter.updateDestinationState(messageEntity);
+//                            } catch (JSONException e) {
+//                                e.printStackTrace();
+//                            }
+//                            Log.d(TAG, "onResponse: " + response);
+//                        }, error -> {
+//                            String body;
+//                            String statusCode = String.valueOf(error.networkResponse.statusCode);
+//                            if(error.networkResponse.data!=null) {
+//                                body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
+//                                Log.d(TAG, "onErrorResponse: " + body);
+//                                Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
+//                            }
+//                        });
+//                        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+//                        MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
+//
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                } else {
+//                    Log.d(TAG, "onCompleteError: " + task.getException());
+//                    Toast.makeText(view.getContext(), "No se pudo subir el archivo.", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+//            Log.d(TAG, "onActivityResult: " + selectedFile.toString());
+        } else if (requestCode == MessageEntity.MessageType.Video.getValue()) {
+            messageEntity.setMessageType(MessageEntity.MessageType.Video);
+            filePath = file.getPath();
+            fileReference = storageReference.child("videos/" + file.getName());
+        } else if (requestCode == MessageEntity.MessageType.Document.getValue()) {
+            messageEntity.setMessageType(MessageEntity.MessageType.Document);
+            filePath = file.getPath();
+            Log.d(TAG, "onActivityResultDoc: " + file.getName());
+            fileReference = storageReference.child("documents/" + file.getName());
+        }
+        MultimediaEntity multimediaEntity = new MultimediaEntity(UUID.randomUUID().toString(), messageEntity.getId(), filePath, "");
+
+        UploadTask uploadTask = fileReference.putFile(selectedFile);
+
+        StorageReference finalFileReference = fileReference;
+        uploadTask.continueWithTask(task -> {
                 if (!task.isSuccessful()) {
                     throw task.getException();
                 }
-                return imageReference.getDownloadUrl();
+                return finalFileReference.getDownloadUrl();
             }).addOnCompleteListener(task -> {
                 Log.d(TAG, "onComplete: " + task.isSuccessful());
                 if (task.isSuccessful()) {
@@ -226,7 +362,6 @@ public class ChatFragment extends Fragment {
                         });
                         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                         MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
-
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -236,8 +371,6 @@ public class ChatFragment extends Fragment {
                     Toast.makeText(view.getContext(), "No se pudo subir el archivo.", Toast.LENGTH_SHORT).show();
                 }
             });
-            Log.d(TAG, "onActivityResult: " + selectedImage.toString());
-        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -249,65 +382,17 @@ public class ChatFragment extends Fragment {
         try {
             messageEntityList = messageRepository.findAll(currentContact.getId());
             messageAdapter = new MessageAdapter(messageEntityList);
-            List<MessageEntity> messagesToConfirm = new ArrayList<>();
-            List<MessageEntity> messagesWithMultimediaToDownload = new ArrayList<>();
             for (MessageEntity message: messageAdapter.getMessageEntities()) {
-                if (message.getDestinationId().equals(currentUser.getCodigo())){
-                    if (message.getDestinationState() == MessageEntity.DestinationState.Received) {
-                        message.setDestinationState(MessageEntity.DestinationState.Read);
-                        confirmAck(message);
-//                        messagesToConfirm.add(message);
-                    }
-//                    if (message.getMessageType() != MessageEntity.MessageType.Text && message.getMultimediaEntity().getLocalUri().isEmpty()) {
-//                        downloadFileFromMessage(message);
-////                        messagesWithMultimediaToDownload.add(message);
-//                    }
+                if (message.getDestinationId().equals(currentUser.getCodigo()) && message.getDestinationState() == MessageEntity.DestinationState.Received){
+                    message.setDestinationState(MessageEntity.DestinationState.Read);
+                    confirmAck(message);
                 }
             }
             messageAdapter.notifyDataSetChanged();
-//            if(messagesToConfirm.size() > 0){
-//                for (MessageEntity messageToConfirm: messagesToConfirm
-//                ) {
-//                    messageToConfirm.setDestinationState(MessageEntity.DestinationState.Read);
-//                    confirmAck(messageToConfirm);
-//                }
-//            }
-//            if(messagesWithMultimediaToDownload.size() > 0) {
-//                for (MessageEntity messageWithDownload: messagesWithMultimediaToDownload) {
-////                    StorageReference imageToDownloadReference = storage.getReferenceFromUrl(messageWithDownload.getMultimediaEntity().getFirebaseUri());
-////                    File localFile = File.createTempFile("images", "jpg");
-////                    imageToDownloadReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-////                        @Override
-////                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-////                            Log.d(TAG, "onSuccessFile: " + localFile.getPath());
-////                            try {
-////                                Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(view.getContext().getContentResolver(), Uri.fromFile(localFile));
-////                                String localUrl = MediaStore.Images.Media.insertImage(view.getContext().getContentResolver(), imageBitmap, messageWithDownload.getMultimediaEntity().getId(), "");
-////                                Log.d(TAG, "onSuccessSave: " + localUrl);
-////                                messageWithDownload.getMultimediaEntity().setLocalUri(localUrl);
-////                                ContentValues contentValues = new ContentValues();
-////                                contentValues.put(MultimediaBase.COL_LOCAL_URI, localUrl);
-////                                messageRepository.updateMultimedia(contentValues, MultimediaBase._ID + "=?", new String[] {messageWithDownload.getMultimediaEntity().getId()});
-////
-////                            } catch (IOException e) {
-////                                e.printStackTrace();
-////                            }
-////
-////                        }
-////                    }).addOnFailureListener(new OnFailureListener() {
-////                        @Override
-////                        public void onFailure(@NonNull Exception e) {
-////                            Log.d(TAG, "onFailure: " + e.getMessage());
-////                            Toast.makeText(view.getContext(), "No se pudo descargar la imagen.", Toast.LENGTH_SHORT).show();
-////                        }
-////                    });
-//                }
-//            }
         } catch (Exception e) {
             Log.d(TAG, "initRecyclerView: " + e.getMessage());
             e.printStackTrace();
         }
-
 
         rvMessages.setAdapter(messageAdapter);
         try {
@@ -349,37 +434,6 @@ public class ChatFragment extends Fragment {
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
             Log.d(TAG, e.getMessage());
         }
-    }
-
-
-    private void downloadFileFromMessage(MessageEntity message) throws IOException {
-        StorageReference imageToDownloadReference = storage.getReferenceFromUrl(message.getMultimediaEntity().getFirebaseUri());
-        File localFile = File.createTempFile("images", "jpg");
-        imageToDownloadReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                Log.d(TAG, "onSuccessFile: " + localFile.getPath());
-                try {
-                    Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(view.getContext().getContentResolver(), Uri.fromFile(localFile));
-                    String localUrl = MediaStore.Images.Media.insertImage(view.getContext().getContentResolver(), imageBitmap, message.getMultimediaEntity().getId(), "");
-                    Log.d(TAG, "onSuccessSave: " + localUrl);
-                    message.getMultimediaEntity().setLocalUri(localUrl);
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(MultimediaBase.COL_LOCAL_URI, localUrl);
-                    messageRepository.updateMultimedia(contentValues, MultimediaBase._ID + "=?", new String[] {message.getMultimediaEntity().getId()});
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "onFailure: " + e.getMessage());
-                Toast.makeText(view.getContext(), "No se pudo descargar la imagen.", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private void initSentButton(){

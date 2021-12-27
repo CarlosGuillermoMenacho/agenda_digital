@@ -7,4 +7,8 @@
         android:id="@+id/attachImage"
         android:title="@string/attachImage"
         android:icon="@drawable/ic_agenda"/>
+    <item
+        android:id="@+id/attachVideo"
+        android:title="@string/attachVideo"
+        android:icon="@drawable/ic_agenda"/>
 </menu>

@@ -11,6 +11,7 @@ import com.agendadigital.R;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import com.agendadigital.clases.Globals;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
@@ -28,7 +29,7 @@ public class MessageViewHolder extends RecyclerView.ViewHolder {
 
     public MessageViewHolder(@NonNull View itemView) {
         super(itemView);
-        //this.messageView = (MessageView) itemView;
+//        this.messageView = (MessageView) itemView;
         tvTitle = itemView.findViewById(R.id.sender_text_view);
         tvTitle.setVisibility(View.GONE);
         tvBody = itemView.findViewById(R.id.message_text_view);
@@ -59,26 +60,46 @@ public class MessageViewHolder extends RecyclerView.ViewHolder {
         this.tvBody.setText(messageEntity.getData());
         if(messageEntity.getDestinationState() == MessageEntity.DestinationState.Create) {
             this.tvBody.setTextColor(Color.RED);
-        } else {
-            if(messageEntity.getData().isEmpty()) {
-                this.tvBody.setVisibility(View.GONE);
-            }else {
-                this.tvBody.setVisibility(View.VISIBLE);
-                if (viewType == 1) {
-                    this.tvBody.setTextColor(Color.BLACK);
-                } else if (viewType == 2) {
-                    this.tvBody.setTextColor(Color.WHITE);
-                }
+        }
+        else {
+            if (viewType == 1) {
+                this.tvBody.setTextColor(Color.BLACK);
+            } else if (viewType == 2) {
+                this.tvBody.setTextColor(Color.WHITE);
             }
         }
         this.tvReceivedAt.setText(new SimpleDateFormat("HH:mm")
                                     .format(messageEntity.getDeviceFromId().equals(Globals.user.getCodigo())?
                                             messageEntity.getCreatedAt():
                                             messageEntity.getReceivedAt()));
-        if (messageEntity.getMessageType().getValue() == MessageEntity.MessageType.Image.getValue()){
+        if (messageEntity.getMessageType() != MessageEntity.MessageType.Text && messageEntity.getMultimediaEntity() != null) {
             ivImage.setVisibility(View.VISIBLE);
-            ivImage.setImageBitmap(MediaStore.Images.Media.getBitmap(itemView.getContext().getContentResolver(), Uri.parse(messageEntity.getMultimediaEntity().getLocalUri())));
-        }else{
+            File file = new File(messageEntity.getMultimediaEntity().getLocalUri());
+
+            if (messageEntity.getMessageType() == MessageEntity.MessageType.Image) {
+                if ((file.exists() && !file.isDirectory()) || viewType == 1) {
+                    Uri uri;
+                    if (viewType == 1) {
+                        uri = Uri.parse(messageEntity.getMultimediaEntity().getLocalUri());
+                    } else {
+                        uri = Uri.fromFile(file);
+                    }
+                    ivImage.setImageBitmap(MediaStore.Images.Media.getBitmap(itemView.getContext().getContentResolver(), uri));
+                }else {
+                    ivImage.setImageResource(R.drawable.not_found);
+                }
+            }else if (messageEntity.getMessageType() == MessageEntity.MessageType.Document) {
+                if(file.getPath().endsWith(".txt")) {
+                    ivImage.setImageResource(R.drawable.txt_32icon);
+                } else if (file.getPath().endsWith(".pdf")) {
+                    ivImage.setImageResource(R.drawable.pdf_32icon);
+                } else if (file.getPath().endsWith(".doc") || (file.getPath().endsWith(".docx"))) {
+                    ivImage.setImageResource(R.drawable.word_32icon);
+                }
+                ivImage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                tvBody.setText(file.getName());
+            }
+        }else {
             ivImage.setVisibility(View.GONE);
         }
     }

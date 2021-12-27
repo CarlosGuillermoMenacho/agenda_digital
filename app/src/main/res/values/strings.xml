@@ -110,5 +110,6 @@
     <string name="attachFile">File</string>
     <string name="attachImage">Image</string>
     <string name="attachDocument">Document</string>
+    <string name="attachVideo">Video</string>
 
 </resources>

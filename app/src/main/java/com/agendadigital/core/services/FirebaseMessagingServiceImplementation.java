@@ -28,6 +28,7 @@ import com.agendadigital.core.modules.messages.domain.MultimediaEntity;
 import com.agendadigital.core.modules.messages.infrastructure.MessageRepository;
 import com.agendadigital.core.services.messages.MessageDto;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
+import com.agendadigital.core.shared.infrastructure.utils.DirectoryManager;
 import com.agendadigital.views.modules.chats.components.observers.MessageObservable;
 import com.agendadigital.views.modules.contacts.components.observers.ContactObservable;
 import com.android.volley.DefaultRetryPolicy;
@@ -46,7 +47,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -91,10 +95,11 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
                 Date sentAt = DateFormatter.parse(dataMessage.get("sentAt"));
                 long receivedAt = System.currentTimeMillis();
                 String notificationBody = dataMessage.get("notificationBody");
-                JSONObject multimedia = new JSONObject(dataMessage.get("multimedia"));
-                Log.d(TAG, "onMessageReceived: " + multimedia.toString(4));
+
                 MessageEntity messageEntity = new MessageEntity(id, MessageEntity.MessageType.setValue(messageTypeId), deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, forGroup, destinationState, status, createdAt, sentAt, new Date(receivedAt));
                 if (messageEntity.getMessageType() != MessageEntity.MessageType.Text) {
+                    JSONObject multimedia = new JSONObject(dataMessage.get("multimedia"));
+                    Log.d(TAG, "onMessageReceived: " + multimedia.toString(4));
                     messageEntity.setMultimediaEntity(new MultimediaEntity(multimedia.getString("id"), multimedia.getString("messageId"), "", multimedia.getString("firebaseUri")));
                     downloadFileFromMessage(messageEntity);
                 }else {
@@ -184,34 +189,60 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
     }
 
     private void downloadFileFromMessage(MessageEntity message) throws IOException {
-        StorageReference imageToDownloadReference = storage.getReferenceFromUrl(message.getMultimediaEntity().getFirebaseUri());
+        StorageReference fileToDownloadReference = storage.getReferenceFromUrl(message.getMultimediaEntity().getFirebaseUri());
         File localFile = File.createTempFile("images", "jpg");
-        imageToDownloadReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                Log.d(TAG, "onSuccessFile: " + localFile.getPath());
-                try {
+        fileToDownloadReference.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+            Log.d(TAG, "onSuccessFile: " + localFile.getPath());
+            try {
+                String pathToSave = "";
+                if (message.getMessageType() ==  MessageEntity.MessageType.Image) {
                     Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), Uri.fromFile(localFile));
-                    String localUrl = MediaStore.Images.Media.insertImage(getApplicationContext().getContentResolver(), imageBitmap, message.getMultimediaEntity().getId(), "");
-                    Log.d(TAG, "onSuccessSave: " + localUrl);
-                    message.getMultimediaEntity().setLocalUri(localUrl);
-//                    ContentValues contentValues = new ContentValues();
-//                    contentValues.put(MultimediaBase.COL_LOCAL_URI, localUrl);
-                     new MessageRepository(getApplicationContext()).insert(message);
-                    messageObservable.getPublisher().onNext(message);
-//                    messageRepository.updateMultimedia(contentValues, MultimediaBase._ID + "=?", new String[] {message.getMultimediaEntity().getId()});
+                    pathToSave = DirectoryManager.getPathToSave(message.getMessageType());
+                    FileOutputStream out = new FileOutputStream(new File(pathToSave, message.getMultimediaEntity().getId() + ".jpg"));
+                    pathToSave += message.getMultimediaEntity().getId() + ".jpg";
+                    imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                    out.flush();
+                    out.close();
+                }else if (message.getMessageType() == MessageEntity.MessageType.Video) {
+                    pathToSave = DirectoryManager.getPathToSave(message.getMessageType());
+                    InputStream inputStream = new FileInputStream(localFile);
+                    FileOutputStream out = new FileOutputStream(new File(pathToSave, message.getMultimediaEntity().getId() + ".mp4"));
+                    pathToSave += fileToDownloadReference.getName();
+                    byte[] buf = new byte[1024];
+                    int len;
+                    while ((len = inputStream.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
+                    out.flush();
+                    inputStream.close();
+                    out.close();
+                }else if (message.getMessageType() == MessageEntity.MessageType.Document) {
+                    Log.d(TAG, "onSuccessDocument: " + fileToDownloadReference.getName());
+                    pathToSave = DirectoryManager.getPathToSave(message.getMessageType());
+                    InputStream inputStream = new FileInputStream(localFile);
+                    FileOutputStream fileOutputStream = new FileOutputStream(new File(pathToSave, fileToDownloadReference.getName()), true);
+                    pathToSave += fileToDownloadReference.getName();
+                    byte[] buf = new byte[5 * 1024];
+                    int len;
 
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    while ((len = inputStream.read(buf)) > 0) {
+                        fileOutputStream.write(buf, 0, len);
+                    }
+
+                    fileOutputStream.flush();
+                    inputStream.close();
+                    fileOutputStream.close();
                 }
 
+                Log.d(TAG, "onSuccessSave: " + pathToSave);
+                message.getMultimediaEntity().setLocalUri(pathToSave);
+                 new MessageRepository(getApplicationContext()).insert(message);
+                messageObservable.getPublisher().onNext(message);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "onFailure: " + e.getMessage());
-            }
-        });
+
+        }).addOnFailureListener(e -> Log.d(TAG, "onFailure: " + e.getMessage()));
     }
 
     private boolean isAppOnForeground(Context context) {

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,12 +47,17 @@ import com.agendadigital.clases.User;
 import com.agendadigital.clases.Usuarios;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
+import com.agendadigital.core.shared.infrastructure.utils.DirectoryManager;
 import com.agendadigital.services.ProcessMainClass;
 import com.agendadigital.services.restarter.RestartServiceBroadcastReceiver;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity  implements Comunicador {
 
@@ -62,6 +68,7 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
     ImageView imgUser;
     private AdminSQLite adm;
     private ArrayList<String[]> codigos;
+    private final int WRITE_READ_PERMISSIONS_REQUEST = 1;
 
     @Override
     protected void onPause() {
@@ -70,7 +77,6 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,7 +91,6 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
         View hview = sNavigationView.getHeaderView(0);
         nameUser = hview.findViewById(R.id.tvUser);
         imgUser = hview.findViewById(R.id.ivUser);
-/*        Globals.user = adm.getUltUsr();*/
 
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.fragmentAgendaDigital, R.id.fragmentBoletin,
@@ -98,15 +103,35 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
                 .setDrawerLayout(drawer)
                 .build();
 
-            navigation();
 
-        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[] {
-                    Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE
-            }, 1);
-            this.finishAffinity();
-        }
+        navigation();
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == WRITE_READ_PERMISSIONS_REQUEST) {
+            Log.d(TAG, "onRequestPermissionsResult: " + Arrays.toString(permissions));
+            for (int i = 0; i < permissions.length; i++) {
+                String permission = permissions[i];
+                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                    this.finishAffinity();
+                }else {
+                    switch (permission) {
+                        case Manifest.permission.READ_EXTERNAL_STORAGE:
+                            break;
+                        case Manifest.permission.WRITE_EXTERNAL_STORAGE:
+                            DirectoryManager.createDirectories();
+//                            DirectoryManager.createDocumentsDirectoryGallery();
+//                            DirectoryManager.createImageDirectoryGallery();
+//                            DirectoryManager.createVideoDirectoryGallery();
+                            break;
+                    }
+                }
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
     private void llenarListas() {
 
         Usuarios usuarios = new Usuarios(getApplicationContext());
@@ -192,9 +217,20 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[] {
+                        Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, WRITE_READ_PERMISSIONS_REQUEST);
+            }
+        }else {
+            DirectoryManager.createDirectories();
+        }
         String extra = getIntent().getStringExtra("restartService");
         if (extra==null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -204,6 +240,7 @@ public class MainActivity extends AppCompatActivity  implements Comunicador {
                 bck.launchService(getApplicationContext());
             }
         }
+
         String from = getIntent().getStringExtra("from");
         if(from != null && from.equals("notification")){
             Bundle bundle = new Bundle();

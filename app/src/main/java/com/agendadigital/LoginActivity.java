@@ -1,11 +1,14 @@
 package com.agendadigital;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -14,7 +17,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.clases.Colegio;
 import com.agendadigital.clases.Constants;
@@ -25,6 +33,7 @@ import com.agendadigital.clases.User;
 import com.agendadigital.clases.Usuarios;
 import com.agendadigital.core.services.login.UserDto;
 import com.agendadigital.core.shared.infrastructure.Firebase;
+import com.agendadigital.core.shared.infrastructure.utils.DirectoryManager;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -35,6 +44,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -556,6 +566,8 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
         }
     }
+
+
 
     private void habilitar_alumno() {
         if(existe_Alumn()){
