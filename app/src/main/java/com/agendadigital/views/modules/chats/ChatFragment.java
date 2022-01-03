@@ -2,19 +2,14 @@ package com.agendadigital.views.modules.chats;
 
 import android.Manifest;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.MemoryFile;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -29,12 +24,13 @@ import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.core.modules.messages.domain.MessageBase;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
-import com.agendadigital.core.modules.messages.domain.MultimediaBase;
 import com.agendadigital.core.modules.messages.domain.MultimediaEntity;
 import com.agendadigital.core.modules.messages.infrastructure.MessageRepository;
 import com.agendadigital.core.services.messages.MessageDto;
 import com.agendadigital.core.services.messages.MultimediaDto;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
+import com.agendadigital.core.shared.infrastructure.utils.DirectoryManager;
+import com.agendadigital.core.shared.infrastructure.utils.FileUtils;
 import com.agendadigital.views.modules.chats.components.adapters.MessageAdapter;
 import com.agendadigital.views.modules.chats.components.fab.SendFloatingActionButton;
 import com.agendadigital.views.modules.chats.components.observers.MessageObservable;
@@ -43,12 +39,6 @@ import com.agendadigital.clases.User;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -58,15 +48,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import androidx.annotation.NonNull;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
@@ -137,7 +127,6 @@ public class ChatFragment extends Fragment {
                 int activityResult = 0;
                     switch (item.getItemId()) {
                     case R.id.attachDocument:
-                        Toast.makeText(view.getContext(), "FileAttach", Toast.LENGTH_SHORT).show();
                         pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
                         pickIntent.setType("*/*");
                         pickIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {
@@ -151,15 +140,13 @@ public class ChatFragment extends Fragment {
                         activityResult = MessageEntity.MessageType.Document.getValue();
                         break;
                     case R.id.attachImage:
-                        Toast.makeText(view.getContext(), "ImageAttach", Toast.LENGTH_SHORT).show();
-                        pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+                        pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         pickIntent.setType("image/*");
                         chooserIntent = Intent.createChooser(pickIntent, "Select a image");
                         activityResult = MessageEntity.MessageType.Image.getValue();
                         break;
                     case R.id.attachVideo:
-                        pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                        Toast.makeText(view.getContext(), "VideoAttach", Toast.LENGTH_SHORT).show();
+                        pickIntent = new Intent(Intent.ACTION_GET_CONTENT, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
                         pickIntent.setType("video/*");
                         chooserIntent = Intent.createChooser(pickIntent, "Select a video");
                         activityResult = MessageEntity.MessageType.Video.getValue();
@@ -178,9 +165,9 @@ public class ChatFragment extends Fragment {
         assert data != null;
 
         Uri selectedFile = data.getData();
-        String filePath = selectedFile.toString();
+
         File file = new File(selectedFile.getPath());
-        Log.d(TAG, "onActivityResultSelectedFile: " + filePath);
+        Log.d(TAG, "onActivityResultSelectedFile: " + file.getPath());
         Date currentTime = new Date(System.currentTimeMillis());
         MessageEntity messageEntity = new MessageEntity(UUID.randomUUID().toString()
                 , MessageEntity.MessageType.Image
@@ -195,108 +182,37 @@ public class ChatFragment extends Fragment {
 
         StorageReference storageReference = storage.getReference();
         StorageReference fileReference = null;
+        String filePath = "";
 
         if (requestCode == MessageEntity.MessageType.Image.getValue()) {
-//            Uri selectedImage = data.getData();
-//            Date currentTime = new Date(System.currentTimeMillis());
-//            MessageEntity messageEntity = new MessageEntity(UUID.randomUUID().toString()
-//                    , MessageEntity.MessageType.Image
-//                    , currentUser.getCodigo()
-//                    , currentUser.getTipo()
-//                    , currentContact.getId()
-//                    , currentContact.getContactType()
-//                    , ""
-//                    , currentContact.getContactType() == ContactEntity.ContactType.Course?1:0
-//                    , MessageEntity.DestinationState.Create
-//                    , 1, currentTime, currentTime, null  );
-//
-//            MultimediaEntity multimediaEntity = new MultimediaEntity(UUID.randomUUID().toString(), messageEntity.getId(), selectedImage.toString(), "");
-            messageEntity.setMessageType(MessageEntity.MessageType.Image);
-//            StorageReference storageReference = storage.getReference();
-//            StorageReference imageReference = storageReference.child("images/" + selectedFile.getLastPathSegment());
-//
-//            UploadTask uploadTask = imageReference.putFile(selectedFile);
-            fileReference = storageReference.child("images/" + file.getName());
-
-//            Task<Uri> urlTask = uploadTask.continueWithTask(task -> {
-//                if (!task.isSuccessful()) {
-//                    throw task.getException();
-//                }
-//                return imageReference.getDownloadUrl();
-//            }).addOnCompleteListener(task -> {
-//                Log.d(TAG, "onComplete: " + task.isSuccessful());
-//                if (task.isSuccessful()) {
-//                    Uri downloadUri = task.getResult();
-//                    multimediaEntity.setFirebaseUri(downloadUri.toString());
-//
-//                    messageEntity.setMultimediaEntity(multimediaEntity);
-//                    messageRepository.insert(messageEntity);
-//                    messageAdapter.add(messageEntity);
-//
-//                    JSONObject params = new JSONObject();
-//                    try {
-//                        MessageDto.SendMessageRequest sendMessageRequest = new MessageDto.SendMessageRequest(messageEntity.getMessageType().getValue()
-//                                , messageEntity.getDeviceFromId()
-//                                , messageEntity.getDeviceFromType().getValue()
-//                                , messageEntity.getDestinationId()
-//                                , messageEntity.getDestinationType().getValue()
-//                                , messageEntity.getData(), messageEntity.getForGroup(), messageEntity.getCreatedAt());
-//
-//                        sendMessageRequest.setMultimedia(new MultimediaDto.SendMultimediaRequest(multimediaEntity.getId(), multimediaEntity.getFirebaseUri()));
-//
-//                        Log.d(TAG, "MessageSent: " + sendMessageRequest.toJSON());
-//                        params.put("message", new JSONObject(sendMessageRequest.toJSON()));
-//
-//
-//                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/send-message", params, response -> {
-//                            try {
-//                                MessageDto.SendMessageResponse sendMessageResponse = new Gson().fromJson(response.getString("message"),
-//                                        new TypeToken<MessageDto.SendMessageResponse>() {}
-//                                                .getType());
-//
-//                                ContentValues contentValues = new ContentValues();
-//                                contentValues.put(MessageBase._ID, sendMessageResponse.getId());
-//                                contentValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Sent.getValue());
-//                                contentValues.put(MessageBase.COL_SENT_AT, currentTime.getTime());
-//                                messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { messageEntity.getId() });
-//
-//                                messageEntity.setDestinationState(MessageEntity.DestinationState.Sent);
-//                                messageAdapter.updateDestinationState(messageEntity);
-//                            } catch (JSONException e) {
-//                                e.printStackTrace();
-//                            }
-//                            Log.d(TAG, "onResponse: " + response);
-//                        }, error -> {
-//                            String body;
-//                            String statusCode = String.valueOf(error.networkResponse.statusCode);
-//                            if(error.networkResponse.data!=null) {
-//                                body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
-//                                Log.d(TAG, "onErrorResponse: " + body);
-//                                Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
-//                            }
-//                        });
-//                        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-//                        MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
-//
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                } else {
-//                    Log.d(TAG, "onCompleteError: " + task.getException());
-//                    Toast.makeText(view.getContext(), "No se pudo subir el archivo.", Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//            Log.d(TAG, "onActivityResult: " + selectedFile.toString());
+            try {
+                messageEntity.setMessageType(MessageEntity.MessageType.Image);
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(view.getContext().getContentResolver(), selectedFile);
+                File bitmapFile = FileUtils.bitmapToFile(view.getContext(), bitmap, file.getName());
+                filePath = FileUtils.saveImageJPEG(view.getContext(), bitmapFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
+                Log.d(TAG, "onActivityResultVideo: " + filePath);
+                fileReference = storageReference.child("images/" + file.getName());
+            }catch (Exception e) {
+                Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
+            }
         } else if (requestCode == MessageEntity.MessageType.Video.getValue()) {
-            messageEntity.setMessageType(MessageEntity.MessageType.Video);
-            filePath = file.getPath();
-            fileReference = storageReference.child("videos/" + file.getName());
+            try {
+                messageEntity.setMessageType(MessageEntity.MessageType.Video);
+                filePath = FileUtils.saveVideoMP4FromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Video, true));//DirectoryManager.getPathToSave(MessageEntity.MessageType.Video, true) + file.getName() + ".mp4";
+                Log.d(TAG, "onActivityResultVideo: " + filePath);
+                fileReference = storageReference.child("videos/" + file.getName());
+            }catch (Exception e) {
+                Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
+            }
         } else if (requestCode == MessageEntity.MessageType.Document.getValue()) {
+            try {
             messageEntity.setMessageType(MessageEntity.MessageType.Document);
-            filePath = file.getPath();
-            Log.d(TAG, "onActivityResultDoc: " + file.getName());
+            filePath = FileUtils.saveDocumentFromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Document, true));
+            Log.d(TAG, "onActivityResultDoc: " + filePath);
             fileReference = storageReference.child("documents/" + file.getName());
+            }catch (Exception e) {
+                Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
+            }
         }
         MultimediaEntity multimediaEntity = new MultimediaEntity(UUID.randomUUID().toString(), messageEntity.getId(), filePath, "");
 
@@ -511,7 +427,7 @@ public class ChatFragment extends Fragment {
 
     private void confirmAck(MessageEntity message) throws UnsupportedEncodingException, JSONException {
         JSONObject params = new JSONObject();
-        MessageDto.ConfirmMessageRequest confirmMessageRequest = new MessageDto.ConfirmMessageRequest(message.getId(), message.getDestinationState().getValue(), DateFormatter.format(message.getReceivedAt()));
+        MessageDto.ConfirmMessageRequest confirmMessageRequest = new MessageDto.ConfirmMessageRequest(message.getId(), message.getDestinationState().getValue(), DateFormatter.formatToDate(message.getReceivedAt()));
         params.put("message", new JSONObject(confirmMessageRequest.toJSON()));
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/send-message", params, response -> {
@@ -530,6 +446,4 @@ public class ChatFragment extends Fragment {
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
     }
-
-    
 }

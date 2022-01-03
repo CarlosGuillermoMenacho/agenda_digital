@@ -19,14 +19,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:src="@drawable/ic_user"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:contentDescription="@string/contact_photo" />
     </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/tvContactName"
         android:layout_width="0dp"
         android:layout_height="24dp"
-        android:layout_marginRight="14dp"
+        android:layout_marginEnd="14dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:layout_toStartOf="@id/tvContactLastReceivedMessage"

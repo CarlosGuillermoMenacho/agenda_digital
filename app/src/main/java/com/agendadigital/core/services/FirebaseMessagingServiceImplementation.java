@@ -4,7 +4,6 @@ import android.app.ActivityManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,7 +11,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.agendadigital.MainActivity;
 import com.agendadigital.R;
@@ -23,23 +21,19 @@ import com.agendadigital.clases.User;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
-import com.agendadigital.core.modules.messages.domain.MultimediaBase;
 import com.agendadigital.core.modules.messages.domain.MultimediaEntity;
 import com.agendadigital.core.modules.messages.infrastructure.MessageRepository;
 import com.agendadigital.core.services.messages.MessageDto;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
 import com.agendadigital.core.shared.infrastructure.utils.DirectoryManager;
+import com.agendadigital.core.shared.infrastructure.utils.FileUtils;
 import com.agendadigital.views.modules.chats.components.observers.MessageObservable;
 import com.agendadigital.views.modules.contacts.components.observers.ContactObservable;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -171,7 +165,7 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
 
     private void confirmAck(MessageEntity message) throws UnsupportedEncodingException, JSONException {
         JSONObject params = new JSONObject();
-        MessageDto.ConfirmMessageRequest confirmMessageRequest = new MessageDto.ConfirmMessageRequest(message.getId(), message.getDestinationState().getValue(), DateFormatter.format(message.getReceivedAt()));
+        MessageDto.ConfirmMessageRequest confirmMessageRequest = new MessageDto.ConfirmMessageRequest(message.getId(), message.getDestinationState().getValue(), DateFormatter.formatToDate(message.getReceivedAt()));
         params.put("message", new JSONObject(confirmMessageRequest.toJSON()));
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/send-message", params, response -> {
@@ -196,42 +190,21 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
             try {
                 String pathToSave = "";
                 if (message.getMessageType() ==  MessageEntity.MessageType.Image) {
-                    Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), Uri.fromFile(localFile));
-                    pathToSave = DirectoryManager.getPathToSave(message.getMessageType());
-                    FileOutputStream out = new FileOutputStream(new File(pathToSave, message.getMultimediaEntity().getId() + ".jpg"));
-                    pathToSave += message.getMultimediaEntity().getId() + ".jpg";
-                    imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-                    out.flush();
-                    out.close();
+                    pathToSave = FileUtils.saveImageJPEG(getApplicationContext()
+                            , localFile
+                            , message.getMultimediaEntity().getId()
+                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
                 }else if (message.getMessageType() == MessageEntity.MessageType.Video) {
-                    pathToSave = DirectoryManager.getPathToSave(message.getMessageType());
-                    InputStream inputStream = new FileInputStream(localFile);
-                    FileOutputStream out = new FileOutputStream(new File(pathToSave, message.getMultimediaEntity().getId() + ".mp4"));
-                    pathToSave += fileToDownloadReference.getName();
-                    byte[] buf = new byte[1024];
-                    int len;
-                    while ((len = inputStream.read(buf)) > 0) {
-                        out.write(buf, 0, len);
-                    }
-                    out.flush();
-                    inputStream.close();
-                    out.close();
+                    pathToSave = FileUtils.saveVideoMP4FromFile(getApplicationContext()
+                            , localFile
+                            , fileToDownloadReference.getName()
+                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
                 }else if (message.getMessageType() == MessageEntity.MessageType.Document) {
                     Log.d(TAG, "onSuccessDocument: " + fileToDownloadReference.getName());
-                    pathToSave = DirectoryManager.getPathToSave(message.getMessageType());
-                    InputStream inputStream = new FileInputStream(localFile);
-                    FileOutputStream fileOutputStream = new FileOutputStream(new File(pathToSave, fileToDownloadReference.getName()), true);
-                    pathToSave += fileToDownloadReference.getName();
-                    byte[] buf = new byte[5 * 1024];
-                    int len;
-
-                    while ((len = inputStream.read(buf)) > 0) {
-                        fileOutputStream.write(buf, 0, len);
-                    }
-
-                    fileOutputStream.flush();
-                    inputStream.close();
-                    fileOutputStream.close();
+                    pathToSave = FileUtils.saveDocument(getApplicationContext()
+                            , localFile
+                            , fileToDownloadReference.getName()
+                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
                 }
 
                 Log.d(TAG, "onSuccessSave: " + pathToSave);

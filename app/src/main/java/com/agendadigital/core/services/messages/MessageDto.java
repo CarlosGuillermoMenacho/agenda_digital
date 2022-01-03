@@ -1,18 +1,11 @@
 package com.agendadigital.core.services.messages;
 
-import com.agendadigital.core.modules.messages.domain.MessageEntity;
-import com.agendadigital.core.modules.messages.domain.MultimediaEntity;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class MessageDto {
 
@@ -121,8 +114,8 @@ public class MessageDto {
                 jsonObject.put("destinationType", destinationType);
                 jsonObject.put("data", data);
                 jsonObject.put("forGroup", forGroup);
-                jsonObject.put("createdAt", DateFormatter.format(createdAt));
-                jsonObject.put("multimedia", new JSONObject(multimedia.toJSON()));
+                jsonObject.put("createdAt", DateFormatter.formatToDate(createdAt));
+                jsonObject.put("multimedia", multimedia != null? new JSONObject(multimedia.toJSON()): "");
                 return jsonObject.toString(4);
             } catch (JSONException e) {
                 // TODO Auto-generated catch block

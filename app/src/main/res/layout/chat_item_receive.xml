@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
 
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:paddingStart="16dp"
     android:paddingEnd="72dp">
@@ -41,8 +41,37 @@
                 android:id="@+id/ivImageMessage"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
-                android:scaleType="centerCrop"
-                android:layout_gravity="start"/>
+                android:maxWidth="150dp"
+                android:maxHeight="150dp"
+                android:layout_gravity="end"
+                android:visibility="visible"
+                android:contentDescription="@string/image"
+                android:adjustViewBounds="true"/>
+
+            <FrameLayout
+                android:id="@+id/flMessageVideoContainer"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:visibility="gone"
+                android:layout_gravity="end"
+                android:background="@android:color/transparent">
+                <VideoView
+                    android:id="@+id/vvVideoMessage"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:visibility="visible"
+                    android:layout_gravity="end"
+                    android:contentDescription="@string/video_message"/>
+
+                <ImageButton
+                    android:id="@+id/ibMessagePlayVideo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:layout_gravity="center_vertical|center_horizontal"
+                    android:visibility="visible"
+                    android:src="@drawable/play_64icon"/>
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/message_text_view"
@@ -72,4 +101,4 @@
 
     </androidx.cardview.widget.CardView>
 
-</FrameLayout>
+</RelativeLayout>

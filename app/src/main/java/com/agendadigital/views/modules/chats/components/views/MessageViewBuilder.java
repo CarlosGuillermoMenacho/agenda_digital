@@ -6,10 +6,11 @@ import android.view.ViewGroup;
 public class MessageViewBuilder {
 
     public static View build(ViewGroup parent, int messageType) {
-        View view= new ItemSentView(parent).initializeView();
+        MessageView view= new ItemSentView(parent);
         if (messageType == 2) {
-            view = new ItemReceiveView(parent).initializeView();
+            view = new ItemReceiveView(parent);
         }
+        view.initComponents();
         return view;
     }
 }

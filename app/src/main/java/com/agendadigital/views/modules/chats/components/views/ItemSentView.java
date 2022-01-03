@@ -8,6 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.agendadigital.R;
+import com.agendadigital.core.modules.messages.domain.MessageEntity;
+import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
+
+import java.io.IOException;
 
 import androidx.annotation.NonNull;
 
@@ -15,20 +19,17 @@ public class ItemSentView extends MessageView {
 
     public ItemSentView(@NonNull ViewGroup viewGroup) {
         super(viewGroup);
-    }
-
-    public ItemSentView(ViewGroup viewGroup, AttributeSet attrs) {
-        super(viewGroup, attrs);
+        inflate(viewGroup.getContext(), R.layout.chat_item_sent, this);
     }
 
     @Override
-    public View initializeView() {
-        View view = null;
-        LayoutInflater inflater = (LayoutInflater)
-                viewGroup.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (inflater != null) {
-            view = inflater.inflate(R.layout.chat_item_sent, viewGroup, false);
+    public void setMessage(MessageEntity message) throws IOException {
+        super.setMessage(message);
+        this.tvMessageReceivedAt.setText(DateFormatter.formatToTime(message.getCreatedAt()));
+        if(messageEntity.getDestinationState() == MessageEntity.DestinationState.Create) {
+            this.tvMessageBody.setTextColor(Color.RED);
+        } else {
+            this.tvMessageBody.setTextColor(Color.BLACK);
         }
-        return view;
     }
 }

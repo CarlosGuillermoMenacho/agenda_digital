@@ -111,5 +111,8 @@
     <string name="attachImage">Image</string>
     <string name="attachDocument">Document</string>
     <string name="attachVideo">Video</string>
+    <string name="image">Image</string>
+    <string name="contact_photo">contact_photo</string>
+    <string name="video_message">Video Message</string>
 
 </resources>

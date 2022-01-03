@@ -12,21 +12,36 @@ public class DirectoryManager {
     private static final String TAG = "DirectoryManager";
     private static final String MAIN_DIRECTORY = "AgendaAizama";
     private static final String IMAGES_DIRECTORY = MAIN_DIRECTORY + File.separator + "Imagenes";
+    private static final String IMAGES_SENT_DIRECTORY = MAIN_DIRECTORY + File.separator + "Imagenes" + File.separator + "Enviadas";
     private static final String VIDEOS_DIRECTORY = MAIN_DIRECTORY + File.separator + "Videos";
+    private static final String VIDEOS_SENT_DIRECTORY = MAIN_DIRECTORY + File.separator + "Videos" + File.separator + "Enviados";
     private static final String DOCUMENTS_DIRECTORY = MAIN_DIRECTORY + File.separator + "Documentos";
+    private static final String DOCUMENTS_SENT_DIRECTORY = MAIN_DIRECTORY + File.separator + "Documentos" + File.separator + "Enviados";
 
 
-    public static String getPathToSave(MessageEntity.MessageType messageType) {
+    public static String getPathToSave(MessageEntity.MessageType messageType, boolean sent) {
         String path = Environment.getExternalStorageDirectory() + File.separator;
         switch (messageType) {
             case Image:
-                path += IMAGES_DIRECTORY + File.separator;
+                if (sent) {
+                    path += IMAGES_SENT_DIRECTORY + File.separator;
+                }else {
+                    path += IMAGES_DIRECTORY + File.separator;
+                }
                 break;
             case Video:
-                path += VIDEOS_DIRECTORY + File.separator;
+                if (sent) {
+                    path += VIDEOS_SENT_DIRECTORY + File.separator;
+                } else {
+                    path += VIDEOS_DIRECTORY + File.separator;
+                }
                 break;
             case Document:
-                path += DOCUMENTS_DIRECTORY + File.separator;
+                if (sent) {
+                    path += DOCUMENTS_SENT_DIRECTORY + File.separator;
+                } else {
+                    path += DOCUMENTS_DIRECTORY + File.separator;
+                }
                 break;
         }
         return path;
@@ -49,6 +64,12 @@ public class DirectoryManager {
     }
 
     public static boolean createDirectories() {
-        return createDirectory(MAIN_DIRECTORY) && createDirectory(IMAGES_DIRECTORY) && createDirectory(VIDEOS_DIRECTORY) && createDirectory(DOCUMENTS_DIRECTORY);
+        return createDirectory(MAIN_DIRECTORY)
+                && createDirectory(IMAGES_DIRECTORY)
+                && createDirectory(IMAGES_SENT_DIRECTORY)
+                && createDirectory(VIDEOS_DIRECTORY)
+                && createDirectory(VIDEOS_SENT_DIRECTORY)
+                && createDirectory(DOCUMENTS_DIRECTORY)
+                && createDirectory(DOCUMENTS_SENT_DIRECTORY);
     }
 }

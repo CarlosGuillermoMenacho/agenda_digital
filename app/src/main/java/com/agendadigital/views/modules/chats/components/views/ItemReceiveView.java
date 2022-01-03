@@ -8,26 +8,23 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.agendadigital.R;
+import com.agendadigital.core.modules.messages.domain.MessageEntity;
+import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
+
+import java.io.IOException;
 
 import androidx.annotation.NonNull;
 
 public class ItemReceiveView extends MessageView {
     public ItemReceiveView(@NonNull ViewGroup viewGroup) {
         super(viewGroup);
-    }
-
-    public ItemReceiveView(ViewGroup viewGroup, AttributeSet attrs) {
-        super(viewGroup, attrs);
+        inflate(viewGroup.getContext(), R.layout.chat_item_receive, this);
     }
 
     @Override
-    public View initializeView() {
-        View view = null;
-        LayoutInflater inflater = (LayoutInflater)
-                viewGroup.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (inflater != null) {
-            view = inflater.inflate(R.layout.chat_item_receive, viewGroup, false);
-        }
-        return view;
+    public void setMessage(MessageEntity message) throws IOException {
+        super.setMessage(message);
+        this.tvMessageBody.setTextColor(Color.WHITE);
+        this.tvMessageReceivedAt.setText(DateFormatter.formatToTime(message.getReceivedAt()));
     }
 }

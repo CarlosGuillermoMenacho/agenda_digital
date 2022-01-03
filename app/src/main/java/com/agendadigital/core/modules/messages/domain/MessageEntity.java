@@ -1,18 +1,13 @@
 package com.agendadigital.core.modules.messages.domain;
 
-import android.provider.ContactsContract;
-
 import com.agendadigital.clases.User;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
-
-import java.text.SimpleDateFormat;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
-import java.util.List;
 
 import androidx.annotation.NonNull;
 
@@ -172,9 +167,9 @@ public class MessageEntity {
             jsonObject.put("forGroup", forGroup);
             jsonObject.put("destinationStatus", destinationState.getValue());
             jsonObject.put("state", state);
-            jsonObject.put("createdAt", DateFormatter.format(createdAt));
-            jsonObject.put("sentAt", DateFormatter.format(sentAt));
-            jsonObject.put("receivedAt", receivedAt == null?null: DateFormatter.format(receivedAt));
+            jsonObject.put("createdAt", DateFormatter.formatToDate(createdAt));
+            jsonObject.put("sentAt", DateFormatter.formatToDate(sentAt));
+            jsonObject.put("receivedAt", receivedAt == null?null: DateFormatter.formatToDate(receivedAt));
             return jsonObject.toString(4);
     }
 
