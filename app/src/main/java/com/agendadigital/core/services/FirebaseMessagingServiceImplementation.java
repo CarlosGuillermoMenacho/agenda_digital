@@ -6,10 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Build;
-import android.provider.MediaStore;
 import android.util.Log;
 
 import com.agendadigital.MainActivity;
@@ -26,7 +23,7 @@ import com.agendadigital.core.modules.messages.infrastructure.MessageRepository;
 import com.agendadigital.core.services.messages.MessageDto;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
 import com.agendadigital.core.shared.infrastructure.utils.DirectoryManager;
-import com.agendadigital.core.shared.infrastructure.utils.FileUtils;
+import com.agendadigital.core.shared.infrastructure.utils.FilesUtils;
 import com.agendadigital.views.modules.chats.components.observers.MessageObservable;
 import com.agendadigital.views.modules.contacts.components.observers.ContactObservable;
 import com.android.volley.DefaultRetryPolicy;
@@ -41,10 +38,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -190,18 +184,18 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
             try {
                 String pathToSave = "";
                 if (message.getMessageType() ==  MessageEntity.MessageType.Image) {
-                    pathToSave = FileUtils.saveImageJPEG(getApplicationContext()
+                    pathToSave = FilesUtils.saveImageJPEG(getApplicationContext()
                             , localFile
                             , message.getMultimediaEntity().getId()
                             , DirectoryManager.getPathToSave(message.getMessageType(), false));
                 }else if (message.getMessageType() == MessageEntity.MessageType.Video) {
-                    pathToSave = FileUtils.saveVideoMP4FromFile(getApplicationContext()
+                    pathToSave = FilesUtils.saveVideoMP4FromFile(getApplicationContext()
                             , localFile
                             , fileToDownloadReference.getName()
                             , DirectoryManager.getPathToSave(message.getMessageType(), false));
                 }else if (message.getMessageType() == MessageEntity.MessageType.Document) {
                     Log.d(TAG, "onSuccessDocument: " + fileToDownloadReference.getName());
-                    pathToSave = FileUtils.saveDocument(getApplicationContext()
+                    pathToSave = FilesUtils.saveDocument(getApplicationContext()
                             , localFile
                             , fileToDownloadReference.getName()
                             , DirectoryManager.getPathToSave(message.getMessageType(), false));

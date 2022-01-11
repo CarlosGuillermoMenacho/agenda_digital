@@ -56,5 +56,5 @@ public class MessageBase implements BaseColumns {
     };
 
     public static final String sortOrder =
-            COL_CREATED_AT + " ASC";
+            COL_SENT_AT + " ASC";
 }

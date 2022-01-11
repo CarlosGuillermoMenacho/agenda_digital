@@ -105,12 +105,12 @@ public class MessageRepository {
             int destinationType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_TYPE));
             String data = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DATA));
             int forGroup = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_FOR_GROUP));
-            MessageEntity.DestinationState destionationState = MessageEntity.DestinationState.setValue(cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_STATE)));
+            MessageEntity.DestinationState destinationState = MessageEntity.DestinationState.setValue(cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_STATE)));
             int status = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_STATE));
             Date createdAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_CREATED_AT)));
             Date sentAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_SENT_AT)));
             Date receivedAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_RECEIVED_AT)));
-            MessageEntity messageEntity = new MessageEntity(id, MessageEntity.MessageType.setValue(messageType), deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, forGroup, destionationState, status, createdAt, sentAt, receivedAt);
+            MessageEntity messageEntity = new MessageEntity(id, MessageEntity.MessageType.setValue(messageType), deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, forGroup, destinationState, status, createdAt, sentAt, receivedAt);
             messageEntity.setMultimediaEntity(getMultimedia(messageEntity.getId()));
             notificationEntities.add(messageEntity);
         }

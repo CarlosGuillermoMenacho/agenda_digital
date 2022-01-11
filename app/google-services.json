@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "99403445413",
-    "project_id": "agendadigital-f9d57",
-    "storage_bucket": "agendadigital-f9d57.appspot.com"
+    "project_number": "505703894825",
+    "project_id": "agenda-digital-b7400",
+    "storage_bucket": "agenda-digital-b7400.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:99403445413:android:412a21dc4a846ecb44894c",
+        "mobilesdk_app_id": "1:505703894825:android:ae5eb5af4bb4089663b138",
         "android_client_info": {
           "package_name": "com.agendadigital"
         }
       },
       "oauth_client": [
         {
-          "client_id": "99403445413-foma2uv6oc1csim1paiebabm0rqvlgdo.apps.googleusercontent.com",
+          "client_id": "505703894825-j9oen9chpapuu7m66u1f194q1a3h9p92.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBH294o1tIwoHOaJoqwwSXUzG7nhS12BBE"
+          "current_key": "AIzaSyDjffe-pAPUrPG97FV1VVmv0UmPcDPWU-8"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "99403445413-foma2uv6oc1csim1paiebabm0rqvlgdo.apps.googleusercontent.com",
+              "client_id": "505703894825-j9oen9chpapuu7m66u1f194q1a3h9p92.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

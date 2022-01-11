@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 
@@ -17,8 +18,34 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.channels.FileChannel;
 
-public class FileUtils {
+import androidx.annotation.RequiresApi;
+
+public class FilesUtils {
+
+    public static String copyFile(String from, String fileName, String pathToSave) {
+        try {
+            File sd = Environment.getExternalStorageDirectory();
+            if (sd.canWrite()) {
+                int end = from.toString().lastIndexOf("/");
+                String str1 = from.toString().substring(0, end);
+                String str2 = from.toString().substring(end+1, from.length());
+                File source = new File(str1, str2);
+                File destination= new File(pathToSave, str2);
+                if (source.exists()) {
+                    FileChannel src = new FileInputStream(source).getChannel();
+                    FileChannel dst = new FileOutputStream(destination).getChannel();
+                    dst.transferFrom(src, 0, src.size());
+                    src.close();
+                    dst.close();
+                }
+            }
+            return pathToSave + fileName + ".jpg";
+        } catch (Exception e) {
+            return "";
+        }
+    }
 
     public static String saveImageJPEG(Context context, File file, String fileName, String pathToSave) throws IOException {
         Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.fromFile(file));
@@ -93,7 +120,7 @@ public class FileUtils {
         File file = new File(context.getCacheDir(), filename);
         if (file.createNewFile()) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 0 /*ignored for PNG*/, bos);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100 /*ignored for PNG*/, bos);
             byte[] bitmapdata = bos.toByteArray();
 
             FileOutputStream fos = new FileOutputStream(file);

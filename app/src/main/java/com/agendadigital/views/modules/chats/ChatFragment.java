@@ -30,7 +30,7 @@ import com.agendadigital.core.services.messages.MessageDto;
 import com.agendadigital.core.services.messages.MultimediaDto;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
 import com.agendadigital.core.shared.infrastructure.utils.DirectoryManager;
-import com.agendadigital.core.shared.infrastructure.utils.FileUtils;
+import com.agendadigital.core.shared.infrastructure.utils.FilesUtils;
 import com.agendadigital.views.modules.chats.components.adapters.MessageAdapter;
 import com.agendadigital.views.modules.chats.components.fab.SendFloatingActionButton;
 import com.agendadigital.views.modules.chats.components.observers.MessageObservable;
@@ -48,10 +48,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -188,17 +187,18 @@ public class ChatFragment extends Fragment {
             try {
                 messageEntity.setMessageType(MessageEntity.MessageType.Image);
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(view.getContext().getContentResolver(), selectedFile);
-                File bitmapFile = FileUtils.bitmapToFile(view.getContext(), bitmap, file.getName());
-                filePath = FileUtils.saveImageJPEG(view.getContext(), bitmapFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
-                Log.d(TAG, "onActivityResultVideo: " + filePath);
+                File bitmapFile = FilesUtils.bitmapToFile(view.getContext(), bitmap, file.getName());
+                //filePath = FilesUtils.copyFile(file.getPath(), file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
+                filePath = FilesUtils.saveImageJPEG(view.getContext(), bitmapFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
+                Log.d(TAG, "onActivityResultImage: " + filePath);
                 fileReference = storageReference.child("images/" + file.getName());
             }catch (Exception e) {
-                Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
+                Log.e(TAG, "onActivityResultImage: ", e.fillInStackTrace());
             }
         } else if (requestCode == MessageEntity.MessageType.Video.getValue()) {
             try {
                 messageEntity.setMessageType(MessageEntity.MessageType.Video);
-                filePath = FileUtils.saveVideoMP4FromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Video, true));//DirectoryManager.getPathToSave(MessageEntity.MessageType.Video, true) + file.getName() + ".mp4";
+                filePath = FilesUtils.saveVideoMP4FromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Video, true));//DirectoryManager.getPathToSave(MessageEntity.MessageType.Video, true) + file.getName() + ".mp4";
                 Log.d(TAG, "onActivityResultVideo: " + filePath);
                 fileReference = storageReference.child("videos/" + file.getName());
             }catch (Exception e) {
@@ -207,7 +207,7 @@ public class ChatFragment extends Fragment {
         } else if (requestCode == MessageEntity.MessageType.Document.getValue()) {
             try {
             messageEntity.setMessageType(MessageEntity.MessageType.Document);
-            filePath = FileUtils.saveDocumentFromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Document, true));
+            filePath = FilesUtils.saveDocumentFromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Document, true));
             Log.d(TAG, "onActivityResultDoc: " + filePath);
             fileReference = storageReference.child("documents/" + file.getName());
             }catch (Exception e) {
@@ -396,12 +396,12 @@ public class ChatFragment extends Fragment {
                             ContentValues contentValues = new ContentValues();
                             contentValues.put(MessageBase._ID, sendMessageResponse.getId());
                             contentValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Sent.getValue());
-                            contentValues.put(MessageBase.COL_SENT_AT, currentTime.getTime());
+                            contentValues.put(MessageBase.COL_SENT_AT, DateFormatter.parse(sendMessageResponse.getSentAt()).getTime());
                             messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { messageSend.getId() });
 
                             messageSend.setDestinationState(MessageEntity.DestinationState.Sent);
                             messageAdapter.updateDestinationState(messageSend);
-                        } catch (JSONException e) {
+                        } catch (JSONException | ParseException e) {
                             e.printStackTrace();
                         }
                         Log.d(TAG, "onResponse: " + response);

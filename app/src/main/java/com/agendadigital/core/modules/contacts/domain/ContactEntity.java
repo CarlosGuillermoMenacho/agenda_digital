@@ -99,7 +99,8 @@ public class ContactEntity implements Serializable {
         Teacher(3),
         Director(4),
         Staff(5),
-        Course(6);
+        Course(6),
+        TeacherAndDirectorGroup(7);
 
         private final int value;
 
@@ -124,6 +125,8 @@ public class ContactEntity implements Serializable {
                     return Staff;
                 case 6:
                     return Course;
+                case 7:
+                    return TeacherAndDirectorGroup;
                 default:
                     throw new Exception("TypeContact inválido." + value);
             }
