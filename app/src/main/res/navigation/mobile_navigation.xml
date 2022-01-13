@@ -14,11 +14,19 @@
             android:id="@+id/action_nav_home_to_fragmentFormAfiliacion2"
             app:destination="@id/fragmentFormAfiliacion" />
     </fragment>
+
     <fragment
         android:id="@+id/fragmentChat"
         android:name="com.agendadigital.views.modules.chats.ChatFragment"
         android:label="Chat"
-        tools:layout="@layout/fragment_chat" >
+        tools:layout="@layout/fragment_chat">
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentRestrictions"
+        android:name="com.agendadigital.views.modules.restrictions.RestrictionsFragment"
+        android:label="Restricciones"
+        tools:layout="@layout/fragment_restrictions" >
     </fragment>
 
     <fragment
@@ -29,6 +37,9 @@
         <action
             android:id="@+id/action_fragment_contacts_to_fragment_chat"
             app:destination="@id/fragmentChat" />
+        <action
+            android:id="@+id/action_fragment_contacts_to_fragment_restrictions"
+            app:destination="@id/fragmentRestrictions" />
     </fragment>
     <!--Navigation Drawer-->
     <fragment

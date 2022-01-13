@@ -4,7 +4,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import com.itextpdf.text.pdf.codec.Base64;
 
-public class User {
+import java.io.Serializable;
+
+ public class User {
     private String codigo;
     private String nombre;
     private UserType tipo;

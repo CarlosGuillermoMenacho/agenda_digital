@@ -13,11 +13,13 @@ import com.agendadigital.R;
 import com.agendadigital.clases.Constants;
 import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.MySingleton;
+import com.agendadigital.clases.User;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import com.agendadigital.core.services.contacts.ContactDto;
 import com.agendadigital.core.shared.infrastructure.AsyncHttpRest;
+import com.agendadigital.views.modules.chats.ChatFragment;
 import com.agendadigital.views.modules.chats.components.observers.MessageObservable;
 import com.agendadigital.views.modules.contacts.components.ContactAdapter;
 import com.agendadigital.clases.Globals;
@@ -38,6 +40,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
@@ -101,14 +104,11 @@ public class ContactFragment extends Fragment {
                     }
                 });
         try {
-            //contactRepository.deleteAll();
             getContactsFromDatabase();
             if (contactEntityList.size() == 0) {
                 getContactsFromServer();
             }
             contactAdapter.setContactEntityList(contactEntityList);
-//            Collections.sort(contactEntityList, ContactEntity.contactUnreadMessagesAndReceivedAt);
-//            contactAdapter.notifyDataSetChanged();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -122,6 +122,24 @@ public class ContactFragment extends Fragment {
 
             @Override
             public void onLongClick(int position, View v) {
+
+                if ((Globals.user.getTipo() == User.UserType.Director && contactEntityList.get(position).getContactType() == ContactEntity.ContactType.TeacherAndDirectorGroup)
+                        || (Globals.user.getTipo() == User.UserType.Teacher
+                            && (contactEntityList.get(position).getContactType() == ContactEntity.ContactType.Course
+                                || contactEntityList.get(position).getContactType() == ContactEntity.ContactType.CourseWithTutors))) {
+                    PopupMenu popupMenu = new PopupMenu(viewFragment.getContext(), v);
+                    popupMenu.setOnMenuItemClickListener(item -> {
+                        if(item.getItemId() == R.id.groupRestrictionsConfig) {
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("contact", contactEntityList.get(position));
+                            Navigation.findNavController(requireView()).navigate(R.id.action_fragment_contacts_to_fragment_restrictions, bundle);
+                        }
+                        return ContactFragment.super.onOptionsItemSelected(item);
+                    });
+                    popupMenu.inflate(R.menu.popup_group_restrictions_config);
+                    popupMenu.show();
+                }
+
             }
         });
         return viewFragment;

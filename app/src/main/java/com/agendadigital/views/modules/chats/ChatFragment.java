@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -60,6 +61,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.Observer;
@@ -83,16 +85,25 @@ public class ChatFragment extends Fragment {
     private SendFloatingActionButton sendFloatingActionButton;
 
     private FirebaseStorage storage;
+
+    private int abTitleId;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         view = inflater.inflate(R.layout.fragment_chat, container, false);
+        currentUser = Globals.user;
         Bundle bundle = getArguments();
         if (bundle != null) {
             currentContact = (ContactEntity) bundle.getSerializable("contact");
             new ContactRepository(view.getContext()).resetUnreadMessages(currentContact);
             ((MainActivity) getActivity()).getSupportActionBar().setTitle(currentContact.toString());
+//            if ((currentUser.getTipo() == User.UserType.Director && currentContact.getContactType() == ContactEntity.ContactType.TeacherAndDirectorGroup)
+//                 || (currentUser.getTipo() == User.UserType.Teacher && currentContact.getContactType() == ContactEntity.ContactType.Course)) {
+//                MenuItem groupConfig = view.findViewById(R.id.groupRestrictionsConfig);
+//                groupConfig.setVisible(true);
+//            }
         }
         if(ActivityCompat.checkSelfPermission(view.getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(view.getContext(), "Sin permisos de lectura", Toast.LENGTH_SHORT).show();
@@ -113,7 +124,6 @@ public class ChatFragment extends Fragment {
         messageRepository = new MessageRepository(view.getContext());
         btAttach = view.findViewById(R.id.btAttach);
         etTextMessageToSend = view.findViewById(R.id.etTextMessageToSend);
-        currentUser = Globals.user;
         storage = FirebaseStorage.getInstance();
     }
 
