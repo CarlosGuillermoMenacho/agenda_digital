@@ -148,8 +148,6 @@ public abstract class MessageView extends RelativeLayout {
             image.setLayoutParams(layoutParams);
         });
         dialog.show();
-
-
     }
 
     private void showVideoView(String path) {

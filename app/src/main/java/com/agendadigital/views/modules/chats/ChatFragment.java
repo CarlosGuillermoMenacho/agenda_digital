@@ -1,7 +1,9 @@
 package com.agendadigital.views.modules.chats;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,8 +15,11 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.agendadigital.MainActivity;
 import com.agendadigital.R;
@@ -282,7 +287,7 @@ public class ChatFragment extends Fragment {
                             String statusCode = String.valueOf(error.networkResponse.statusCode);
                             if(error.networkResponse.data!=null) {
                                 body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
-                                Log.d(TAG, "onErrorResponse: " + body);
+                                Log.d(TAG, "SendMultimediaonErrorResponse: " + body);
                                 Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -291,7 +296,6 @@ public class ChatFragment extends Fragment {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
                 } else {
                     Log.d(TAG, "onCompleteError: " + task.getException());
                     Toast.makeText(view.getContext(), "No se pudo subir el archivo.", Toast.LENGTH_SHORT).show();
@@ -420,7 +424,7 @@ public class ChatFragment extends Fragment {
                         String statusCode = String.valueOf(error.networkResponse.statusCode);
                         if(error.networkResponse.data!=null) {
                             body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
-                            Log.d(TAG, "onErrorResponse: " + body);
+                            Log.d(TAG, "sendButtononErrorResponse: " + body);
                             Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -440,7 +444,7 @@ public class ChatFragment extends Fragment {
         MessageDto.ConfirmMessageRequest confirmMessageRequest = new MessageDto.ConfirmMessageRequest(message.getId(), message.getDestinationState().getValue(), DateFormatter.formatToDate(message.getReceivedAt()));
         params.put("message", new JSONObject(confirmMessageRequest.toJSON()));
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/send-message", params, response -> {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/confirm-message", params, response -> {
             ContentValues contentValues = new ContentValues();
             contentValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Read.getValue());
             messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { message.getId() });
@@ -449,7 +453,7 @@ public class ChatFragment extends Fragment {
             String statusCode = String.valueOf(error.networkResponse.statusCode);
             if(error.networkResponse.data!=null) {
                 body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
-                Log.d(TAG, "onErrorResponse: " + body);
+                Log.d(TAG, "ackonErrorResponse: " + body);
                 Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
             }
         });

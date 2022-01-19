@@ -21,6 +21,16 @@
         android:paddingBottom="32dp"
         android:transcriptMode="alwaysScroll" />
 
+    <com.devlomi.record_view.RecordView
+        android:id="@+id/recordView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.8"
+        android:visibility="gone"
+        app:slide_to_cancel_arrow="@drawable/recv_ic_arrow"
+        app:slide_to_cancel_arrow_color="@color/black"
+        app:slide_to_cancel_text="Slide to cancel" />
+
     <com.agendadigital.views.modules.chats.components.fab.SendFloatingActionButton
         android:id="@+id/sendButton"
         tools:src="@drawable/ic_send_white_24dp"
@@ -29,6 +39,19 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true">
     </com.agendadigital.views.modules.chats.components.fab.SendFloatingActionButton>
+
+    <com.devlomi.record_view.RecordButton
+        android:id="@+id/recordButton"
+        android:layout_width="0dp"
+        android:layout_height="38dp"
+        android:layout_gravity="center|bottom"
+        android:layout_marginEnd="5dp"
+        android:layout_weight=".2"
+        android:background="@drawable/mic_background"
+        android:scaleType="center"
+        android:tint="@color/colorAccent"
+        android:visibility="gone"
+        app:mic_icon="@drawable/ic_mic" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/input_frame"

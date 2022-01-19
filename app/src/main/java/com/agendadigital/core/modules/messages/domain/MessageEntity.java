@@ -212,7 +212,8 @@ public class MessageEntity {
         Text(1),
         Image(2),
         Document(3),
-        Video(4);
+        Audio(4),
+        Video(5);
 
         private final int value;
 
@@ -233,6 +234,8 @@ public class MessageEntity {
                 case 3:
                     return Document;
                 case 4:
+                    return Audio;
+                case 5:
                     return Video;
                 default:
                     throw new Exception("MessageType doesn't exists");
