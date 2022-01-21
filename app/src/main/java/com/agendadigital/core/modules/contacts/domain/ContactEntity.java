@@ -83,7 +83,10 @@ public class ContactEntity implements Serializable {
     public static Comparator<ContactEntity> ContactLastReceivedMessages = new Comparator<ContactEntity>() {
         @Override
         public int compare(ContactEntity o1, ContactEntity o2) {
-            if (o2.getLastMessageReceived() == null) {
+            if (o1.getLastMessageReceived() == null) {
+                return -1;
+            }
+            else if (o2.getLastMessageReceived() == null) {
                 return 1;
             }else {
                 return o2.getLastMessageReceived().compareTo(o1.getLastMessageReceived());

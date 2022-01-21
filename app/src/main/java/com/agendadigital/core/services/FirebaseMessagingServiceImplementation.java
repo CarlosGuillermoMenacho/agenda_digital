@@ -162,7 +162,7 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
         MessageDto.ConfirmMessageRequest confirmMessageRequest = new MessageDto.ConfirmMessageRequest(message.getId(), message.getDestinationState().getValue(), DateFormatter.formatToDate(message.getReceivedAt()));
         params.put("message", new JSONObject(confirmMessageRequest.toJSON()));
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/send-message", params, response -> {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/confirm-message", params, response -> {
             Log.d(TAG, "confirmAck: " + response);
         }, error -> {
             String body;

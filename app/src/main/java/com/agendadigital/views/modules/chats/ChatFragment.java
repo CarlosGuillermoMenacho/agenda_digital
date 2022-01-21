@@ -379,7 +379,10 @@ public class ChatFragment extends Fragment {
                         currentContact.getId(),
                         currentContact.getContactType(),
                         etTextMessageToSend.getText().toString(),
-                        currentContact.getContactType() == ContactEntity.ContactType.Course ? 1 : 0,
+                        currentContact.getContactType() == ContactEntity.ContactType.Course
+                                || currentContact.getContactType() == ContactEntity.ContactType.CourseWithTutors
+                                || currentContact.getContactType() == ContactEntity.ContactType.TeacherAndDirectorGroup
+                                ? 1 : 0,
                         MessageEntity.DestinationState.Create,
                         1,
                         currentTime,
@@ -448,6 +451,7 @@ public class ChatFragment extends Fragment {
             ContentValues contentValues = new ContentValues();
             contentValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Read.getValue());
             messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { message.getId() });
+            new ContactRepository(view.getContext()).resetUnreadMessages(currentContact);
         }, error -> {
             String body;
             String statusCode = String.valueOf(error.networkResponse.statusCode);

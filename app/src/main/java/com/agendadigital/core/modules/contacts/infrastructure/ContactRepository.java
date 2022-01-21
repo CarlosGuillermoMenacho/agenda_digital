@@ -76,7 +76,16 @@ public class ContactRepository {
     }
 
     public ContactEntity updateUnreadMessagesAndLastMessage(MessageEntity messageEntity) throws Exception {
-        ContactEntity contactEntity = findByIdAndType(messageEntity.getDeviceFromId(), messageEntity.getDeviceFromType().getValue());
+        String id;
+        int type;
+        if(messageEntity.getForGroup() == 1) {
+            id = messageEntity.getDestinationId();
+            type = messageEntity.getDestinationType().getValue();
+        } else {
+            id = messageEntity.getDeviceFromId();
+            type = messageEntity.getDeviceFromType().getValue();
+        }
+        ContactEntity contactEntity = findByIdAndType(id, type);
         contactEntity.setUnreadMessages(contactEntity.getUnreadMessages() + 1);
         contactEntity.setLastMessageData(messageEntity.getData());
         contactEntity.setLastMessageReceived(messageEntity.getReceivedAt());
@@ -85,7 +94,7 @@ public class ContactRepository {
         contentValues.put(ContactBase.COL_LAST_MESSAGE_DATA, messageEntity.getData());
         contentValues.put(ContactBase.COL_LAST_MESSAGE_RECEIVED_AT, messageEntity.getReceivedAt().getTime());
         repository.update(ContactBase.TABLE_NAME, contentValues, ContactBase._ID + "= ? and " + ContactBase.COL_TYPE_CONTACT + "=?",
-                new String[] { messageEntity.getDeviceFromId(), String.valueOf(messageEntity.getDeviceFromType().getValue()) });
+                new String[] { id, String.valueOf(type) });
         return contactEntity;
     }
 
