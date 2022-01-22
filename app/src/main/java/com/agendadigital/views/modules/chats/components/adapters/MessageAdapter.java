@@ -36,9 +36,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
     @Override
     public int getItemViewType(int position) {
         MessageEntity messageEntity = messageEntities.get(position);
-        int viewType = 1;
-        if(messageEntity.getDestinationId().equals(Globals.user.getCodigo()) || messageEntity.getForGroup() == 1)
-            viewType = 2;
+        int viewType = 2;
+        if(messageEntity.getDeviceFromId().equals(Globals.user.getCodigo()))
+            viewType = 1;
         return viewType;
     }
 
