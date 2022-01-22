@@ -84,13 +84,12 @@ public class ContactEntity implements Serializable {
         @Override
         public int compare(ContactEntity o1, ContactEntity o2) {
             if (o1.getLastMessageReceived() == null) {
-                return -1;
+                o1.setLastMessageReceived(new Date(Long.MIN_VALUE));
             }
-            else if (o2.getLastMessageReceived() == null) {
-                return 1;
-            }else {
-                return o2.getLastMessageReceived().compareTo(o1.getLastMessageReceived());
+            if (o2.getLastMessageReceived() == null) {
+                o2.setLastMessageReceived(new Date(Long.MIN_VALUE));
             }
+            return o2.getLastMessageReceived().compareTo(o1.getLastMessageReceived());
         }
     };
 

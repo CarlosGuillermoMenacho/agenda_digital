@@ -7,9 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -45,6 +50,9 @@ import com.agendadigital.clases.User;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.devlomi.record_view.OnRecordListener;
+import com.devlomi.record_view.RecordButton;
+import com.devlomi.record_view.RecordView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -54,6 +62,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -64,6 +73,7 @@ import java.util.UUID;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
@@ -87,8 +97,12 @@ public class ChatFragment extends Fragment {
     private List<MessageEntity> messageEntityList = new ArrayList<>();
 
     private MessageRepository messageRepository;
+    private LinearLayout messageLayout;
     private SendFloatingActionButton sendFloatingActionButton;
-
+    private RecordView rvRecordView;
+    private RecordButton rbRecord;
+    private MediaRecorder mediaRecorder;
+    private String audioPath;
     private FirebaseStorage storage;
 
     private int abTitleId;
@@ -120,6 +134,7 @@ public class ChatFragment extends Fragment {
         }
         init();
         initSentButton();
+        initRecordButton();
         initRecyclerView();
         initAttachButton();
         return view;
@@ -128,7 +143,32 @@ public class ChatFragment extends Fragment {
     private void init(){
         messageRepository = new MessageRepository(view.getContext());
         btAttach = view.findViewById(R.id.btAttach);
+        messageLayout = view.findViewById(R.id.messageLayout);
         etTextMessageToSend = view.findViewById(R.id.etTextMessageToSend);
+
+        etTextMessageToSend.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.toString().trim().length() == 0) {
+                    sendFloatingActionButton.setVisibility(View.GONE);
+                    rbRecord.setVisibility(View.VISIBLE);
+                } else {
+                    rbRecord.setVisibility(View.GONE);
+                    sendFloatingActionButton.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         storage = FirebaseStorage.getInstance();
     }
 
@@ -190,7 +230,10 @@ public class ChatFragment extends Fragment {
                 , currentContact.getId()
                 , currentContact.getContactType()
                 , ""
-                , currentContact.getContactType() == ContactEntity.ContactType.Course?1:0
+                ,currentContact.getContactType() == ContactEntity.ContactType.Course
+                        || currentContact.getContactType() == ContactEntity.ContactType.CourseWithTutors
+                        || currentContact.getContactType() == ContactEntity.ContactType.TeacherAndDirectorGroup
+                        ? 1 : 0
                 , MessageEntity.DestinationState.Create
                 , 1, currentTime, currentTime, null  );
 
@@ -440,6 +483,90 @@ public class ChatFragment extends Fragment {
                 etTextMessageToSend.setText("");
             }
         });
+    }
+
+    private void initRecordButton() {
+        rvRecordView = view.findViewById(R.id.recordView);
+        rvRecordView.setCounterTimeColor(Color.BLACK);
+
+        rbRecord = view.findViewById(R.id.recordButton);
+        rbRecord.setRecordView(rvRecordView);
+
+        rbRecord.setListenForRecord(false);
+        rbRecord.setOnClickListener(view -> {
+            rbRecord.setListenForRecord(true);
+        });
+
+
+        rvRecordView.setOnRecordListener(new OnRecordListener() {
+            @Override
+            public void onStart() {
+                setUpRecording();
+
+                try {
+                    mediaRecorder.prepare();
+                    mediaRecorder.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                messageLayout.setVisibility(View.GONE);
+                rvRecordView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onCancel() {
+                mediaRecorder.reset();
+                mediaRecorder.release();
+                File file = new File(audioPath);
+                if (file.exists())
+                    file.delete();
+
+                rvRecordView.setVisibility(View.GONE);
+                messageLayout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onFinish(long recordTime) {
+                try {
+                    mediaRecorder.stop();
+                    mediaRecorder.release();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+                rvRecordView.setVisibility(View.GONE);
+                messageLayout.setVisibility(View.VISIBLE);
+
+                //sendRecodingMessage(audioPath);
+            }
+
+            @Override
+            public void onLessThanSecond() {
+                mediaRecorder.reset();
+                mediaRecorder.release();
+
+                File file = new File(audioPath);
+                if (file.exists())
+                    file.delete();
+
+                rvRecordView.setVisibility(View.GONE);
+                messageLayout.setVisibility(View.VISIBLE);
+            }
+        });
+
+    }
+
+    private void setUpRecording() {
+
+        mediaRecorder = new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+
+        audioPath = DirectoryManager.getPathToSave(MessageEntity.MessageType.Audio, true) + System.currentTimeMillis() + ".3gp";
+
+        mediaRecorder.setOutputFile(audioPath);
     }
 
     private void confirmAck(MessageEntity message) throws UnsupportedEncodingException, JSONException {

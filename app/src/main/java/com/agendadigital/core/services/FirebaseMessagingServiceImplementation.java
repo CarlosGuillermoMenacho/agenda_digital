@@ -199,6 +199,12 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
                             , localFile
                             , fileToDownloadReference.getName()
                             , DirectoryManager.getPathToSave(message.getMessageType(), false));
+                }else if (message.getMessageType() == MessageEntity.MessageType.Audio) {
+                    Log.d(TAG, "onSuccessDocument: " + fileToDownloadReference.getName());
+                    pathToSave = FilesUtils.saveDocument(getApplicationContext()
+                            , localFile
+                            , fileToDownloadReference.getName()
+                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
                 }
 
                 Log.d(TAG, "onSuccessSave: " + pathToSave);
