@@ -37,7 +37,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
     public int getItemViewType(int position) {
         MessageEntity messageEntity = messageEntities.get(position);
         int viewType = 1;
-        if(messageEntity.getDestinationId().equals(Globals.user.getCodigo()))
+        if(messageEntity.getDestinationId().equals(Globals.user.getCodigo()) || messageEntity.getForGroup() == 1)
             viewType = 2;
         return viewType;
     }

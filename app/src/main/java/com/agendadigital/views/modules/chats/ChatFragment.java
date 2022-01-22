@@ -118,11 +118,6 @@ public class ChatFragment extends Fragment {
             currentContact = (ContactEntity) bundle.getSerializable("contact");
             new ContactRepository(view.getContext()).resetUnreadMessages(currentContact);
             ((MainActivity) getActivity()).getSupportActionBar().setTitle(currentContact.toString());
-//            if ((currentUser.getTipo() == User.UserType.Director && currentContact.getContactType() == ContactEntity.ContactType.TeacherAndDirectorGroup)
-//                 || (currentUser.getTipo() == User.UserType.Teacher && currentContact.getContactType() == ContactEntity.ContactType.Course)) {
-//                MenuItem groupConfig = view.findViewById(R.id.groupRestrictionsConfig);
-//                groupConfig.setVisible(true);
-//            }
         }
         if(ActivityCompat.checkSelfPermission(view.getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(view.getContext(), "Sin permisos de lectura", Toast.LENGTH_SHORT).show();
@@ -356,7 +351,8 @@ public class ChatFragment extends Fragment {
             messageEntityList = messageRepository.findAll(currentContact.getId());
             messageAdapter = new MessageAdapter(messageEntityList);
             for (MessageEntity message: messageAdapter.getMessageEntities()) {
-                if (message.getDestinationId().equals(currentUser.getCodigo()) && message.getDestinationState() == MessageEntity.DestinationState.Received){
+                if ( (message.getDestinationId().equals(currentUser.getCodigo()) || message.getForGroup() == 1)
+                        && message.getDestinationState() == MessageEntity.DestinationState.Received){
                     message.setDestinationState(MessageEntity.DestinationState.Read);
                     confirmAck(message);
                 }
@@ -381,7 +377,7 @@ public class ChatFragment extends Fragment {
 
                         @Override
                         public void onNext(MessageEntity messageEntity) {
-                            if(messageEntity.getDestinationId().equals(currentUser.getCodigo())){
+                            if(messageEntity.getDestinationId().equals(currentUser.getCodigo()) || messageEntity.getForGroup() == 1){
                                 try {
                                     Log.d(TAG, "onNext: " + messageEntity.toJSON());
                                     messageEntity.setDestinationState(MessageEntity.DestinationState.Read);
