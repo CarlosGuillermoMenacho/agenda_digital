@@ -173,6 +173,13 @@ public class MessageEntity {
             return jsonObject.toString(4);
     }
 
+    public static int isForGroupMessage(ContactEntity destinationContact) {
+        return destinationContact.getContactType() == ContactEntity.ContactType.Course
+                || destinationContact.getContactType() == ContactEntity.ContactType.CourseWithTutors
+                || destinationContact.getContactType() == ContactEntity.ContactType.TeacherAndDirectorGroup
+                ? 1 : 0;
+    }
+
     @NonNull
     @Override
     public String toString() {

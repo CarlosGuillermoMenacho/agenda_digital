@@ -44,7 +44,7 @@
                 android:maxWidth="150dp"
                 android:maxHeight="150dp"
                 android:layout_gravity="end"
-                android:visibility="visible"
+                android:visibility="gone"
                 android:contentDescription="@string/image"
                 android:adjustViewBounds="true"/>
 
@@ -72,6 +72,36 @@
                     android:visibility="visible"
                     android:src="@drawable/play_64icon"/>
             </FrameLayout>
+
+            <RelativeLayout
+                android:id="@+id/rlMessageAudioContainer"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:visibility="visible"
+                android:layout_gravity="end"
+                android:background="@android:color/transparent">
+                <Button
+                    android:id="@+id/btAudioPlay"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_centerInParent="true"
+                    android:layout_alignParentStart="true"
+                    android:background="@drawable/play_32px"/>
+                <Button
+                    android:id="@+id/btAudioPause"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:visibility="gone"
+                    android:layout_centerInParent="true"
+                    android:layout_alignParentStart="true"
+                    android:background="@drawable/pause_32px"/>
+                <SeekBar
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="28dp"
+                    android:layout_centerInParent="true"/>
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/message_text_view"

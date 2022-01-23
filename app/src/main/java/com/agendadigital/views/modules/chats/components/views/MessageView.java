@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
@@ -14,11 +15,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.VideoView;
 import com.agendadigital.R;
@@ -42,6 +45,13 @@ public abstract class MessageView extends RelativeLayout {
     protected ViewGroup viewGroup;
     protected ImageButton ibMessagePlayVideo;
 
+    protected RelativeLayout rlMessageAudioContainer;
+    protected Button btAudioPlay;
+    protected Button btAudioPause;
+    protected SeekBar sbAudioBar;
+    protected MediaPlayer mediaPlayer;
+    private Thread thread;
+
     public MessageView(@NonNull ViewGroup viewGroup) {
         super(viewGroup.getContext());
         this.viewGroup = viewGroup;
@@ -57,6 +67,10 @@ public abstract class MessageView extends RelativeLayout {
         ibMessagePlayVideo = this.findViewById(R.id.ibMessagePlayVideo);
         bubble = this.findViewById(R.id.bubble);
 
+        rlMessageAudioContainer = this.findViewById(R.id.rlMessageAudioContainer);
+        btAudioPlay = this.findViewById(R.id.btAudioPlay);
+        btAudioPause = this.findViewById(R.id.btAudioPause);
+        sbAudioBar = this.findViewById(R.id.sbAudioBar);
     }
 
     public void setMessage(MessageEntity message) throws IOException {
@@ -68,19 +82,16 @@ public abstract class MessageView extends RelativeLayout {
             File file = new File(messageEntity.getMultimediaEntity().getLocalUri());
             switch (messageEntity.getMessageType()) {
                 case Image:
+                    rlMessageAudioContainer.setVisibility(GONE);
                     flVideoMessageContainer.setVisibility(GONE);
                     ivImage.setVisibility(VISIBLE);
                     Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(viewGroup.getContext().getContentResolver(), Uri.fromFile(file));
                     ivImage.setImageBitmap(Bitmap.createScaledBitmap(imageBitmap, ivImage.getMaxWidth(), ivImage.getMaxHeight(), true));
 
-                    ivImage.setOnClickListener(new OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            showImageView(imageBitmap);
-                        }
-                    });
+                    ivImage.setOnClickListener(v -> showImageView(imageBitmap));
                     break;
                 case Video:
+                    rlMessageAudioContainer.setVisibility(GONE);
                     ivImage.setVisibility(GONE);
                     flVideoMessageContainer.setVisibility(VISIBLE);
                     Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(file.getPath(), MediaStore.Images.Thumbnails.MINI_KIND);
@@ -91,6 +102,7 @@ public abstract class MessageView extends RelativeLayout {
                     ibMessagePlayVideo.setOnClickListener(v -> showVideoView(file.getPath()));
                     break;
                 case Document:
+                    rlMessageAudioContainer.setVisibility(GONE);
                     flVideoMessageContainer.setVisibility(GONE);
                     ivImage.setVisibility(VISIBLE);
                     if (file.getPath().endsWith(".txt")) {
@@ -103,10 +115,71 @@ public abstract class MessageView extends RelativeLayout {
                     ivImage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
                     tvMessageBody.setText(file.getName());
                     break;
+                case Audio:
+                    tvMessageBody.setVisibility(GONE);
+                    ivImage.setVisibility(GONE);
+                    flVideoMessageContainer.setVisibility(GONE);
+                    rlMessageAudioContainer.setVisibility(VISIBLE);
+                    mediaPlayer = MediaPlayer.create(viewGroup.getContext(), Uri.fromFile(file));
+                    sbAudioBar.setMax(mediaPlayer.getDuration());
+
+                    thread = new Thread(){
+                        @Override
+                        public void run() {
+                            int currentPosition = 0;
+                            int duration = mediaPlayer.getDuration();
+                            sbAudioBar.setMax(duration);
+                            while (mediaPlayer != null && currentPosition < duration) {
+                                try {
+                                    Thread.sleep(300);
+                                    currentPosition = mediaPlayer.getCurrentPosition();
+                                }catch (InterruptedException e) {
+                                    return;
+                                }
+                                sbAudioBar.setProgress(currentPosition);
+                            }
+                            mediaPlayer.reset();
+                            sbAudioBar.setProgress(0);
+                        }
+                    };
+
+                    thread.start();
+                    btAudioPlay.setOnClickListener(v -> {
+                        btAudioPlay.setVisibility(GONE);
+                        btAudioPause.setVisibility(VISIBLE);
+                        mediaPlayer.start();
+                    });
+                    btAudioPause.setOnClickListener(v -> {
+                        btAudioPause.setVisibility(GONE);
+                        btAudioPlay.setVisibility(VISIBLE);
+                        mediaPlayer.pause();
+                    });
+
+                    sbAudioBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            if (fromUser) {
+                                mediaPlayer.seekTo(progress);
+                            }
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                        }
+                    });
+
+                    break;
             }
         } else {
             ivImage.setVisibility(GONE);
             flVideoMessageContainer.setVisibility(GONE);
+            rlMessageAudioContainer.setVisibility(GONE);
+            tvMessageBody.setVisibility(VISIBLE);
         }
     }
 
@@ -135,11 +208,9 @@ public abstract class MessageView extends RelativeLayout {
         });
         final AlertDialog dialog = builder.create();
 
-        //dialog.setView(dialogLayout);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setOnShowListener(d -> {
             ImageView image = dialog.findViewById(R.id.ivDialogImage);
-//            image.setImageResource(R.drawable.backgroud_splash);
             image.setImageBitmap(bitmap);
             float imageWidthInPX = (float)image.getWidth();
 //
