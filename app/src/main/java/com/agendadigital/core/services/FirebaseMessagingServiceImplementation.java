@@ -29,8 +29,10 @@ import com.agendadigital.views.modules.contacts.components.observers.ContactObse
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -176,46 +178,51 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
         MySingleton.getInstance(getApplicationContext()).addToRequest(jsonObjectRequest);
     }
 
-    private void downloadFileFromMessage(MessageEntity message) throws IOException {
+    private void downloadFileFromMessage(MessageEntity message) {
         StorageReference fileToDownloadReference = storage.getReferenceFromUrl(message.getMultimediaEntity().getFirebaseUri());
-        File localFile = File.createTempFile("images", "jpg");
+        String filename = message.getMessageType() == MessageEntity.MessageType.Image? message.getMultimediaEntity().getId(): fileToDownloadReference.getName();
+        String pathToSave = DirectoryManager.getPathToSave(message.getMessageType(), false);
+        File localFile = new File(pathToSave, filename);
         fileToDownloadReference.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
-            Log.d(TAG, "onSuccessFile: " + localFile.getPath());
-            try {
-                String pathToSave = "";
-                if (message.getMessageType() ==  MessageEntity.MessageType.Image) {
-                    pathToSave = FilesUtils.saveImageJPEG(getApplicationContext()
-                            , localFile
-                            , message.getMultimediaEntity().getId()
-                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
-                }else if (message.getMessageType() == MessageEntity.MessageType.Video) {
-                    pathToSave = FilesUtils.saveVideoMP4FromFile(getApplicationContext()
-                            , localFile
-                            , fileToDownloadReference.getName()
-                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
-                }else if (message.getMessageType() == MessageEntity.MessageType.Document) {
-                    Log.d(TAG, "onSuccessDocument: " + fileToDownloadReference.getName());
-                    pathToSave = FilesUtils.saveDocument(getApplicationContext()
-                            , localFile
-                            , fileToDownloadReference.getName()
-                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
-                }else if (message.getMessageType() == MessageEntity.MessageType.Audio) {
-                    Log.d(TAG, "onSuccessDocument: " + fileToDownloadReference.getName());
-                    pathToSave = FilesUtils.saveDocument(getApplicationContext()
-                            , localFile
-                            , fileToDownloadReference.getName()
-                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
-                }
-
-                Log.d(TAG, "onSuccessSave: " + pathToSave);
-                message.getMultimediaEntity().setLocalUri(pathToSave);
-                 new MessageRepository(getApplicationContext()).insert(message);
-                messageObservable.getPublisher().onNext(message);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+            message.getMultimediaEntity().setLocalUri(pathToSave + filename);
+            new MessageRepository(getApplicationContext()).insert(message);
+            messageObservable.getPublisher().onNext(message);
         }).addOnFailureListener(e -> Log.d(TAG, "onFailure: " + e.getMessage()));
+//        File localFile = File.createTempFile("images", "jpg");
+//        fileToDownloadReference.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+//            Log.d(TAG, "onSuccessFile: " + localFile.getPath());
+//            try {
+//                String pathToSave = "";
+//                if (message.getMessageType() ==  MessageEntity.MessageType.Image) {
+//                    pathToSave = FilesUtils.saveImageJPEG(getApplicationContext()
+//                            , localFile
+//                            , message.getMultimediaEntity().getId()
+//                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
+//                }else if (message.getMessageType() == MessageEntity.MessageType.Video) {
+//                    pathToSave = FilesUtils.saveVideoMP4FromFile(getApplicationContext()
+//                            , localFile
+//                            , fileToDownloadReference.getName()
+//                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
+//                }else if (message.getMessageType() == MessageEntity.MessageType.Document) {
+//                    Log.d(TAG, "onSuccessDocument: " + fileToDownloadReference.getName());
+//                    pathToSave = FilesUtils.saveDocument(getApplicationContext()
+//                            , localFile
+//                            , fileToDownloadReference.getName()
+//                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
+//                }else if (message.getMessageType() == MessageEntity.MessageType.Audio) {
+//                    Log.d(TAG, "onSuccessDocument: " + fileToDownloadReference.getName());
+//
+//                }
+//
+//                Log.d(TAG, "onSuccessSave: " + pathToSave);
+//                message.getMultimediaEntity().setLocalUri(pathToSave);
+//                 new MessageRepository(getApplicationContext()).insert(message);
+//                messageObservable.getPublisher().onNext(message);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }).addOnFailureListener(e -> Log.d(TAG, "onFailure: " + e.getMessage()));
     }
 
     private boolean isAppOnForeground(Context context) {

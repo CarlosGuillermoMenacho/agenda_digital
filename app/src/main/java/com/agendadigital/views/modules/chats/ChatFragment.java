@@ -20,6 +20,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import com.agendadigital.BuildConfig;
 import com.agendadigital.MainActivity;
 import com.agendadigital.R;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
@@ -59,6 +61,7 @@ import java.util.UUID;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -77,6 +80,8 @@ public class ChatFragment extends Fragment {
     private RecyclerView rvMessages;
     private EditText etTextMessageToSend;
     private ImageButton btAttach;
+    private ImageButton btCamera;
+    private final int CAMERA_REQUEST = 1001;
 
     private MessageAdapter messageAdapter;
     private final MessageObservable messageObservable = new MessageObservable();
@@ -132,6 +137,7 @@ public class ChatFragment extends Fragment {
     private void initViews() {
         etTextMessageToSend = view.findViewById(R.id.etTextMessageToSend);
         btAttach = view.findViewById(R.id.btAttach);
+        btCamera = view.findViewById(R.id.btCamera);
 
         rvMessages = view.findViewById(R.id.rvMessagesList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(view.getContext());
@@ -151,6 +157,7 @@ public class ChatFragment extends Fragment {
 
         initTextMessageListener();
         initButtonAttachListener();
+        initButtonCameraListener();
         initRecyclerView();
         initMessageObserver();
         initSentButtonListener();
@@ -206,6 +213,10 @@ public class ChatFragment extends Fragment {
                     case R.id.attachImage:
                         pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         pickIntent.setType("image/*");
+                        pickIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String [] {
+                                "image/jpeg",
+                                "image/png"
+                        });
                         chooserIntent = Intent.createChooser(pickIntent, "Select a image");
                         activityResult = MessageEntity.MessageType.Image.getValue();
                         break;
@@ -224,18 +235,17 @@ public class ChatFragment extends Fragment {
         });
     }
 
+    private void initButtonCameraListener() {
+        btCamera.setOnClickListener(click -> {
+            Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(cameraIntent, CAMERA_REQUEST);
+        });
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        assert data != null;
-
-        Uri selectedFile = data.getData();
-        if (selectedFile == null || selectedFile.getPath() == null) {
-            Toast.makeText(view.getContext(), "Ocurrió un error al seleccionar el archivo.", Toast.LENGTH_SHORT).show();
+        if (data == null)
             return;
-        }
-
-        File file = new File(selectedFile.getPath());
-        Log.d(TAG, "onActivityResultSelectedFile: " + file.getPath());
 
         Date currentTime = new Date(System.currentTimeMillis());
         MessageEntity messageEntity = new MessageEntity(UUID.randomUUID().toString()
@@ -249,112 +259,66 @@ public class ChatFragment extends Fragment {
                 , MessageEntity.DestinationState.Create
                 , 1, currentTime, currentTime, null  );
 
+        Uri selectedFile = null;
         StorageReference fileReference = null;
         String filePath = "";
-
-        if (requestCode == MessageEntity.MessageType.Image.getValue()) {
+        if (requestCode == CAMERA_REQUEST) {
             try {
                 messageEntity.setMessageType(MessageEntity.MessageType.Image);
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(view.getContext().getContentResolver(), selectedFile);
-                File bitmapFile = FilesUtils.bitmapToFile(view.getContext(), bitmap, file.getName());
-                filePath = FilesUtils.saveImageJPEG(view.getContext(), bitmapFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
-                Log.d(TAG, "onActivityResultImage: " + filePath);
-                fileReference = storageReference.child("images/" + file.getName());
+                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+                String filename = "Photo".concat(String.valueOf(System.currentTimeMillis()));
+                File bitmapFile = FilesUtils.bitmapToFile(view.getContext(), bitmap, filename);
+                selectedFile = Uri.fromFile(bitmapFile);
+                filePath = FilesUtils.saveImageJPEG(view.getContext(), bitmapFile, filename, DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
+                Log.d(TAG, "onActivityResultCamera: " + filePath);
+                fileReference = storageReference.child("images/" + filename);
             }catch (Exception e) {
                 Log.e(TAG, "onActivityResultImage: ", e.fillInStackTrace());
             }
-        } else if (requestCode == MessageEntity.MessageType.Video.getValue()) {
-            try {
-                messageEntity.setMessageType(MessageEntity.MessageType.Video);
-                filePath = FilesUtils.saveVideoMP4FromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Video, true));//DirectoryManager.getPathToSave(MessageEntity.MessageType.Video, true) + file.getName() + ".mp4";
-                Log.d(TAG, "onActivityResultVideo: " + filePath);
-                fileReference = storageReference.child("videos/" + file.getName());
-            }catch (Exception e) {
-                Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
+        } else {
+            selectedFile = data.getData();
+            if (selectedFile == null || selectedFile.getPath() == null) {
+                Toast.makeText(view.getContext(), "Ocurrió un error al seleccionar el archivo.", Toast.LENGTH_SHORT).show();
+                return;
             }
-        } else if (requestCode == MessageEntity.MessageType.Document.getValue()) {
-            try {
-            messageEntity.setMessageType(MessageEntity.MessageType.Document);
-            filePath = FilesUtils.saveDocumentFromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Document, true));
-            Log.d(TAG, "onActivityResultDoc: " + filePath);
-            fileReference = storageReference.child("documents/" + file.getName());
-            }catch (Exception e) {
-                Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
+
+            File file = new File(selectedFile.getPath());
+            Log.d(TAG, "onActivityResultSelectedFile: " + file.getPath());
+
+            if (requestCode == MessageEntity.MessageType.Image.getValue()) {
+                try {
+                    messageEntity.setMessageType(MessageEntity.MessageType.Image);
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(view.getContext().getContentResolver(), selectedFile);
+                    File bitmapFile = FilesUtils.bitmapToFile(view.getContext(), bitmap, file.getName());
+                    filePath = FilesUtils.saveImageJPEG(view.getContext(), bitmapFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
+                    Log.d(TAG, "onActivityResultImage: " + filePath);
+                    fileReference = storageReference.child("images/" + file.getName());
+                } catch (Exception e) {
+                    Log.e(TAG, "onActivityResultImage: ", e.fillInStackTrace());
+                }
+            } else if (requestCode == MessageEntity.MessageType.Video.getValue()) {
+                try {
+                    messageEntity.setMessageType(MessageEntity.MessageType.Video);
+                    filePath = FilesUtils.saveVideoMP4FromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Video, true));//DirectoryManager.getPathToSave(MessageEntity.MessageType.Video, true) + file.getName() + ".mp4";
+                    Log.d(TAG, "onActivityResultVideo: " + filePath);
+                    fileReference = storageReference.child("videos/" + file.getName());
+                } catch (Exception e) {
+                    Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
+                }
+            } else if (requestCode == MessageEntity.MessageType.Document.getValue()) {
+                try {
+                    messageEntity.setMessageType(MessageEntity.MessageType.Document);
+                    filePath = FilesUtils.saveDocumentFromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Document, true));
+                    Log.d(TAG, "onActivityResultDoc: " + filePath);
+                    fileReference = storageReference.child("documents/" + file.getName());
+                } catch (Exception e) {
+                    Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
+                }
             }
         }
         MultimediaEntity multimediaEntity = new MultimediaEntity(UUID.randomUUID().toString(), messageEntity.getId(), filePath, "");
         sendMultimediaMessage(fileReference, selectedFile, messageEntity, multimediaEntity);
-//        UploadTask uploadTask = fileReference.putFile(selectedFile);
 
-//        StorageReference finalFileReference = fileReference;
-//        uploadTask.continueWithTask(task -> {
-//                if (!task.isSuccessful()) {
-//                    throw task.getException();
-//                }
-//                return finalFileReference.getDownloadUrl();
-//            }).addOnCompleteListener(task -> {
-//                Log.d(TAG, "onComplete: " + task.isSuccessful());
-//                if (!task.isSuccessful()) {
-//                    Log.d(TAG, "onCompleteError: " + task.getException());
-//                    Toast.makeText(view.getContext(), "No se pudo subir el archivo.", Toast.LENGTH_SHORT).show();
-//                } else {
-//                    Uri downloadUri = task.getResult();
-//                    multimediaEntity.setFirebaseUri(downloadUri.toString());
-//
-//                    messageEntity.setMultimediaEntity(multimediaEntity);
-//                    messageRepository.insert(messageEntity);
-//                    messageAdapter.add(messageEntity);
-//
-////                    JSONObject params = new JSONObject();
-////                    try {
-////                        MessageDto.SendMessageRequest sendMessageRequest = new MessageDto.SendMessageRequest(messageEntity.getMessageType().getValue()
-////                                , messageEntity.getDeviceFromId()
-////                                , messageEntity.getDeviceFromType().getValue()
-////                                , messageEntity.getDestinationId()
-////                                , messageEntity.getDestinationType().getValue()
-////                                , messageEntity.getData(), messageEntity.getForGroup(), messageEntity.getCreatedAt());
-////
-////                        sendMessageRequest.setMultimedia(new MultimediaDto.SendMultimediaRequest(multimediaEntity.getId(), multimediaEntity.getFirebaseUri()));
-////
-////                        Log.d(TAG, "MessageSent: " + sendMessageRequest.toJSON());
-////                        params.put("message", new JSONObject(sendMessageRequest.toJSON()));
-////
-////
-////                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/send-message", params, response -> {
-//                    messageService.sendMultimediaMessage(messageEntity, multimediaEntity, response -> {
-//                        try {
-//                            MessageDto.SendMessageResponse sendMessageResponse = new Gson().fromJson(response.getString("message"),
-//                                    new TypeToken<MessageDto.SendMessageResponse>() {}
-//                                            .getType());
-//
-//                            ContentValues contentValues = new ContentValues();
-//                            contentValues.put(MessageBase._ID, sendMessageResponse.getId());
-//                            contentValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Sent.getValue());
-//                            contentValues.put(MessageBase.COL_SENT_AT, currentTime.getTime());
-//                            messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { messageEntity.getId() });
-//
-//                            messageEntity.setDestinationState(MessageEntity.DestinationState.Sent);
-//                            messageAdapter.updateDestinationState(messageEntity);
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
-//                        Log.d(TAG, "onResponse: " + response);
-//                    }, error -> {
-//                        String body;
-//                        String statusCode = String.valueOf(error.networkResponse.statusCode);
-//                        if(error.networkResponse.data!=null) {
-//                            body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
-//                            Log.d(TAG, "SendMultimediaonErrorResponse: " + body);
-//                            Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
-//                        }
-//                    });
-////                        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-////                        MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
-////                    } catch (JSONException e) {
-////                        e.printStackTrace();
-////                    }
-//                }
-//            });
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -374,15 +338,6 @@ public class ChatFragment extends Fragment {
             e.printStackTrace();
         }
         rvMessages.setAdapter(messageAdapter);
-        rvMessages.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                if (bottom < oldBottom) {
-                    rvMessages.postDelayed(() ->
-                            rvMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1), 100);
-                }
-            }
-        });
     }
 
     private void initMessageObserver(){
@@ -404,6 +359,7 @@ public class ChatFragment extends Fragment {
                                 Log.d(TAG, "onNext: " + messageEntity.toJSON());
                                 confirmAck(messageEntity);
                                 messageAdapter.add(messageEntity);
+                                rvMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
                             } catch (UnsupportedEncodingException | JSONException e) {
                                 e.printStackTrace();
                             }
@@ -444,56 +400,9 @@ public class ChatFragment extends Fragment {
                         currentTime,
                         null);
 
-//                JSONObject params = new JSONObject();
-//                try {
-//                    MessageDto.SendMessageRequest sendMessageRequest = new MessageDto.SendMessageRequest(messageSend.getMessageType().getValue()
-//                            , messageSend.getDeviceFromId()
-//                            , messageSend.getDeviceFromType().getValue()
-//                            , messageSend.getDestinationId()
-//                            , messageSend.getDestinationType().getValue()
-//                            , messageSend.getData(), messageSend.getForGroup(), messageSend.getCreatedAt());
-//
-//                    Log.d(TAG, "MessageSent: " + sendMessageRequest.toJSON());
-//                    params.put("message", new JSONObject(sendMessageRequest.toJSON()));
-
-//                messageSend.setId(UUID.randomUUID().toString());
                 messageRepository.insert(messageSend);
                 messageAdapter.add(messageSend);
                 sendMessage(messageSend);
-//                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/send-message", params, response -> {
-//                messageService.sendMessage(messageSend, response ->{
-//                    try {
-//                        MessageDto.SendMessageResponse sendMessageResponse = new Gson().fromJson(response.getString("message"),
-//                                                                                                new TypeToken<MessageDto.SendMessageResponse>() {}
-//                                                                                                    .getType());
-//
-//                        ContentValues contentValues = new ContentValues();
-//                        contentValues.put(MessageBase._ID, sendMessageResponse.getId());
-//                        contentValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Sent.getValue());
-//                        contentValues.put(MessageBase.COL_SENT_AT, DateFormatter.parse(sendMessageResponse.getSentAt()).getTime());
-//                        messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { messageSend.getId() });
-//
-//                        messageSend.setDestinationState(MessageEntity.DestinationState.Sent);
-//                        messageAdapter.updateDestinationState(messageSend);
-//                    } catch (JSONException | ParseException e) {
-//                        e.printStackTrace();
-//                    }
-//                    Log.d(TAG, "onResponse: " + response);
-//                }, error -> {
-//                    String body;
-//                    String statusCode = String.valueOf(error.networkResponse.statusCode);
-//                    if(error.networkResponse.data!=null) {
-//                        body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
-//                        Log.d(TAG, "sendButtononErrorResponse: " + body);
-//                        Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//                    jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-//                    MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
-
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
                 etTextMessageToSend.setText("");
             }
         });
@@ -583,11 +492,6 @@ public class ChatFragment extends Fragment {
 
     private void confirmAck(MessageEntity message) throws UnsupportedEncodingException, JSONException {
         message.setDestinationState(MessageEntity.DestinationState.Read);
-//        JSONObject params = new JSONObject();
-//        MessageDto.ConfirmMessageRequest confirmMessageRequest = new MessageDto.ConfirmMessageRequest(message.getId(), message.getDestinationState().getValue(), DateFormatter.formatToDate(message.getReceivedAt()));
-//        params.put("message", new JSONObject(confirmMessageRequest.toJSON()));
-//
-//        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/confirm-message", params, response -> {
         messageService.confirmAckMessage(message, response -> {
             ContentValues contentValues = new ContentValues();
             contentValues.put(MessageBase.COL_DESTINATION_STATE, message.getDestinationState().getValue());
@@ -602,8 +506,6 @@ public class ChatFragment extends Fragment {
                 Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
             }
         });
-//        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-//        MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
     }
 
     private void sendMessage(MessageEntity messageToSend) {
@@ -651,59 +553,11 @@ public class ChatFragment extends Fragment {
             } else {
                 Uri downloadUri = task.getResult();
                 multimediaToSend.setFirebaseUri(downloadUri.toString());
-
                 messageToSend.setMultimediaEntity(multimediaToSend);
                 messageRepository.insert(messageToSend);
                 messageAdapter.add(messageToSend);
                 sendMessage(messageToSend);
-//                    JSONObject params = new JSONObject();
-//                    try {
-//                        MessageDto.SendMessageRequest sendMessageRequest = new MessageDto.SendMessageRequest(messageEntity.getMessageType().getValue()
-//                                , messageEntity.getDeviceFromId()
-//                                , messageEntity.getDeviceFromType().getValue()
-//                                , messageEntity.getDestinationId()
-//                                , messageEntity.getDestinationType().getValue()
-//                                , messageEntity.getData(), messageEntity.getForGroup(), messageEntity.getCreatedAt());
-//
-//                        sendMessageRequest.setMultimedia(new MultimediaDto.SendMultimediaRequest(multimediaEntity.getId(), multimediaEntity.getFirebaseUri()));
-//
-//                        Log.d(TAG, "MessageSent: " + sendMessageRequest.toJSON());
-//                        params.put("message", new JSONObject(sendMessageRequest.toJSON()));
-//
-//
-//                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ConstantsGlobals.urlChatServer + "/send-message", params, response -> {
-//                messageService.sendMultimediaMessage(messageToSend, multimediaToSend, response -> {
-//                    try {
-//                        MessageDto.SendMessageResponse sendMessageResponse = new Gson().fromJson(response.getString("message"),
-//                                new TypeToken<MessageDto.SendMessageResponse>() {}
-//                                        .getType());
-//
-//                        ContentValues contentValues = new ContentValues();
-//                        contentValues.put(MessageBase._ID, sendMessageResponse.getId());
-//                        contentValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Sent.getValue());
-//                        contentValues.put(MessageBase.COL_SENT_AT, messageToSend.getSentAt().getTime());
-//                        messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { messageToSend.getId() });
-//
-//                        messageToSend.setDestinationState(MessageEntity.DestinationState.Sent);
-//                        messageAdapter.updateDestinationState(messageToSend);
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-//                    Log.d(TAG, "onResponse: " + response);
-//                }, error -> {
-//                    String body;
-//                    String statusCode = String.valueOf(error.networkResponse.statusCode);
-//                    if(error.networkResponse.data!=null) {
-//                        body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
-//                        Log.d(TAG, "SendMultimediaonErrorResponse: " + body);
-//                        Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//                        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-//                        MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
+                rvMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
             }
         });
     }

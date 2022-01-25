@@ -4,6 +4,8 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -19,6 +21,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import androidx.annotation.RequiresApi;
 
@@ -129,5 +133,19 @@ public class FilesUtils {
             fos.close();
         }
         return file;
+    }
+
+    public static File createImageTempFile(Context context) throws IOException {
+            // Create an image file name
+            String timeStamp = DateFormatter.formatToDate(new Date());
+            String imageFileName = "JPEG_" + timeStamp + "_";
+            File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File image = File.createTempFile(
+                    imageFileName,  /* prefix */
+                    ".jpg",         /* suffix */
+                    storageDir      /* directory */
+            );
+
+            return image;
     }
 }
