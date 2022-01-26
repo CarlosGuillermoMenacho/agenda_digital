@@ -198,14 +198,14 @@ public class ChatFragment extends Fragment {
                 int activityResult = 0;
                 switch (item.getItemId()) {
                     case R.id.attachDocument:
-                        pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                        pickIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                         pickIntent.setType("*/*");
                         pickIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {
+                                "text/plain",
                                 "application/msword",
-                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                "text/*",
-                                "application/pdf",
-                                "application/vnd.ms-excel"
+                                "application/vnd.ms-excel",
+                                "application/vnd.ms-powerpoint",
+                                "application/pdf"
                         });
                         chooserIntent = Intent.createChooser(pickIntent, "Select a document");
                         activityResult = MessageEntity.MessageType.Document.getValue();

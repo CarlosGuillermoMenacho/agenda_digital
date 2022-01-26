@@ -218,9 +218,9 @@ public class MessageEntity {
     public enum MessageType {
         Text(1),
         Image(2),
-        Document(3),
+        Video(3),
         Audio(4),
-        Video(5);
+        Document(5);
 
         private final int value;
 
@@ -239,11 +239,11 @@ public class MessageEntity {
                 case 2:
                     return Image;
                 case 3:
-                    return Document;
+                    return Video;
                 case 4:
                     return Audio;
                 case 5:
-                    return Video;
+                    return Document;
                 default:
                     throw new Exception("MessageType doesn't exists");
             }

@@ -1,6 +1,7 @@
 package com.agendadigital.views.modules.chats.components.views;
 
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -114,6 +115,18 @@ public abstract class MessageView extends RelativeLayout {
                     }
                     ivImage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
                     tvMessageBody.setText(file.getName());
+//                    ivImage.setOnClickListener(v -> {
+//                        Intent target = new Intent(Intent.ACTION_VIEW);
+//                        target.setDataAndType(Uri.fromFile(file),"application/pdf");
+//                        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+//
+//                        Intent intent = Intent.createChooser(target, "Open File");
+//                        try {
+//                            viewGroup.getContext().startActivity(intent);
+//                        } catch (ActivityNotFoundException e) {
+//                            // Instruct the user to install a PDF reader here, or something
+//                        }
+//                    });
                     break;
                 case Audio:
                     tvMessageBody.setVisibility(GONE);
