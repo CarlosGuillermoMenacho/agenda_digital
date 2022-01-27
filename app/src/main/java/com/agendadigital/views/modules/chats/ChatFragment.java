@@ -21,7 +21,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.agendadigital.BuildConfig;
 import com.agendadigital.MainActivity;
 import com.agendadigital.R;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
@@ -61,7 +60,6 @@ import java.util.UUID;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -269,7 +267,7 @@ public class ChatFragment extends Fragment {
                 String filename = "Photo".concat(String.valueOf(System.currentTimeMillis()));
                 File bitmapFile = FilesUtils.bitmapToFile(view.getContext(), bitmap, filename);
                 selectedFile = Uri.fromFile(bitmapFile);
-                filePath = FilesUtils.saveImageJPEG(view.getContext(), bitmapFile, filename, DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
+                filePath = FilesUtils.saveFileFromUri(view.getContext(), selectedFile, bitmapFile.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
                 Log.d(TAG, "onActivityResultCamera: " + filePath);
                 fileReference = storageReference.child("images/" + filename);
             }catch (Exception e) {
@@ -283,37 +281,12 @@ public class ChatFragment extends Fragment {
             }
 
             File file = new File(selectedFile.getPath());
-            Log.d(TAG, "onActivityResultSelectedFile: " + file.getPath());
-
-            if (requestCode == MessageEntity.MessageType.Image.getValue()) {
-                try {
-                    messageEntity.setMessageType(MessageEntity.MessageType.Image);
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(view.getContext().getContentResolver(), selectedFile);
-                    File bitmapFile = FilesUtils.bitmapToFile(view.getContext(), bitmap, file.getName());
-                    filePath = FilesUtils.saveImageJPEG(view.getContext(), bitmapFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
-                    Log.d(TAG, "onActivityResultImage: " + filePath);
-                    fileReference = storageReference.child("images/" + file.getName());
-                } catch (Exception e) {
-                    Log.e(TAG, "onActivityResultImage: ", e.fillInStackTrace());
-                }
-            } else if (requestCode == MessageEntity.MessageType.Video.getValue()) {
-                try {
-                    messageEntity.setMessageType(MessageEntity.MessageType.Video);
-                    filePath = FilesUtils.saveVideoMP4FromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Video, true));//DirectoryManager.getPathToSave(MessageEntity.MessageType.Video, true) + file.getName() + ".mp4";
-                    Log.d(TAG, "onActivityResultVideo: " + filePath);
-                    fileReference = storageReference.child("videos/" + file.getName());
-                } catch (Exception e) {
-                    Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
-                }
-            } else if (requestCode == MessageEntity.MessageType.Document.getValue()) {
-                try {
-                    messageEntity.setMessageType(MessageEntity.MessageType.Document);
-                    filePath = FilesUtils.saveDocumentFromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Document, true));
-                    Log.d(TAG, "onActivityResultDoc: " + filePath);
-                    fileReference = storageReference.child("documents/" + file.getName());
-                } catch (Exception e) {
-                    Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
-                }
+            try {
+                messageEntity.setMessageType(MessageEntity.MessageType.setValue(requestCode));
+                filePath = FilesUtils.saveFileFromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(messageEntity.getMessageType(), true));
+                fileReference = storageReference.child(messageEntity.getMessageType().toString() + "/" + file.getName());
+            }catch(Exception e) {
+                Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
             }
         }
         MultimediaEntity multimediaEntity = new MultimediaEntity(UUID.randomUUID().toString(), messageEntity.getId(), filePath, "");

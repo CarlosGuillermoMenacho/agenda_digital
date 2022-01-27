@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 
@@ -247,6 +248,29 @@ public class MessageEntity {
                 default:
                     throw new Exception("MessageType doesn't exists");
             }
+        }
+
+        @Override
+        public String toString() {
+            String name;
+            switch (value) {
+                case 4:
+                    name = "audios";
+                    break;
+                case 3:
+                    name = "videos";
+                    break;
+                case 2:
+                    name = "images";
+                    break;
+                case 5:
+                    name = "documents";
+                    break;
+                default:
+                    name = "undefined";
+                    break;
+            }
+            return name;
         }
     }
 }

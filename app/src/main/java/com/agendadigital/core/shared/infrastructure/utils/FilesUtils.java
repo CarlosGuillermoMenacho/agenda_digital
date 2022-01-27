@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -27,29 +28,6 @@ import java.util.Date;
 import androidx.annotation.RequiresApi;
 
 public class FilesUtils {
-
-    public static String copyFile(String from, String fileName, String pathToSave) {
-        try {
-            File sd = Environment.getExternalStorageDirectory();
-            if (sd.canWrite()) {
-                int end = from.toString().lastIndexOf("/");
-                String str1 = from.toString().substring(0, end);
-                String str2 = from.toString().substring(end+1, from.length());
-                File source = new File(str1, str2);
-                File destination= new File(pathToSave, str2);
-                if (source.exists()) {
-                    FileChannel src = new FileInputStream(source).getChannel();
-                    FileChannel dst = new FileOutputStream(destination).getChannel();
-                    dst.transferFrom(src, 0, src.size());
-                    src.close();
-                    dst.close();
-                }
-            }
-            return pathToSave + fileName + ".jpg";
-        } catch (Exception e) {
-            return "";
-        }
-    }
 
     public static String saveImageJPEG(Context context, File file, String fileName, String pathToSave) throws IOException {
         Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.fromFile(file));
@@ -92,8 +70,8 @@ public class FilesUtils {
         return pathToSave + fileName;
     }
 
-    public static String saveVideoMP4FromFile(Context context, File file, String fileName, String pathToSave) throws IOException {
-        InputStream inputStream = new FileInputStream(file);
+    public static String saveFileFromUri(Context context, Uri uri, String fileName, String pathToSave) throws IOException {
+        InputStream inputStream = context.getContentResolver().openInputStream(uri);
         FileOutputStream out = new FileOutputStream(new File(pathToSave, fileName));
         byte[] buf = new byte[1024];
         int len;
@@ -104,20 +82,6 @@ public class FilesUtils {
         inputStream.close();
         out.close();
         return pathToSave + fileName;
-    }
-
-    public static String saveVideoMP4FromUri(Context context, Uri uri, String fileName, String pathToSave) throws IOException {
-        InputStream inputStream = context.getContentResolver().openInputStream(uri);
-        FileOutputStream out = new FileOutputStream(new File(pathToSave, fileName + ".mp4"));
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = inputStream.read(buf)) > 0) {
-            out.write(buf, 0, len);
-        }
-        out.flush();
-        inputStream.close();
-        out.close();
-        return pathToSave + fileName + ".mp4";
     }
 
     public static File bitmapToFile(Context context, Bitmap bitmap, String filename) throws IOException {
