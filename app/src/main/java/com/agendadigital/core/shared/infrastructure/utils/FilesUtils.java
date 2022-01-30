@@ -13,6 +13,8 @@ import android.os.FileUtils;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 
+import com.agendadigital.core.modules.messages.domain.MessageEntity;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -111,5 +113,30 @@ public class FilesUtils {
             );
 
             return image;
+    }
+
+    public static boolean validateExtension(String filename, MessageEntity.MessageType messageType) {
+        boolean result;
+        switch (messageType) {
+            case Image:
+                result = filename.endsWith(".jpeg") || filename.endsWith(".png");
+                break;
+            case Video:
+                result = filename.endsWith(".mp4") || filename.endsWith(".mpg");
+                break;
+            case Document:
+                result = filename.endsWith(".txt")
+                        || filename.endsWith(".doc")
+                        || filename.endsWith(".docx")
+                        || filename.endsWith(".xls")
+                        || filename.endsWith(".xlsx")
+                        || filename.endsWith(".ppt")
+                        || filename.endsWith(".pptx")
+                        || filename.endsWith(".pdf");
+                break;
+            default:
+                result = true;
+        }
+        return result;
     }
 }

@@ -282,7 +282,12 @@ public class ChatFragment extends Fragment {
 
             File file = new File(selectedFile.getPath());
             try {
-                messageEntity.setMessageType(MessageEntity.MessageType.setValue(requestCode));
+                MessageEntity.MessageType messageType = MessageEntity.MessageType.setValue(requestCode);
+                if (!FilesUtils.validateExtension(file.getName(),messageType)) {
+                    Toast.makeText(view.getContext(), "Seleccione el formato correcto", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                messageEntity.setMessageType(messageType);
                 filePath = FilesUtils.saveFileFromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(messageEntity.getMessageType(), true));
                 fileReference = storageReference.child(messageEntity.getMessageType().toString() + "/" + file.getName());
             }catch(Exception e) {
