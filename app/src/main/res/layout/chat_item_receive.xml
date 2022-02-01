@@ -43,7 +43,7 @@
                 android:layout_height="150dp"
                 android:maxWidth="150dp"
                 android:maxHeight="150dp"
-                android:layout_gravity="end"
+                android:layout_gravity="start"
                 android:visibility="gone"
                 android:contentDescription="@string/image"
                 android:adjustViewBounds="true"/>
@@ -53,14 +53,14 @@
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:visibility="gone"
-                android:layout_gravity="end"
+                android:layout_gravity="start"
                 android:background="@android:color/transparent">
                 <VideoView
                     android:id="@+id/vvVideoMessage"
                     android:layout_width="150dp"
                     android:layout_height="150dp"
                     android:visibility="visible"
-                    android:layout_gravity="end"
+                    android:layout_gravity="start"
                     android:contentDescription="@string/video_message"/>
 
                 <ImageButton
@@ -78,7 +78,7 @@
                 android:layout_width="200dp"
                 android:layout_height="50dp"
                 android:visibility="visible"
-                android:layout_gravity="end"
+                android:layout_gravity="start"
                 android:background="@android:color/transparent">
                 <Button
                     android:id="@+id/btAudioPlay"

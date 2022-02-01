@@ -93,6 +93,12 @@ public class ContactEntity implements Serializable {
         }
     };
 
+    public boolean isGroup() {
+        return contactType == ContactEntity.ContactType.Course
+                || contactType == ContactEntity.ContactType.CourseWithTutors
+                || contactType == ContactEntity.ContactType.TeacherAndDirectorGroup;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -100,6 +106,7 @@ public class ContactEntity implements Serializable {
     }
 
     public enum ContactType {
+        None(0),
         Tutor(1),
         Student(2),
         Teacher(3),
@@ -121,6 +128,8 @@ public class ContactEntity implements Serializable {
         }
         public static ContactType setValue(int value) throws Exception {
             switch (value){
+                case 0:
+                    return None;
                 case 1:
                     return Tutor;
                 case 2:

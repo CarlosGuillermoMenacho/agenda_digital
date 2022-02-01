@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.MediaRecorder;
@@ -191,7 +192,7 @@ public class ChatFragment extends Fragment {
         btAttach.setOnClickListener(v -> {
             PopupMenu popupMenu = new PopupMenu(view.getContext(), v);
             popupMenu.setOnMenuItemClickListener(item -> {
-                Intent pickIntent;
+                Intent pickIntent = null;
                 Intent chooserIntent = null;
                 int activityResult = 0;
                 switch (item.getItemId()) {
@@ -201,15 +202,18 @@ public class ChatFragment extends Fragment {
                         pickIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {
                                 "text/plain",
                                 "application/msword",
+                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                                 "application/vnd.ms-excel",
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                 "application/vnd.ms-powerpoint",
+                                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
                                 "application/pdf"
                         });
                         chooserIntent = Intent.createChooser(pickIntent, "Select a document");
                         activityResult = MessageEntity.MessageType.Document.getValue();
                         break;
                     case R.id.attachImage:
-                        pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
                         pickIntent.setType("image/*");
                         pickIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String [] {
                                 "image/jpeg",
@@ -225,7 +229,7 @@ public class ChatFragment extends Fragment {
                         activityResult = MessageEntity.MessageType.Video.getValue();
                         break;
                 }
-                startActivityForResult(chooserIntent, activityResult);
+                startActivityForResult(chooserIntent,activityResult);
                 return ChatFragment.super.onOptionsItemSelected(item);
             });
             popupMenu.inflate(R.menu.popup_attachments);
@@ -246,14 +250,16 @@ public class ChatFragment extends Fragment {
             return;
 
         Date currentTime = new Date(System.currentTimeMillis());
-        MessageEntity messageEntity = new MessageEntity(UUID.randomUUID().toString()
+        MessageEntity messageEntity = new MessageEntity(
+                UUID.randomUUID().toString()
                 , MessageEntity.MessageType.Image
                 , currentUser.getCodigo()
                 , currentUser.getTipo()
                 , currentContact.getId()
                 , currentContact.getContactType()
                 , ""
-                , MessageEntity.isForGroupMessage(currentContact)
+                , MessageEntity.getGroupId(currentContact)
+                , MessageEntity.getGroupId(currentContact).isEmpty()? ContactEntity.ContactType.None: currentContact.getContactType()
                 , MessageEntity.DestinationState.Create
                 , 1, currentTime, currentTime, null  );
 
@@ -281,31 +287,52 @@ public class ChatFragment extends Fragment {
             }
 
             File file = new File(selectedFile.getPath());
-            try {
-                MessageEntity.MessageType messageType = MessageEntity.MessageType.setValue(requestCode);
-                if (!FilesUtils.validateExtension(file.getName(),messageType)) {
-                    Toast.makeText(view.getContext(), "Seleccione el formato correcto", Toast.LENGTH_SHORT).show();
-                    return;
+
+            if(file.getAbsolutePath() != null){
+                String filename;
+                Cursor cursor = view.getContext().getContentResolver().query(selectedFile,null,null,null,null);
+
+                if(cursor == null)
+                    filename=selectedFile.getPath();
+                else{
+                    cursor.moveToFirst();
+                    int idx = cursor.getColumnIndex(MediaStore.Files.FileColumns.DISPLAY_NAME);
+                    filename = cursor.getString(idx);
+                    cursor.close();
                 }
-                messageEntity.setMessageType(messageType);
-                filePath = FilesUtils.saveFileFromUri(view.getContext(), selectedFile, file.getName(), DirectoryManager.getPathToSave(messageEntity.getMessageType(), true));
-                fileReference = storageReference.child(messageEntity.getMessageType().toString() + "/" + file.getName());
-            }catch(Exception e) {
-                Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
+
+                String extension = filename.substring(filename.lastIndexOf("."));
+                try {
+                    MessageEntity.MessageType messageType = MessageEntity.MessageType.setValue(requestCode);
+                    if (!FilesUtils.validateExtension(extension,messageType)) {
+                        Toast.makeText(view.getContext(), "Seleccione el formato correcto", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    messageEntity.setMessageType(messageType);
+                    filePath = FilesUtils.saveFileFromUri(view.getContext(), selectedFile, filename, DirectoryManager.getPathToSave(messageEntity.getMessageType(), true));
+                    fileReference = storageReference.child(messageEntity.getMessageType().toString() + "/" + file.getName());
+                }catch(Exception e) {
+                    Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
+                }
+            } else {
+                return;
             }
         }
         MultimediaEntity multimediaEntity = new MultimediaEntity(UUID.randomUUID().toString(), messageEntity.getId(), filePath, "");
         sendMultimediaMessage(fileReference, selectedFile, messageEntity, multimediaEntity);
-
         super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void initRecyclerView(){
         try {
-            messageEntityList = messageRepository.findAll(currentContact.getId());
+            if (currentContact.isGroup()) {
+                messageEntityList = messageRepository.findAllForGroup(currentContact.getId(), currentContact.getContactType().getValue());
+            } else {
+                messageEntityList = messageRepository.findAll(currentContact.getId(), currentContact.getContactType().getValue());
+            }
             messageAdapter = new MessageAdapter(messageEntityList);
             for (MessageEntity message: messageAdapter.getMessageEntities()) {
-                if ( (message.getDestinationId().equals(currentUser.getCodigo()) || message.getForGroup() == 1)
+                if ( (message.getDestinationId().equals(currentUser.getCodigo()) || !message.getGroupId().isEmpty())
                         && message.getDestinationState() == MessageEntity.DestinationState.Received){
                     confirmAck(message);
                 }
@@ -332,7 +359,7 @@ public class ChatFragment extends Fragment {
 
                     @Override
                     public void onNext(MessageEntity messageEntity) {
-                        if(messageEntity.getDestinationId().equals(currentUser.getCodigo()) || messageEntity.getForGroup() == 1){
+                        if(messageEntity.getDestinationId().equals(currentUser.getCodigo()) || !messageEntity.getGroupId().isEmpty()){
                             try {
                                 Log.d(TAG, "onNext: " + messageEntity.toJSON());
                                 confirmAck(messageEntity);
@@ -371,7 +398,8 @@ public class ChatFragment extends Fragment {
                         currentContact.getId(),
                         currentContact.getContactType(),
                         etTextMessageToSend.getText().toString(),
-                        MessageEntity.isForGroupMessage(currentContact),
+                        MessageEntity.getGroupId(currentContact),
+                        MessageEntity.getGroupId(currentContact).isEmpty() ? ContactEntity.ContactType.None: currentContact.getContactType(),
                         MessageEntity.DestinationState.Create,
                         1,
                         currentTime,
@@ -435,7 +463,8 @@ public class ChatFragment extends Fragment {
                         , currentContact.getId()
                         , currentContact.getContactType()
                         , ""
-                        , MessageEntity.isForGroupMessage(currentContact)
+                        , MessageEntity.getGroupId(currentContact)
+                        ,MessageEntity.getGroupId(currentContact).isEmpty() ? ContactEntity.ContactType.None: currentContact.getContactType()
                         , MessageEntity.DestinationState.Create
                         , 1, currentTime, currentTime, null  );
 

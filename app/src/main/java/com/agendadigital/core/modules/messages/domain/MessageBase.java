@@ -11,7 +11,8 @@ public class MessageBase implements BaseColumns {
     public static final String COL_DESTINATION_ID = "destinationId";
     public static final String COL_DESTINATION_TYPE = "destinationType";
     public static final String COL_DATA = "data";
-    public static final String COL_FOR_GROUP = "forGroup";
+    public static final String COL_GROUP_ID = "groupId";
+    public static final String COL_GROUP_TYPE = "groupType";
     public static final String COL_DESTINATION_STATE = "destinationState";
     public static final String COL_STATE = "state";
     public static final String COL_CREATED_AT = "createdAt";
@@ -27,7 +28,8 @@ public class MessageBase implements BaseColumns {
                     COL_DESTINATION_ID + " TEXT," +
                     COL_DESTINATION_TYPE + " INTEGER," +
                     COL_DATA + " TEXT," +
-                    COL_FOR_GROUP + " INTEGER," +
+                    COL_GROUP_ID + " TEXT," +
+                    COL_GROUP_TYPE + " INTEGER," +
                     COL_DESTINATION_STATE + " INTEGER," +
                     COL_STATE + " INTEGER," +
                     COL_CREATED_AT + " DATE," +
@@ -47,7 +49,8 @@ public class MessageBase implements BaseColumns {
             COL_DESTINATION_ID,
             COL_DESTINATION_TYPE,
             COL_DATA,
-            COL_FOR_GROUP,
+            COL_GROUP_ID,
+            COL_GROUP_TYPE,
             COL_DESTINATION_STATE,
             COL_STATE,
             COL_CREATED_AT,

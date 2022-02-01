@@ -10,11 +10,12 @@ public class MultimediaBase implements BaseColumns {
 
     public static final String SQL_CREATE_TABLE =
             "CREATE TABLE " + TABLE_NAME + " (" +
-                _ID + " TEXT PRIMARY KEY," +
+                _ID + " TEXT," +
                 COL_MESSAGE_ID + " TEXT," +
                 COL_LOCAL_URI + " TEXT," +
                 COL_FIREBASE_URI + " TEXT" +
-            ");";
+                "PRIMARY KEY (" + _ID + "," + COL_MESSAGE_ID + "));"
+            ;
 
     public static final String SQL_SELECT_ALL[] = {
             _ID,

@@ -78,7 +78,8 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
                 String destinationId = (dataMessage.get("destinationId"));
                 int destinationType = Integer.parseInt(Objects.requireNonNull(dataMessage.get("destinationType")));
                 String data = dataMessage.get("data");
-                int forGroup = Integer.parseInt(Objects.requireNonNull(dataMessage.get("forGroup")));
+                String groupId = Objects.requireNonNull(dataMessage.get("groupId"));
+                int groupType = Integer.parseInt(Objects.requireNonNull(dataMessage.get("groupType")));
                 MessageEntity.DestinationState destinationState = MessageEntity.DestinationState.Received;
                 int status = Integer.parseInt(Objects.requireNonNull(dataMessage.get("state")));
                 Date createdAt = DateFormatter.parse(dataMessage.get("createdAt"));
@@ -86,7 +87,7 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
                 long receivedAt = System.currentTimeMillis();
                 String notificationBody = dataMessage.get("notificationBody");
 
-                MessageEntity messageEntity = new MessageEntity(id, MessageEntity.MessageType.setValue(messageTypeId), deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, forGroup, destinationState, status, createdAt, sentAt, new Date(receivedAt));
+                MessageEntity messageEntity = new MessageEntity(id, MessageEntity.MessageType.setValue(messageTypeId), deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, groupId, ContactEntity.ContactType.setValue(groupType), destinationState, status, createdAt, sentAt, new Date(receivedAt));
                 if (messageEntity.getMessageType() != MessageEntity.MessageType.Text) {
                     JSONObject multimedia = new JSONObject(dataMessage.get("multimedia"));
                     Log.d(TAG, "onMessageReceived: " + multimedia.toString(4));
@@ -97,7 +98,7 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
                 }
                 ContactEntity contact = new ContactRepository(getApplicationContext()).updateUnreadMessagesAndLastMessage(messageEntity);
                 if (!isAppOnForeground(getApplicationContext())) {
-                    showNotification(messageEntity, deviceFromType, notificationBody);
+                    showNotification(messageEntity, notificationBody);
                     confirmAck(messageEntity);
                 }else {
                     if (messageEntity.getMessageType() == MessageEntity.MessageType.Text){
@@ -123,25 +124,34 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
         notificationManager.createNotificationChannel(channel);
     }
 
-    void showNotification(MessageEntity messageEntity, int deviceFromType, String notificationBody) {
+    void showNotification(MessageEntity messageEntity, String notificationBody) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             makeNotificationChannel();
         }
         try {
+            String contactId;
+            int contactType;
+            if (messageEntity.getGroupId().isEmpty()) {
+                contactId = messageEntity.getDeviceFromId();
+                contactType = messageEntity.getDeviceFromType().getValue();
+            } else {
+                contactId = messageEntity.getGroupId();
+                contactType = messageEntity.getGroupType().getValue();
+            }
             Intent appIntent = new Intent(getApplicationContext(), MainActivity.class);
             appIntent.putExtra("from", "notification");
-            appIntent.putExtra("contactId", messageEntity.getDeviceFromId());
-            appIntent.putExtra("contactType", messageEntity.getDeviceFromType().getValue());
+            appIntent.putExtra("contactId", contactId);
+            appIntent.putExtra("contactType", contactType);
             PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), (int)System.currentTimeMillis(), appIntent, 0);
 
             NotificationCompat.Builder notificationBuilder =
                     new NotificationCompat.Builder(this, "CHANNEL_1");
             notificationBuilder
                     .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentTitle(new ContactRepository(getApplicationContext()).findByIdAndType(messageEntity.getDeviceFromId(), deviceFromType).getName())
+                    .setContentTitle(new ContactRepository(getApplicationContext()).findByIdAndType(contactId, contactType).getName())
                     .setContentText(messageEntity.getData())
                     .setContentIntent(pendingIntent)
-                    .setGroup(String.valueOf(messageEntity.getDeviceFromId()))
+                    .setGroup(contactId)
                     .setGroupSummary(true);
 
             notificationBuilder.setAutoCancel(true);
@@ -153,7 +163,7 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
             NotificationManager notificationManager =
                     (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             assert notificationManager != null;
-            notificationManager.notify(String.valueOf(messageEntity.getDeviceFromId()), 10, notificationBuilder.build());
+            notificationManager.notify(contactId, 10, notificationBuilder.build());
         }catch (Exception e) {
             Log.d(TAG, "showNotification: " + e.getMessage());
         }

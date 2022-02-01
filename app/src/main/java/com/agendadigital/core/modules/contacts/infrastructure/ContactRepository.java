@@ -78,9 +78,9 @@ public class ContactRepository {
     public ContactEntity updateUnreadMessagesAndLastMessage(MessageEntity messageEntity) throws Exception {
         String id;
         int type;
-        if(messageEntity.getForGroup() == 1) {
-            id = messageEntity.getDestinationId();
-            type = messageEntity.getDestinationType().getValue();
+        if(!messageEntity.getGroupId().isEmpty()) {
+            id = messageEntity.getGroupId();
+            type = messageEntity.getGroupType().getValue();
         } else {
             id = messageEntity.getDeviceFromId();
             type = messageEntity.getDeviceFromType().getValue();

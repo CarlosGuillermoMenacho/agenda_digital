@@ -27,7 +27,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApp"
         android:windowSoftInputMode="stateHidden"
-        tools:targetApi="n">
+        tools:targetApi="n"
+        tools:replace="android:theme">
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

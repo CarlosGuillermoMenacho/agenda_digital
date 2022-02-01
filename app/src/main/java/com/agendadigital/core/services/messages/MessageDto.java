@@ -16,20 +16,21 @@ public class MessageDto {
         private String destinationId;
         private int destinationType;
         private String data;
-        private int forGroup;
+        private String groupId;
+        private int groupType;
         private Date createdAt;
         private MultimediaDto.SendMultimediaRequest multimedia;
 
-        public SendMessageRequest(int messageType, String deviceFromId, int deviceFromType, String destinationId, int destinationType, String data, int forGroup, Date createdAt) {
+        public SendMessageRequest(int messageType, String deviceFromId, int deviceFromType, String destinationId, int destinationType, String data, String groupId, int groupType, Date createdAt) {
             this.messageType = messageType;
             this.deviceFromId = deviceFromId;
             this.deviceFromType = deviceFromType;
             this.destinationId = destinationId;
             this.destinationType = destinationType;
             this.data = data;
-            this.forGroup = forGroup;
+            this.groupId = groupId;
+            this.groupType = groupType;
             this.createdAt = createdAt;
-            this.multimedia = null;
         }
 
         public int getMessageType() {
@@ -80,12 +81,20 @@ public class MessageDto {
             this.data = data;
         }
 
-        public int getForGroup() {
-            return forGroup;
+        public String getGroupId() {
+            return groupId;
         }
 
-        public void setForGroup(int forGroup) {
-            this.forGroup = forGroup;
+        public void setGroupId(String groupId) {
+            this.groupId = groupId;
+        }
+
+        public int getGroupType() {
+            return groupType;
+        }
+
+        public void setGroupType(int groupType) {
+            this.groupType = groupType;
         }
 
         public Date getCreatedAt() {
@@ -113,7 +122,8 @@ public class MessageDto {
                 jsonObject.put("destinationId", destinationId);
                 jsonObject.put("destinationType", destinationType);
                 jsonObject.put("data", data);
-                jsonObject.put("forGroup", forGroup);
+                jsonObject.put("groupId", groupId);
+                jsonObject.put("groupType", groupType);
                 jsonObject.put("createdAt", DateFormatter.formatToDate(createdAt));
                 jsonObject.put("multimedia", multimedia != null? new JSONObject(multimedia.toJSON()): "");
                 return jsonObject.toString(4);

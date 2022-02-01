@@ -74,7 +74,7 @@ public abstract class MessageView extends RelativeLayout {
         sbAudioBar = this.findViewById(R.id.sbAudioBar);
     }
 
-    public void setMessage(MessageEntity message) throws IOException {
+    public void setMessage(MessageEntity message) throws Exception {
         messageEntity = message;
         tvMessageContactName.setVisibility(GONE);
         tvMessageBody.setText(messageEntity.getData());

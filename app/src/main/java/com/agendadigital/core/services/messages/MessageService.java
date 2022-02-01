@@ -6,7 +6,6 @@ import com.agendadigital.clases.Constants;
 import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
-import com.agendadigital.core.modules.messages.domain.MultimediaEntity;
 import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -27,12 +26,16 @@ public class MessageService {
     public void sendMessage(MessageEntity messageToSend, Response.Listener<JSONObject> responseListener, Response.ErrorListener errorListener) {
         JSONObject params = new JSONObject();
         try {
-            MessageDto.SendMessageRequest sendMessageRequest = new MessageDto.SendMessageRequest(messageToSend.getMessageType().getValue()
+            MessageDto.SendMessageRequest sendMessageRequest = new MessageDto.SendMessageRequest(
+                    messageToSend.getMessageType().getValue()
                     , messageToSend.getDeviceFromId()
                     , messageToSend.getDeviceFromType().getValue()
                     , messageToSend.getDestinationId()
                     , messageToSend.getDestinationType().getValue()
-                    , messageToSend.getData(), messageToSend.getForGroup(), messageToSend.getCreatedAt());
+                    , messageToSend.getData()
+                    , messageToSend.getGroupId()
+                    , messageToSend.getGroupType() == null ? 0: messageToSend.getGroupType().getValue()
+                    , messageToSend.getCreatedAt());
             if(messageToSend.getMessageType() != MessageEntity.MessageType.Text) {
                 sendMessageRequest.setMultimedia(new MultimediaDto.SendMultimediaRequest(messageToSend.getMultimediaEntity().getId(), messageToSend.getMultimediaEntity().getFirebaseUri()));
             }

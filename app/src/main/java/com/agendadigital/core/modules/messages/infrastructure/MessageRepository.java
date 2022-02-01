@@ -36,7 +36,8 @@ public class MessageRepository {
             values.put(MessageBase.COL_DESTINATION_ID, messageEntity.getDestinationId());
             values.put(MessageBase.COL_DESTINATION_TYPE, messageEntity.getDestinationType().getValue());
             values.put(MessageBase.COL_DATA, messageEntity.getData());
-            values.put(MessageBase.COL_FOR_GROUP, messageEntity.getForGroup());
+            values.put(MessageBase.COL_GROUP_ID, messageEntity.getGroupId());
+            values.put(MessageBase.COL_GROUP_TYPE, messageEntity.getGroupType().getValue());
             values.put(MessageBase.COL_DESTINATION_STATE, messageEntity.getDestinationState().getValue());
             values.put(MessageBase.COL_STATE, messageEntity.getState());
             values.put(MessageBase.COL_CREATED_AT, messageEntity.getCreatedAt().getTime());
@@ -73,24 +74,26 @@ public class MessageRepository {
             String destinationId = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_ID));
             int destinationType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_TYPE));
             String data = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DATA));
-            int forGroup = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_FOR_GROUP));
+            String groupId = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_GROUP_ID));
+            int groupType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_GROUP_ID));
             MessageEntity.DestinationState destionationState = MessageEntity.DestinationState.setValue(cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_STATE)));
             int status = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_STATE));
             Date createdAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_CREATED_AT)));
             Date sentAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_SENT_AT)));
             Date receivedAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_RECEIVED_AT)));
-            messageEntity = new MessageEntity(id, MessageEntity.MessageType.setValue(messageType), deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, forGroup, destionationState, status, createdAt, sentAt, receivedAt);
+            messageEntity = new MessageEntity(id, MessageEntity.MessageType.setValue(messageType), deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, groupId, ContactEntity.ContactType.setValue(groupType), destionationState, status, createdAt, sentAt, receivedAt);
         }
         cursor.close();
         return messageEntity;
     }
 
-    public List<MessageEntity> findAll(String contactId) throws Exception {
+    public List<MessageEntity> findAll(String contactId, int contactType) throws Exception {
         Cursor cursor = repository.query(
                 MessageBase.TABLE_NAME,   // The table to query
                 MessageBase.SQL_SELECT_ALL,             // The array of columns to return (pass null to get all)
-                MessageBase.COL_DESTINATION_ID + "=? or " + MessageBase.COL_DEVICE_FROM_ID + " = ? ",              // The columns for the WHERE clause
-                new String[] { contactId, contactId },          // The values for the WHERE clause
+                "(" + MessageBase.COL_DESTINATION_ID + "=? and " + MessageBase.COL_DESTINATION_TYPE + " = ?) or ("
+                        + MessageBase.COL_DEVICE_FROM_ID + " = ? and " + MessageBase.COL_DEVICE_FROM_TYPE + " = ? ) and " + MessageBase.COL_GROUP_ID + " = ?",              // The columns for the WHERE clause
+                new String[] { contactId, String.valueOf(contactType), contactId, String.valueOf(contactType), ""},          // The values for the WHERE clause
                 null,                   // don't group the rows
                 null,                   // don't filter by row groups
                 MessageBase.sortOrder               // The sort order
@@ -104,13 +107,48 @@ public class MessageRepository {
             String destinationId = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_ID));
             int destinationType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_TYPE));
             String data = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DATA));
-            int forGroup = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_FOR_GROUP));
+            String groupId = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_GROUP_ID));
+            int groupType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_GROUP_ID));
             MessageEntity.DestinationState destinationState = MessageEntity.DestinationState.setValue(cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_STATE)));
             int status = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_STATE));
             Date createdAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_CREATED_AT)));
             Date sentAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_SENT_AT)));
             Date receivedAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_RECEIVED_AT)));
-            MessageEntity messageEntity = new MessageEntity(id, MessageEntity.MessageType.setValue(messageType), deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, forGroup, destinationState, status, createdAt, sentAt, receivedAt);
+            MessageEntity messageEntity = new MessageEntity(id, MessageEntity.MessageType.setValue(messageType), deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, groupId, ContactEntity.ContactType.setValue(groupType), destinationState, status, createdAt, sentAt, receivedAt);
+            messageEntity.setMultimediaEntity(getMultimedia(messageEntity.getId()));
+            notificationEntities.add(messageEntity);
+        }
+        cursor.close();
+        return notificationEntities;
+    }
+
+    public List<MessageEntity> findAllForGroup(String groupIdParam, int groupTypeParam) throws Exception {
+        Cursor cursor = repository.query(
+                MessageBase.TABLE_NAME,   // The table to query
+                MessageBase.SQL_SELECT_ALL,             // The array of columns to return (pass null to get all)
+                MessageBase.COL_GROUP_ID + " = ? and " + MessageBase.COL_GROUP_TYPE + " = ? ",              // The columns for the WHERE clause
+                new String[] { groupIdParam, String.valueOf(groupTypeParam) },          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                MessageBase.sortOrder               // The sort order
+        );
+        List<MessageEntity> notificationEntities = new ArrayList<>();
+        while(cursor.moveToNext()) {
+            String id = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase._ID));
+            int messageType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_MESSAGE_TYPE));
+            String deviceFromId = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DEVICE_FROM_ID));
+            int deviceFromType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DEVICE_FROM_TYPE));
+            String destinationId = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_ID));
+            int destinationType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_TYPE));
+            String data = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DATA));
+            String groupId = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_GROUP_ID));
+            int groupType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_GROUP_ID));
+            MessageEntity.DestinationState destinationState = MessageEntity.DestinationState.setValue(cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_STATE)));
+            int status = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_STATE));
+            Date createdAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_CREATED_AT)));
+            Date sentAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_SENT_AT)));
+            Date receivedAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_RECEIVED_AT)));
+            MessageEntity messageEntity = new MessageEntity(id, MessageEntity.MessageType.setValue(messageType), deviceFromId, User.UserType.setValue(deviceFromType), destinationId, ContactEntity.ContactType.setValue(destinationType), data, groupId, ContactEntity.ContactType.setValue(groupType), destinationState, status, createdAt, sentAt, receivedAt);
             messageEntity.setMultimediaEntity(getMultimedia(messageEntity.getId()));
             notificationEntities.add(messageEntity);
         }

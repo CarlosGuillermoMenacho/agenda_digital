@@ -87,7 +87,7 @@ public class FilesUtils {
     }
 
     public static File bitmapToFile(Context context, Bitmap bitmap, String filename) throws IOException {
-        File file = new File(context.getCacheDir(), filename);
+        File file = new File(context.getCacheDir(), filename.concat("jpeg"));
         if (file.createNewFile()) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100 /*ignored for PNG*/, bos);
@@ -115,24 +115,24 @@ public class FilesUtils {
             return image;
     }
 
-    public static boolean validateExtension(String filename, MessageEntity.MessageType messageType) {
+    public static boolean validateExtension(String extension, MessageEntity.MessageType messageType) {
         boolean result;
         switch (messageType) {
             case Image:
-                result = filename.endsWith(".jpeg") || filename.endsWith(".png");
+                result = extension.equalsIgnoreCase(".jpeg") || extension.equalsIgnoreCase(".jpg") || extension.equalsIgnoreCase(".png");
                 break;
             case Video:
-                result = filename.endsWith(".mp4") || filename.endsWith(".mpg");
+                result = extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".mpg");
                 break;
             case Document:
-                result = filename.endsWith(".txt")
-                        || filename.endsWith(".doc")
-                        || filename.endsWith(".docx")
-                        || filename.endsWith(".xls")
-                        || filename.endsWith(".xlsx")
-                        || filename.endsWith(".ppt")
-                        || filename.endsWith(".pptx")
-                        || filename.endsWith(".pdf");
+                result = extension.equalsIgnoreCase(".txt")
+                        || extension.equalsIgnoreCase(".doc")
+                        || extension.equalsIgnoreCase(".docx")
+                        || extension.equalsIgnoreCase(".xls")
+                        || extension.equalsIgnoreCase(".xlsx")
+                        || extension.equalsIgnoreCase(".ppt")
+                        || extension.equalsIgnoreCase(".pptx")
+                        || extension.equalsIgnoreCase(".pdf");
                 break;
             default:
                 result = true;

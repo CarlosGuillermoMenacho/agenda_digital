@@ -53,7 +53,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         try {
             holder.set(messageEntities.get(position));
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.d("MessageAdapter", "onBindViewHolder: " + e.getMessage());
             e.printStackTrace();
         }

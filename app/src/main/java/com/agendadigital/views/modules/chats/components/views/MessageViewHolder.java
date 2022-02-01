@@ -42,7 +42,7 @@ public class MessageViewHolder extends RecyclerView.ViewHolder {
 //        });
 //    }
 
-    public void set(MessageEntity messageEntity) throws IOException {
+    public void set(MessageEntity messageEntity) throws Exception {
         this.messageView.setMessage(messageEntity);
     }
 }

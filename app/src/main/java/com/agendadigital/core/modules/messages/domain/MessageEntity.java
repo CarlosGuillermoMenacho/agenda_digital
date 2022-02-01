@@ -8,7 +8,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
-import java.util.Locale;
 
 import androidx.annotation.NonNull;
 
@@ -20,7 +19,8 @@ public class MessageEntity {
     private String destinationId;
     private ContactEntity.ContactType destinationType;
     private String data;
-    private int forGroup;
+    private String groupId;
+    private ContactEntity.ContactType groupType;
     private DestinationState destinationState;
     private int state;
     private Date createdAt;
@@ -28,7 +28,7 @@ public class MessageEntity {
     private Date receivedAt;
     private MultimediaEntity multimediaEntity;
 
-    public MessageEntity(String id, MessageType messageType, String deviceFromId, User.UserType deviceFromType, String destinationId, ContactEntity.ContactType destinationType, String data, int forGroup, DestinationState destinationState, int state, Date createdAt, Date sentAt, Date receivedAt) {
+    public MessageEntity(String id, MessageType messageType, String deviceFromId, User.UserType deviceFromType, String destinationId, ContactEntity.ContactType destinationType, String data, String groupId, ContactEntity.ContactType groupType, DestinationState destinationState, int state, Date createdAt, Date sentAt, Date receivedAt) {
         this.id = id;
         this.messageType = messageType;
         this.deviceFromId = deviceFromId;
@@ -36,7 +36,8 @@ public class MessageEntity {
         this.destinationId = destinationId;
         this.destinationType = destinationType;
         this.data = data;
-        this.forGroup = forGroup;
+        this.groupId = groupId;
+        this.groupType = groupType;
         this.destinationState = destinationState;
         this.state = state;
         this.createdAt = createdAt;
@@ -100,12 +101,20 @@ public class MessageEntity {
         this.data = data;
     }
 
-    public int getForGroup() {
-        return forGroup;
+    public String getGroupId() {
+        return groupId;
     }
 
-    public void setForGroup(int forGroup) {
-        this.forGroup = forGroup;
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
+
+    public ContactEntity.ContactType getGroupType() {
+        return groupType;
+    }
+
+    public void setGroupType(ContactEntity.ContactType groupType) {
+        this.groupType = groupType;
     }
 
     public DestinationState getDestinationState() {
@@ -165,7 +174,8 @@ public class MessageEntity {
             jsonObject.put("deviceFromId", deviceFromId);
             jsonObject.put("destinationId", destinationId);
             jsonObject.put("data", data);
-            jsonObject.put("forGroup", forGroup);
+            jsonObject.put("groupId", groupId);
+            jsonObject.put("groupType", groupType);
             jsonObject.put("destinationStatus", destinationState.getValue());
             jsonObject.put("state", state);
             jsonObject.put("createdAt", DateFormatter.formatToDate(createdAt));
@@ -174,11 +184,10 @@ public class MessageEntity {
             return jsonObject.toString(4);
     }
 
-    public static int isForGroupMessage(ContactEntity destinationContact) {
-        return destinationContact.getContactType() == ContactEntity.ContactType.Course
-                || destinationContact.getContactType() == ContactEntity.ContactType.CourseWithTutors
-                || destinationContact.getContactType() == ContactEntity.ContactType.TeacherAndDirectorGroup
-                ? 1 : 0;
+    public static String getGroupId(ContactEntity destinationContact) {
+        if (destinationContact.isGroup())
+            return destinationContact.getId();
+        return "";
     }
 
     @NonNull

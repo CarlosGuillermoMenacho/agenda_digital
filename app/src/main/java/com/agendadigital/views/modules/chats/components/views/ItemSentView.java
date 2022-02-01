@@ -23,7 +23,7 @@ public class ItemSentView extends MessageView {
     }
 
     @Override
-    public void setMessage(MessageEntity message) throws IOException {
+    public void setMessage(MessageEntity message) throws Exception {
         super.setMessage(message);
         this.tvMessageReceivedAt.setText(DateFormatter.formatToTime(message.getCreatedAt()));
         if(messageEntity.getDestinationState() == MessageEntity.DestinationState.Create) {
