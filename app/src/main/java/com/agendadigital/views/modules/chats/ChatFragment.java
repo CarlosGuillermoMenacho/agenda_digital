@@ -275,7 +275,7 @@ public class ChatFragment extends Fragment {
                 selectedFile = Uri.fromFile(bitmapFile);
                 filePath = FilesUtils.saveFileFromUri(view.getContext(), selectedFile, bitmapFile.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
                 Log.d(TAG, "onActivityResultCamera: " + filePath);
-                fileReference = storageReference.child("images/" + filename);
+                fileReference = storageReference.child("images/" + bitmapFile.getName());
             }catch (Exception e) {
                 Log.e(TAG, "onActivityResultImage: ", e.fillInStackTrace());
             }
@@ -310,7 +310,7 @@ public class ChatFragment extends Fragment {
                     }
                     messageEntity.setMessageType(messageType);
                     filePath = FilesUtils.saveFileFromUri(view.getContext(), selectedFile, filename, DirectoryManager.getPathToSave(messageEntity.getMessageType(), true));
-                    fileReference = storageReference.child(messageEntity.getMessageType().toString() + "/" + file.getName());
+                    fileReference = storageReference.child(messageEntity.getMessageType().toString() + "/" + filename);
                 }catch(Exception e) {
                     Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
                 }

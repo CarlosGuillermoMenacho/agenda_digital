@@ -87,7 +87,7 @@ public class FilesUtils {
     }
 
     public static File bitmapToFile(Context context, Bitmap bitmap, String filename) throws IOException {
-        File file = new File(context.getCacheDir(), filename.concat("jpeg"));
+        File file = new File(context.getCacheDir(), filename.concat(".jpeg"));
         if (file.createNewFile()) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100 /*ignored for PNG*/, bos);

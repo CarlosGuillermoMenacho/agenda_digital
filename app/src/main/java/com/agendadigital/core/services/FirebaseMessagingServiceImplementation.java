@@ -190,7 +190,7 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
 
     private void downloadFileFromMessage(MessageEntity message) {
         StorageReference fileToDownloadReference = storage.getReferenceFromUrl(message.getMultimediaEntity().getFirebaseUri());
-        String filename = message.getMessageType() == MessageEntity.MessageType.Image? message.getMultimediaEntity().getId(): fileToDownloadReference.getName();
+        String filename = fileToDownloadReference.getName();
         String pathToSave = DirectoryManager.getPathToSave(message.getMessageType(), false);
         File localFile = new File(pathToSave, filename);
         fileToDownloadReference.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
@@ -198,41 +198,6 @@ public class FirebaseMessagingServiceImplementation extends FirebaseMessagingSer
             new MessageRepository(getApplicationContext()).insert(message);
             messageObservable.getPublisher().onNext(message);
         }).addOnFailureListener(e -> Log.d(TAG, "onFailure: " + e.getMessage()));
-//        File localFile = File.createTempFile("images", "jpg");
-//        fileToDownloadReference.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
-//            Log.d(TAG, "onSuccessFile: " + localFile.getPath());
-//            try {
-//                String pathToSave = "";
-//                if (message.getMessageType() ==  MessageEntity.MessageType.Image) {
-//                    pathToSave = FilesUtils.saveImageJPEG(getApplicationContext()
-//                            , localFile
-//                            , message.getMultimediaEntity().getId()
-//                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
-//                }else if (message.getMessageType() == MessageEntity.MessageType.Video) {
-//                    pathToSave = FilesUtils.saveVideoMP4FromFile(getApplicationContext()
-//                            , localFile
-//                            , fileToDownloadReference.getName()
-//                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
-//                }else if (message.getMessageType() == MessageEntity.MessageType.Document) {
-//                    Log.d(TAG, "onSuccessDocument: " + fileToDownloadReference.getName());
-//                    pathToSave = FilesUtils.saveDocument(getApplicationContext()
-//                            , localFile
-//                            , fileToDownloadReference.getName()
-//                            , DirectoryManager.getPathToSave(message.getMessageType(), false));
-//                }else if (message.getMessageType() == MessageEntity.MessageType.Audio) {
-//                    Log.d(TAG, "onSuccessDocument: " + fileToDownloadReference.getName());
-//
-//                }
-//
-//                Log.d(TAG, "onSuccessSave: " + pathToSave);
-//                message.getMultimediaEntity().setLocalUri(pathToSave);
-//                 new MessageRepository(getApplicationContext()).insert(message);
-//                messageObservable.getPublisher().onNext(message);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//        }).addOnFailureListener(e -> Log.d(TAG, "onFailure: " + e.getMessage()));
     }
 
     private boolean isAppOnForeground(Context context) {
