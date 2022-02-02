@@ -73,7 +73,7 @@
                 android:id="@+id/rlMessageAudioContainer"
                 android:layout_width="200dp"
                 android:layout_height="50dp"
-                android:visibility="visible"
+                android:visibility="gone"
                 android:layout_gravity="end"
                 android:background="@android:color/transparent">
                 <Button
