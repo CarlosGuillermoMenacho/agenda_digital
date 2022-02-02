@@ -51,22 +51,22 @@
                 android:visibility="gone"
                 android:layout_gravity="end"
                 android:background="@android:color/transparent">
-            <VideoView
-                android:id="@+id/vvVideoMessage"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:visibility="visible"
-                android:layout_gravity="end"
-                android:contentDescription="@string/video_message"/>
+                <VideoView
+                    android:id="@+id/vvVideoMessage"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:visibility="visible"
+                    android:layout_gravity="end"
+                    android:contentDescription="@string/video_message"/>
 
-            <ImageButton
-                android:id="@+id/ibMessagePlayVideo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:layout_gravity="center_vertical|center_horizontal"
-                android:visibility="visible"
-                android:src="@drawable/play_64icon"/>
+                <ImageButton
+                    android:id="@+id/ibMessagePlayVideo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:layout_gravity="center_vertical|center_horizontal"
+                    android:visibility="visible"
+                    android:src="@drawable/play_64icon"/>
             </FrameLayout>
 
             <RelativeLayout

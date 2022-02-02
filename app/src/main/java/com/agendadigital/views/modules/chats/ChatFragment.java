@@ -285,7 +285,7 @@ public class ChatFragment extends Fragment {
                 Toast.makeText(view.getContext(), "Ocurrió un error al seleccionar el archivo.", Toast.LENGTH_SHORT).show();
                 return;
             }
-
+            Log.d(TAG, "onActivityAttach: " + selectedFile.getPath());
             File file = new File(selectedFile.getPath());
 
             if(file.getAbsolutePath() != null){
@@ -522,13 +522,7 @@ public class ChatFragment extends Fragment {
                         new TypeToken<MessageDto.SendMessageResponse>() {}
                                 .getType());
                 messageToSend.setDestinationState(MessageEntity.DestinationState.Sent);
-
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(MessageBase._ID, sendMessageResponse.getId());
-                contentValues.put(MessageBase.COL_DESTINATION_STATE, messageToSend.getDestinationState().getValue());
-                contentValues.put(MessageBase.COL_SENT_AT, DateFormatter.parse(sendMessageResponse.getSentAt()).getTime());
-
-                messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { messageToSend.getId() });
+                messageRepository.updateMessageSentOk(messageToSend, sendMessageResponse.getId(), sendMessageResponse.getSentAt());
                 messageAdapter.updateDestinationState(messageToSend);
             } catch (JSONException | ParseException e) {
                 e.printStackTrace();

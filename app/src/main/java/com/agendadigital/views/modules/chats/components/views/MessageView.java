@@ -12,6 +12,7 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -114,6 +115,7 @@ public abstract class MessageView extends RelativeLayout {
                         ivImage.setImageResource(R.drawable.word_32icon);
                     }
                     ivImage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                    Log.d("MessageView", "setMessage: " + file.exists());
                     tvMessageBody.setText(file.getName());
 //                    ivImage.setOnClickListener(v -> {
 //                        Intent target = new Intent(Intent.ACTION_VIEW);

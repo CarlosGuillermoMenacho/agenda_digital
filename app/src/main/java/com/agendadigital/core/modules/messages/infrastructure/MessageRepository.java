@@ -12,7 +12,9 @@ import com.agendadigital.core.modules.messages.domain.MessageBase;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import com.agendadigital.core.modules.messages.domain.MultimediaBase;
 import com.agendadigital.core.modules.messages.domain.MultimediaEntity;
+import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -182,6 +184,18 @@ public class MessageRepository {
         repository.update(MessageBase.TABLE_NAME, contentValues, whereClause, whereArgs);
     }
 
+    public void updateMessageSentOk(MessageEntity messageEntity, String newId, String sentAt) throws ParseException {
+        ContentValues messageValues = new ContentValues();
+        messageValues.put(MessageBase._ID, newId);
+        messageValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Sent.getValue());
+        messageValues.put(MessageBase.COL_SENT_AT, DateFormatter.parse(sentAt).getTime());
+        repository.update(MessageBase.TABLE_NAME, messageValues,MessageBase._ID + "= ?", new String[] { messageEntity.getId() });
+        if (messageEntity.getMessageType() != MessageEntity.MessageType.Text) {
+            ContentValues mediaValues = new ContentValues();
+            mediaValues.put(MultimediaBase.COL_MESSAGE_ID, newId);
+            repository.update(MultimediaBase.TABLE_NAME, mediaValues,MultimediaBase.COL_MESSAGE_ID + "= ?", new String[] { messageEntity.getId() });
+        }
+    }
     public void updateMultimedia(ContentValues contentValues, String whereClause, String[] whereArgs) {
         repository.update(MultimediaBase.TABLE_NAME, contentValues, whereClause, whereArgs);
     }
