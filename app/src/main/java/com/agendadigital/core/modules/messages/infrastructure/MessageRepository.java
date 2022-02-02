@@ -110,7 +110,7 @@ public class MessageRepository {
             int destinationType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_TYPE));
             String data = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DATA));
             String groupId = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_GROUP_ID));
-            int groupType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_GROUP_ID));
+            int groupType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_GROUP_TYPE));
             MessageEntity.DestinationState destinationState = MessageEntity.DestinationState.setValue(cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_STATE)));
             int status = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_STATE));
             Date createdAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_CREATED_AT)));
@@ -144,7 +144,7 @@ public class MessageRepository {
             int destinationType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_TYPE));
             String data = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_DATA));
             String groupId = cursor.getString(cursor.getColumnIndexOrThrow(MessageBase.COL_GROUP_ID));
-            int groupType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_GROUP_ID));
+            int groupType = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_GROUP_TYPE));
             MessageEntity.DestinationState destinationState = MessageEntity.DestinationState.setValue(cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_DESTINATION_STATE)));
             int status = cursor.getInt(cursor.getColumnIndexOrThrow(MessageBase.COL_STATE));
             Date createdAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(MessageBase.COL_CREATED_AT)));

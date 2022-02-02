@@ -74,15 +74,18 @@ public class FilesUtils {
 
     public static String saveFileFromUri(Context context, Uri uri, String fileName, String pathToSave) throws IOException {
         InputStream inputStream = context.getContentResolver().openInputStream(uri);
-        FileOutputStream out = new FileOutputStream(new File(pathToSave, fileName));
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = inputStream.read(buf)) > 0) {
-            out.write(buf, 0, len);
+        File file = new File(pathToSave, fileName);
+        if (!file.exists()) {
+            FileOutputStream out = new FileOutputStream(file);
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = inputStream.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            out.flush();
+            inputStream.close();
+            out.close();
         }
-        out.flush();
-        inputStream.close();
-        out.close();
         return pathToSave + fileName;
     }
 
