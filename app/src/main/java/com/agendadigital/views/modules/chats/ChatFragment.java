@@ -1,11 +1,13 @@
 package com.agendadigital.views.modules.chats;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -22,6 +24,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.agendadigital.BuildConfig;
 import com.agendadigital.MainActivity;
 import com.agendadigital.R;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
@@ -61,6 +64,7 @@ import java.util.UUID;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -81,6 +85,7 @@ public class ChatFragment extends Fragment {
     private ImageButton btAttach;
     private ImageButton btCamera;
     private final int CAMERA_REQUEST = 1001;
+    private File photoFile;
 
     private MessageAdapter messageAdapter;
     private final MessageObservable messageObservable = new MessageObservable();
@@ -240,13 +245,27 @@ public class ChatFragment extends Fragment {
     private void initButtonCameraListener() {
         btCamera.setOnClickListener(click -> {
             Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-            startActivityForResult(cameraIntent, CAMERA_REQUEST);
+            cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (cameraIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                try {
+                    photoFile = FilesUtils.createImageTempFile(view.getContext());
+                }catch (Exception e) {
+                    Log.d(TAG, "initButtonCameraListener: " + e.getMessage());
+                }
+                if (photoFile != null) {
+                    Uri photoURI = FileProvider.getUriForFile(view.getContext()
+                            , BuildConfig.APPLICATION_ID + ".provider", photoFile);
+
+                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                }
+            }
         });
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (data == null)
+        if (data == null && resultCode == Activity.RESULT_CANCELED)
             return;
 
         Date currentTime = new Date(System.currentTimeMillis());
@@ -269,13 +288,10 @@ public class ChatFragment extends Fragment {
         if (requestCode == CAMERA_REQUEST) {
             try {
                 messageEntity.setMessageType(MessageEntity.MessageType.Image);
-                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-                String filename = "Photo".concat(String.valueOf(System.currentTimeMillis()));
-                File bitmapFile = FilesUtils.bitmapToFile(view.getContext(), bitmap, filename);
-                selectedFile = Uri.fromFile(bitmapFile);
-                filePath = FilesUtils.saveFileFromUri(view.getContext(), selectedFile, bitmapFile.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
+                selectedFile = Uri.fromFile(photoFile);
+                filePath = FilesUtils.saveFileFromUri(view.getContext(), selectedFile, photoFile.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
                 Log.d(TAG, "onActivityResultCamera: " + filePath);
-                fileReference = storageReference.child("images/" + bitmapFile.getName());
+                fileReference = storageReference.child("images/" + photoFile.getName());
             }catch (Exception e) {
                 Log.e(TAG, "onActivityResultImage: ", e.fillInStackTrace());
             }

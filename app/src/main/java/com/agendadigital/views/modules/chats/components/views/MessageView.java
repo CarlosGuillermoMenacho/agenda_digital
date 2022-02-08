@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ExifInterface;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -87,10 +89,32 @@ public abstract class MessageView extends RelativeLayout {
                     rlMessageAudioContainer.setVisibility(GONE);
                     flVideoMessageContainer.setVisibility(GONE);
                     ivImage.setVisibility(VISIBLE);
+                    int rotate = 0;
                     Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(viewGroup.getContext().getContentResolver(), Uri.fromFile(file));
-                    ivImage.setImageBitmap(Bitmap.createScaledBitmap(imageBitmap, ivImage.getMaxWidth(), ivImage.getMaxHeight(), true));
+                    ExifInterface exif = new ExifInterface(
+                            file.getAbsolutePath());
+                    int orientation = exif.getAttributeInt(
+                            ExifInterface.TAG_ORIENTATION,
+                            ExifInterface.ORIENTATION_NORMAL);
 
-                    ivImage.setOnClickListener(v -> showImageView(imageBitmap));
+                    switch (orientation) {
+                        case ExifInterface.ORIENTATION_ROTATE_270:
+                            rotate = 270;
+                            break;
+                        case ExifInterface.ORIENTATION_ROTATE_180:
+                            rotate = 180;
+                            break;
+                        case ExifInterface.ORIENTATION_ROTATE_90:
+                            rotate = 90;
+                            break;
+                    }
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(rotate);
+                    Bitmap scaledBitmap = Bitmap.createScaledBitmap(imageBitmap, ivImage.getMaxWidth(), ivImage.getMaxHeight(), true);
+                    Bitmap rotatedBitmap = Bitmap.createBitmap(scaledBitmap, 0, 0, ivImage.getWidth(), ivImage.getHeight(), matrix, true);
+                    ivImage.setImageBitmap(rotatedBitmap);
+
+                    ivImage.setOnClickListener(v -> showImageView(rotatedBitmap));
                     break;
                 case Video:
                     rlMessageAudioContainer.setVisibility(GONE);

@@ -108,7 +108,8 @@ public class FilesUtils {
             // Create an image file name
             String timeStamp = DateFormatter.formatToDate(new Date());
             String imageFileName = "JPEG_" + timeStamp + "_";
-            File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File storageDir = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DCIM), "Camera");
             File image = File.createTempFile(
                     imageFileName,  /* prefix */
                     ".jpg",         /* suffix */
