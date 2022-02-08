@@ -173,6 +173,7 @@ public class MessageEntity {
             jsonObject.put("messageType", messageType);
             jsonObject.put("deviceFromId", deviceFromId);
             jsonObject.put("destinationId", destinationId);
+            jsonObject.put("destinationType", destinationType);
             jsonObject.put("data", data);
             jsonObject.put("groupId", groupId);
             jsonObject.put("groupType", groupType);

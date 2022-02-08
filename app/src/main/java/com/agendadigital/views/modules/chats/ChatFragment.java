@@ -359,7 +359,9 @@ public class ChatFragment extends Fragment {
 
                     @Override
                     public void onNext(MessageEntity messageEntity) {
-                        if(messageEntity.getDestinationId().equals(currentUser.getCodigo()) || !messageEntity.getGroupId().isEmpty()){
+                        if ((currentContact.isGroup() && currentContact.getId().equals(messageEntity.getGroupId()) && currentContact.getContactType() == messageEntity.getGroupType())
+                            || (!currentContact.isGroup() && messageEntity.getGroupId().isEmpty() && currentUser.getCodigo().equals(messageEntity.getDestinationId()) && currentUser.getTipo().getValue() == messageEntity.getDestinationType().getValue()
+                                && currentContact.getId().equals(messageEntity.getDeviceFromId()) && currentContact.getContactType().getValue() == messageEntity.getDeviceFromType().getValue()) ) {
                             try {
                                 Log.d(TAG, "onNext: " + messageEntity.toJSON());
                                 confirmAck(messageEntity);
