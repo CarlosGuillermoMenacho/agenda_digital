@@ -111,7 +111,7 @@ public abstract class MessageView extends RelativeLayout {
                     Matrix matrix = new Matrix();
                     matrix.postRotate(rotate);
                     Bitmap scaledBitmap = Bitmap.createScaledBitmap(imageBitmap, ivImage.getMaxWidth(), ivImage.getMaxHeight(), true);
-                    Bitmap rotatedBitmap = Bitmap.createBitmap(scaledBitmap, 0, 0, ivImage.getWidth(), ivImage.getHeight(), matrix, true);
+                    Bitmap rotatedBitmap = Bitmap.createBitmap(scaledBitmap, 0, 0, ivImage.getMaxWidth(), ivImage.getMaxHeight(), matrix, true);
                     ivImage.setImageBitmap(rotatedBitmap);
 
                     ivImage.setOnClickListener(v -> showImageView(rotatedBitmap));
