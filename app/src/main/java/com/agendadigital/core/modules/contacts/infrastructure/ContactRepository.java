@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.core.modules.contacts.domain.ContactBase;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
@@ -86,20 +88,24 @@ public class ContactRepository {
             type = messageEntity.getDeviceFromType().getValue();
         }
         ContactEntity contactEntity = findByIdAndType(id, type);
+        Log.d("ContactFragment2", "updateUnreadMessagesAndLastMessage: " + contactEntity.getName() + ":" + contactEntity.getUnreadMessages());
         contactEntity.setUnreadMessages(contactEntity.getUnreadMessages() + 1);
+        Log.d("ContactFragment2", "updateUnreadMessagesAndLastMessage2: " + contactEntity.getName() + ":" + contactEntity.getUnreadMessages());
         contactEntity.setLastMessageData(messageEntity.getData());
         contactEntity.setLastMessageReceived(messageEntity.getReceivedAt());
         ContentValues contentValues = new ContentValues();
         contentValues.put(ContactBase.COL_UNREAD_MESSAGES, contactEntity.getUnreadMessages());
         contentValues.put(ContactBase.COL_LAST_MESSAGE_DATA, messageEntity.getData());
         contentValues.put(ContactBase.COL_LAST_MESSAGE_RECEIVED_AT, messageEntity.getReceivedAt().getTime());
-        repository.update(ContactBase.TABLE_NAME, contentValues, ContactBase._ID + "= ? and " + ContactBase.COL_TYPE_CONTACT + "=?",
-                new String[] { id, String.valueOf(type) });
+        int i =repository.update(ContactBase.TABLE_NAME, contentValues, ContactBase._ID + "= ? and " + ContactBase.COL_TYPE_CONTACT + "=?",
+                new String[] { contactEntity.getId(), String.valueOf(contactEntity.getContactType().getValue()) });
+        Log.d("ContactFragment3", "updateUnreadMessagesAndLastMessage: " + String.valueOf(i));
         return contactEntity;
     }
 
     public void resetUnreadMessages(ContactEntity currentContact) {
         ContentValues contentValues = new ContentValues();
+        Log.d("MessageRepository", "resetUnreadMessages: " + currentContact.getName());
         contentValues.put(ContactBase.COL_UNREAD_MESSAGES, 0);
         repository.update(ContactBase.TABLE_NAME, contentValues, ContactBase._ID + "= ? and " + ContactBase.COL_TYPE_CONTACT + "=?",
                 new String[] { currentContact.getId(), String.valueOf(currentContact.getContactType().getValue()) });

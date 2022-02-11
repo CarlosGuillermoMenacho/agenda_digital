@@ -50,6 +50,7 @@ public class ContactFragment extends Fragment {
     private ContactRepository contactRepository;
     private ProgressBar pbContacts;
     private ContactAdapter contactAdapter;
+    private Disposable contactDisposable;
     private final ContactObservable contactObservable = new ContactObservable();
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -65,31 +66,16 @@ public class ContactFragment extends Fragment {
         pbContacts = viewFragment.findViewById(R.id.pbContacts);
         contactAdapter = new ContactAdapter();
         rvContactList.setAdapter(contactAdapter);
-        contactObservable
-                .getNotificationObservable()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<ContactEntity>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        Log.d(TAG, "onSubscribe: ");
-                    }
-
-                    @Override
-                    public void onNext(ContactEntity contactEntity) {
+        contactDisposable =
+            contactObservable
+                    .getNotificationObservable()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(contactEntity -> {
                         contactAdapter.updateContactMessage(contactEntity);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d(TAG, "onError: " + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        Log.d(TAG, "onComplete: ");
-                    }
-                });
+                    },error -> {
+                        Log.d(TAG, "onError: " + error.getMessage());
+                    });
         try {
             getContactsFromDatabase();
             if (contactEntityList.size() == 0) {
@@ -103,22 +89,21 @@ public class ContactFragment extends Fragment {
             @Override
             public void onClick(int position, View v) {
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("contact", contactEntityList.get(position));
+                bundle.putSerializable("contact", contactAdapter.getItem(position));
                 Navigation.findNavController(requireView()).navigate(R.id.action_fragment_contacts_to_fragment_chat, bundle);
             }
 
             @Override
             public void onLongClick(int position, View v) {
-
-                if ((Globals.user.getTipo() == User.UserType.Director && contactEntityList.get(position).getContactType() == ContactEntity.ContactType.TeacherAndDirectorGroup)
+                if ((Globals.user.getTipo() == User.UserType.Director && contactAdapter.getItem(position).getContactType() == ContactEntity.ContactType.TeacherAndDirectorGroup)
                         || (Globals.user.getTipo() == User.UserType.Teacher
-                            && (contactEntityList.get(position).getContactType() == ContactEntity.ContactType.Course
-                                || contactEntityList.get(position).getContactType() == ContactEntity.ContactType.CourseWithTutors))) {
+                            && (contactAdapter.getItem(position).getContactType() == ContactEntity.ContactType.Course
+                                || contactAdapter.getItem(position).getContactType() == ContactEntity.ContactType.CourseWithTutors))) {
                     PopupMenu popupMenu = new PopupMenu(viewFragment.getContext(), v);
                     popupMenu.setOnMenuItemClickListener(item -> {
                         if(item.getItemId() == R.id.groupRestrictionsConfig) {
                             Bundle bundle = new Bundle();
-                            bundle.putSerializable("contact", contactEntityList.get(position));
+                            bundle.putSerializable("contact", contactAdapter.getItem(position));
                             Navigation.findNavController(requireView()).navigate(R.id.action_fragment_contacts_to_fragment_restrictions, bundle);
                         }
                         return ContactFragment.super.onOptionsItemSelected(item);
@@ -130,6 +115,12 @@ public class ContactFragment extends Fragment {
             }
         });
         return viewFragment;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        contactDisposable.dispose();
     }
 
     private void getContactsFromDatabase() throws Exception {

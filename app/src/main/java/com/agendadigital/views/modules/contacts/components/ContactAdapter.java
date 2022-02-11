@@ -63,6 +63,10 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
         notifyDataSetChanged();
     }
 
+    public ContactEntity getItem(int position) {
+        return this.contactEntityList.get(position);
+    }
+
     public void setContactEntityList(List<ContactEntity> contactEntityList) {
         this.contactEntityList = contactEntityList;
         Collections.sort(this.contactEntityList, ContactEntity.ContactLastReceivedMessages);

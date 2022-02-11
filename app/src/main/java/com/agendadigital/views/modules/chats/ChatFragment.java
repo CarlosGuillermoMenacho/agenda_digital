@@ -61,6 +61,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
@@ -68,10 +70,13 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import rx.Subscriber;
 
 public class ChatFragment extends Fragment {
 
@@ -88,6 +93,7 @@ public class ChatFragment extends Fragment {
     private File photoFile;
 
     private MessageAdapter messageAdapter;
+    private Disposable messageDisposable;
     private final MessageObservable messageObservable = new MessageObservable();
     private List<MessageEntity> messageEntityList = new ArrayList<>();
 
@@ -128,6 +134,12 @@ public class ChatFragment extends Fragment {
         }
         initViews();
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        messageDisposable.dispose();
     }
 
     private void init(){
@@ -363,23 +375,15 @@ public class ChatFragment extends Fragment {
 
     private void initMessageObserver(){
         try {
-            messageObservable
-                .getNotificationObservable()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<MessageEntity>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        Log.d(TAG, "onSubscribe: ");
-                    }
-
-                    @Override
-                    public void onNext(MessageEntity messageEntity) {
+           messageDisposable =
+               messageObservable.getNotificationObservable()
+                   .subscribeOn(Schedulers.io())
+                   .observeOn(AndroidSchedulers.mainThread())
+                   .subscribe(messageEntity -> {
                         if ((currentContact.isGroup() && currentContact.getId().equals(messageEntity.getGroupId()) && currentContact.getContactType() == messageEntity.getGroupType())
                             || (!currentContact.isGroup() && messageEntity.getGroupId().isEmpty() && currentUser.getCodigo().equals(messageEntity.getDestinationId()) && currentUser.getTipo().getValue() == messageEntity.getDestinationType().getValue()
                                 && currentContact.getId().equals(messageEntity.getDeviceFromId()) && currentContact.getContactType().getValue() == messageEntity.getDeviceFromType().getValue()) ) {
                             try {
-                                Log.d(TAG, "onNext: " + messageEntity.toJSON());
                                 confirmAck(messageEntity);
                                 messageAdapter.add(messageEntity);
                                 rvMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
@@ -387,18 +391,9 @@ public class ChatFragment extends Fragment {
                                 e.printStackTrace();
                             }
                         }
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d(TAG, "onError: " + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-                            Log.d(TAG, "onComplete: ");
-                        }
-                });
+                   },error-> {
+                       Log.d(TAG, "onError: " + error.getMessage());
+                   });
         }catch (Exception e){
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
             Log.d(TAG, e.getMessage());
@@ -521,6 +516,7 @@ public class ChatFragment extends Fragment {
             ContentValues contentValues = new ContentValues();
             contentValues.put(MessageBase.COL_DESTINATION_STATE, message.getDestinationState().getValue());
             messageRepository.update(contentValues, MessageBase._ID + "= ?", new String[] { message.getId() });
+            Log.d(TAG, "confirmAck: " + currentContact.getName());
             contactRepository.resetUnreadMessages(currentContact);
         }, error -> {
             String body;
