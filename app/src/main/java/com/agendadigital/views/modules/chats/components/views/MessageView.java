@@ -13,6 +13,7 @@ import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,7 +28,11 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
+
+import com.agendadigital.BuildConfig;
+import com.agendadigital.MainActivity;
 import com.agendadigital.R;
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import java.io.File;
@@ -35,6 +40,8 @@ import java.io.IOException;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.FileProvider;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
 public abstract class MessageView extends RelativeLayout {
 
@@ -54,7 +61,7 @@ public abstract class MessageView extends RelativeLayout {
     protected Button btAudioPause;
     protected SeekBar sbAudioBar;
     protected MediaPlayer mediaPlayer;
-    private Thread thread;
+    private Handler mHandler = new Handler();
 
     public MessageView(@NonNull ViewGroup viewGroup) {
         super(viewGroup.getContext());
@@ -124,7 +131,6 @@ public abstract class MessageView extends RelativeLayout {
                     BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
                     vvVideoMessage.setBackground(bitmapDrawable);
                     vvVideoMessage.setOnClickListener(v -> showVideoView(file.getPath()));
-
                     ibMessagePlayVideo.setOnClickListener(v -> showVideoView(file.getPath()));
                     break;
                 case Document:
@@ -139,20 +145,21 @@ public abstract class MessageView extends RelativeLayout {
                         ivImage.setImageResource(R.drawable.word_32icon);
                     }
                     ivImage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                    Log.d("MessageView", "setMessage: " + file.exists());
                     tvMessageBody.setText(file.getName());
-//                    ivImage.setOnClickListener(v -> {
-//                        Intent target = new Intent(Intent.ACTION_VIEW);
-//                        target.setDataAndType(Uri.fromFile(file),"application/pdf");
-//                        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-//
-//                        Intent intent = Intent.createChooser(target, "Open File");
-//                        try {
-//                            viewGroup.getContext().startActivity(intent);
-//                        } catch (ActivityNotFoundException e) {
-//                            // Instruct the user to install a PDF reader here, or something
-//                        }
-//                    });
+                    ivImage.setOnClickListener(v -> {
+                        Intent target = new Intent(Intent.ACTION_VIEW);
+                        target.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                        String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+                        String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                        Uri uri = FileProvider.getUriForFile(viewGroup.getContext() , BuildConfig.APPLICATION_ID + ".provider", file);
+                        if (extension.equalsIgnoreCase("") || mimetype == null) {
+                            target.setDataAndType(uri, "text/*");
+                        } else {
+                            target.setDataAndType(uri, mimetype);
+                        }
+                        Intent intent = Intent.createChooser(target, "Open File");
+                        viewGroup.getContext().startActivity(intent);
+                    });
                     break;
                 case Audio:
                     tvMessageBody.setVisibility(GONE);
@@ -162,31 +169,27 @@ public abstract class MessageView extends RelativeLayout {
                     mediaPlayer = MediaPlayer.create(viewGroup.getContext(), Uri.fromFile(file));
                     sbAudioBar.setMax(mediaPlayer.getDuration());
 
-                    thread = new Thread(){
-                        @Override
-                        public void run() {
-                            int currentPosition = 0;
-                            int duration = mediaPlayer.getDuration();
-                            sbAudioBar.setMax(duration);
-                            while (mediaPlayer != null && currentPosition < duration) {
-                                try {
-                                    Thread.sleep(300);
-                                    currentPosition = mediaPlayer.getCurrentPosition();
-                                }catch (InterruptedException e) {
-                                    return;
-                                }
-                                sbAudioBar.setProgress(currentPosition);
-                            }
-                            mediaPlayer.reset();
-                            sbAudioBar.setProgress(0);
-                        }
-                    };
-
-                    thread.start();
                     btAudioPlay.setOnClickListener(v -> {
                         btAudioPlay.setVisibility(GONE);
                         btAudioPause.setVisibility(VISIBLE);
                         mediaPlayer.start();
+                        this.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                int currentPosition = 0;
+                                int duration = mediaPlayer.getDuration();
+                                if (mediaPlayer != null && currentPosition < duration) {
+                                    currentPosition = mediaPlayer.getCurrentPosition();
+                                    sbAudioBar.setProgress(currentPosition);
+                                }
+                                if (currentPosition >= duration) {
+                                    sbAudioBar.setProgress(0);
+                                    btAudioPause.setVisibility(GONE);
+                                    btAudioPlay.setVisibility(VISIBLE);
+                                }
+                                mHandler.postDelayed(this, 300);
+                            }
+                        });
                     });
                     btAudioPause.setOnClickListener(v -> {
                         btAudioPause.setVisibility(GONE);
@@ -252,7 +255,6 @@ public abstract class MessageView extends RelativeLayout {
             ImageView image = dialog.findViewById(R.id.ivDialogImage);
             image.setImageBitmap(bitmap);
             float imageWidthInPX = (float)image.getWidth();
-//
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(Math.round(imageWidthInPX),
                    Math.round(imageWidthInPX * (float)bitmap.getHeight() / (float)bitmap.getWidth()));
             image.setLayoutParams(layoutParams);
