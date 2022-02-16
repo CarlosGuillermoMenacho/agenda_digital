@@ -438,7 +438,7 @@ public class ChatFragment extends Fragment {
 
                 messageRepository.insert(messageSend);
                 messageAdapter.add(messageSend);
-                sendMessage(messageSend, "");
+                sendMessage(messageSend);
                 etTextMessageToSend.setText("");
             }
         });
@@ -546,14 +546,14 @@ public class ChatFragment extends Fragment {
         });
     }
 
-    private void sendMessage(MessageEntity messageToSend, String firebaseUri) {
+    private void sendMessage(MessageEntity messageToSend) {
         messageService.sendMessage(messageToSend, response ->{
             try {
                 MessageDto.SendMessageResponse sendMessageResponse = new Gson().fromJson(response.getString("message"),
                         new TypeToken<MessageDto.SendMessageResponse>() {}
                                 .getType());
                 messageToSend.setDestinationState(MessageEntity.DestinationState.Sent);
-                messageRepository.updateMessageSentOk(messageToSend, sendMessageResponse.getId(), sendMessageResponse.getSentAt(), firebaseUri);
+                messageRepository.updateMessageSentOk(messageToSend, sendMessageResponse.getId(), sendMessageResponse.getSentAt());
                 messageAdapter.updateDestinationState(messageToSend);
             } catch (JSONException | ParseException e) {
                 e.printStackTrace();
@@ -588,11 +588,8 @@ public class ChatFragment extends Fragment {
                 Toast.makeText(view.getContext(), "No se pudo subir el archivo.", Toast.LENGTH_SHORT).show();
             } else {
                 Uri downloadUri = task.getResult();
-//                multimediaToSend.setFirebaseUri(downloadUri.toString());
-//                messageToSend.setMultimediaEntity(multimediaToSend);
-//                messageRepository.insert(messageToSend);
-//                messageAdapter.add(messageToSend);
-                sendMessage(messageToSend, downloadUri.toString());
+                messageToSend.getMultimediaEntity().setFirebaseUri(downloadUri.toString());
+                sendMessage(messageToSend);
                 rvMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
             }
         });

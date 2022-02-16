@@ -184,7 +184,7 @@ public class MessageRepository {
         repository.update(MessageBase.TABLE_NAME, contentValues, whereClause, whereArgs);
     }
 
-    public void updateMessageSentOk(MessageEntity messageEntity, String newId, String sentAt, String firebaseUri) throws ParseException {
+    public void updateMessageSentOk(MessageEntity messageEntity, String newId, String sentAt) throws ParseException {
         ContentValues messageValues = new ContentValues();
         messageValues.put(MessageBase._ID, newId);
         messageValues.put(MessageBase.COL_DESTINATION_STATE, MessageEntity.DestinationState.Sent.getValue());
@@ -193,7 +193,7 @@ public class MessageRepository {
         if (messageEntity.getMessageType() != MessageEntity.MessageType.Text) {
             ContentValues mediaValues = new ContentValues();
             mediaValues.put(MultimediaBase.COL_MESSAGE_ID, newId);
-            mediaValues.put(MultimediaBase.COL_FIREBASE_URI, firebaseUri);
+            mediaValues.put(MultimediaBase.COL_FIREBASE_URI, messageEntity.getMultimediaEntity().getFirebaseUri());
             repository.update(MultimediaBase.TABLE_NAME, mediaValues,MultimediaBase.COL_MESSAGE_ID + "= ?", new String[] { messageEntity.getId() });
         }
     }
