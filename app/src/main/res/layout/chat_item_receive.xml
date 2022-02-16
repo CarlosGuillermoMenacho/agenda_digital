@@ -47,6 +47,21 @@
                 android:visibility="gone"
                 android:contentDescription="@string/image"
                 android:adjustViewBounds="true"/>
+            <FrameLayout
+                android:id="@+id/flMessageLoadingContainer"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:visibility="gone"
+                android:layout_gravity="start"
+                android:background="@android:color/transparent">
+                <ProgressBar
+                    android:id="@+id/pbLoadingMultimediaMessage"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_gravity="start"
+                    tools:visibility="visible" />
+            </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/flMessageVideoContainer"

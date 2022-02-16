@@ -150,5 +150,43 @@ public class ContactEntity implements Serializable {
                     throw new Exception("TypeContact inválido." + value);
             }
         }
+
+        @Override
+        public String toString() {
+            String toString;
+            switch (this) {
+                case None:
+                    toString = "Ninguno";
+                    break;
+                case Tutor:
+                    toString = "Tutor";
+                    break;
+                case Student:
+                    toString = "Estudiante";
+                    break;
+                case Teacher:
+                    toString = "Profesor";
+                    break;
+                case Director:
+                    toString = "Director";
+                    break;
+                case Staff:
+                    toString = "Administrativo";
+                    break;
+                case Course:
+                    toString = "Curso";
+                    break;
+                case CourseWithTutors:
+                    toString = "Curso-Tutores";
+                    break;
+                case TeacherAndDirectorGroup:
+                    toString = "Profesores-Director";
+                    break;
+                default:
+                    toString = "Indefinido";
+                    break;
+            }
+            return toString;
+        }
     }
 }

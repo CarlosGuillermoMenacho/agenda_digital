@@ -135,7 +135,7 @@ public class RestrictionsFragment extends Fragment {
                 new RestrictionDto.CreateUserRestrictionRequest(
                         groupMember.getUserToken().getUserId()
                         , restrictionType.getValue()
-                        , Globals.user.getCodigo()
+                        , currentContact.getId()
                         , currentContact.getContactType().getValue()
                         , 1);
         try {

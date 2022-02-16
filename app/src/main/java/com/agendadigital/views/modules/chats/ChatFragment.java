@@ -347,6 +347,23 @@ public class ChatFragment extends Fragment {
             }
         }
         MultimediaEntity multimediaEntity = new MultimediaEntity(UUID.randomUUID().toString(), messageEntity.getId(), filePath, "");
+        MessageEntity messageSend = new MessageEntity(UUID.randomUUID().toString(),
+                MessageEntity.MessageType.Text,
+                currentUser.getCodigo(),
+                currentUser.getTipo(),
+                currentContact.getId(),
+                currentContact.getContactType(),
+                etTextMessageToSend.getText().toString(),
+                MessageEntity.getGroupId(currentContact),
+                MessageEntity.getGroupId(currentContact).isEmpty() ? ContactEntity.ContactType.None: currentContact.getContactType(),
+                MessageEntity.DestinationState.Create,
+                1,
+                currentTime,
+                currentTime,
+                null);
+
+//        messageRepository.insert(messageSend);
+//        messageAdapter.add(messageSend);
         sendMultimediaMessage(fileReference, selectedFile, messageEntity, multimediaEntity);
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -421,7 +438,7 @@ public class ChatFragment extends Fragment {
 
                 messageRepository.insert(messageSend);
                 messageAdapter.add(messageSend);
-                sendMessage(messageSend);
+                sendMessage(messageSend, "");
                 etTextMessageToSend.setText("");
             }
         });
@@ -529,14 +546,14 @@ public class ChatFragment extends Fragment {
         });
     }
 
-    private void sendMessage(MessageEntity messageToSend) {
+    private void sendMessage(MessageEntity messageToSend, String firebaseUri) {
         messageService.sendMessage(messageToSend, response ->{
             try {
                 MessageDto.SendMessageResponse sendMessageResponse = new Gson().fromJson(response.getString("message"),
                         new TypeToken<MessageDto.SendMessageResponse>() {}
                                 .getType());
                 messageToSend.setDestinationState(MessageEntity.DestinationState.Sent);
-                messageRepository.updateMessageSentOk(messageToSend, sendMessageResponse.getId(), sendMessageResponse.getSentAt());
+                messageRepository.updateMessageSentOk(messageToSend, sendMessageResponse.getId(), sendMessageResponse.getSentAt(), firebaseUri);
                 messageAdapter.updateDestinationState(messageToSend);
             } catch (JSONException | ParseException e) {
                 e.printStackTrace();
@@ -554,6 +571,10 @@ public class ChatFragment extends Fragment {
     }
 
     private void sendMultimediaMessage(StorageReference storageReference, Uri fileToSend, MessageEntity messageToSend, MultimediaEntity multimediaToSend) {
+        messageToSend.setMultimediaEntity(multimediaToSend);
+        messageRepository.insert(messageToSend);
+        messageAdapter.add(messageToSend);
+
         UploadTask uploadTask = storageReference.putFile(fileToSend);
         uploadTask.continueWithTask(task -> {
             if (!task.isSuccessful()) {
@@ -567,11 +588,11 @@ public class ChatFragment extends Fragment {
                 Toast.makeText(view.getContext(), "No se pudo subir el archivo.", Toast.LENGTH_SHORT).show();
             } else {
                 Uri downloadUri = task.getResult();
-                multimediaToSend.setFirebaseUri(downloadUri.toString());
-                messageToSend.setMultimediaEntity(multimediaToSend);
-                messageRepository.insert(messageToSend);
-                messageAdapter.add(messageToSend);
-                sendMessage(messageToSend);
+//                multimediaToSend.setFirebaseUri(downloadUri.toString());
+//                messageToSend.setMultimediaEntity(multimediaToSend);
+//                messageRepository.insert(messageToSend);
+//                messageAdapter.add(messageToSend);
+                sendMessage(messageToSend, downloadUri.toString());
                 rvMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
             }
         });
