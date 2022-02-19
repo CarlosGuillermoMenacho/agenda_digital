@@ -85,6 +85,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
             }
         }
     }
+    public void delete(MessageEntity messageSend) {
+        for (int i = 0; i < this.messageEntities.size(); i++) {
+            if (messageEntities.get(i).getId().equals(messageSend.getId())) {
+                this.messageEntities.remove(i);
+                notifyDataSetChanged();
+                break;
+            }
+        }
+    }
 
     public List<MessageEntity> getMessageEntities() {
         return messageEntities;

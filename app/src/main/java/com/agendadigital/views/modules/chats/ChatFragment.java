@@ -565,6 +565,10 @@ public class ChatFragment extends Fragment {
             if(error.networkResponse.data!=null) {
                 body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
                 Log.d(TAG, "sendButtononErrorResponse: " + body);
+                if (body.contains("no tiene permisos")) {
+                    messageRepository.delete(messageToSend);
+                    messageAdapter.delete(messageToSend);
+                }
                 Toast.makeText(getContext(), statusCode + ":" + body, Toast.LENGTH_SHORT).show();
             }
         });

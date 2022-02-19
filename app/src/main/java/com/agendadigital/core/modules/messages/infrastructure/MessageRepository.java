@@ -60,6 +60,10 @@ public class MessageRepository {
         return rowsInserted;
     }
 
+    public long delete(MessageEntity messageEntity) {
+        return repository.delete(MessageBase.TABLE_NAME, MessageBase._ID + "= ?", new String[] { messageEntity.getId() });
+    }
+
     public MessageEntity findLastMessageReceivedByContact(ContactEntity contactEntity) throws Exception {
         Cursor cursor = repository.query(MessageBase.TABLE_NAME,
                                         MessageBase.SQL_SELECT_ALL,
