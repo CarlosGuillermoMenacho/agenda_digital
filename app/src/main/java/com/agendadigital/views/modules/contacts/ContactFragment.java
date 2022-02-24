@@ -3,10 +3,14 @@ package com.agendadigital.views.modules.contacts;
 import android.content.ContentValues;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.agendadigital.R;
@@ -49,6 +53,7 @@ public class ContactFragment extends Fragment {
     private List<ContactEntity> contactEntityList;
     private ContactRepository contactRepository;
     private ProgressBar pbContacts;
+    private EditText etContactSearch;
     private ContactAdapter contactAdapter;
     private Disposable contactDisposable;
     private final ContactObservable contactObservable = new ContactObservable();
@@ -59,6 +64,8 @@ public class ContactFragment extends Fragment {
         viewFragment = inflater.inflate(R.layout.fragment_contacts, container, false);
         contactRepository = new ContactRepository(viewFragment.getContext());
         RecyclerView rvContactList = viewFragment.findViewById(R.id.rvContactList);
+        etContactSearch = viewFragment.findViewById(R.id.etContactSearch);
+
         DividerItemDecoration itemDecoration = new DividerItemDecoration(viewFragment.getContext(), DividerItemDecoration.VERTICAL);
         itemDecoration.setDrawable(getResources().getDrawable(R.drawable.divider));
         rvContactList.setLayoutManager(new LinearLayoutManager(viewFragment.getContext(), LinearLayoutManager.VERTICAL, false));
@@ -82,6 +89,22 @@ public class ContactFragment extends Fragment {
                 getContactsFromServer();
             }
             contactAdapter.setContactEntityList(contactEntityList);
+            etContactSearch.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    contactAdapter.getFilter().filter(etContactSearch.getText().toString());
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }

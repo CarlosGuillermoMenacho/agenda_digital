@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 import com.agendadigital.R;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
@@ -15,17 +17,49 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactViewHolder> {
+public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactViewHolder> implements Filterable {
 
     private CustomClickListener clickListener;
+    private List<ContactEntity> fullContactEntityList;
     private List<ContactEntity> contactEntityList;
+
+    private Filter filter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<ContactEntity> filtered = new ArrayList<>();
+            if (constraint == null || constraint.length() == 0) {
+                filtered.addAll(fullContactEntityList);
+            }else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for (ContactEntity contactEntity: fullContactEntityList) {
+                    if (contactEntity.getName().toLowerCase().contains(filterPattern) || contactEntity.getContactType().toString().toLowerCase().contains(filterPattern)) {
+                        filtered.add(contactEntity);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filtered;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            contactEntityList.clear();
+            contactEntityList.addAll((List) results.values);
+            Collections.sort(contactEntityList, ContactEntity.ContactLastReceivedMessages);
+            notifyDataSetChanged();
+        }
+    };
 
     public ContactAdapter(List<ContactEntity> contactEntityList) {
         this.contactEntityList = contactEntityList;
+        this.fullContactEntityList = new ArrayList<>(contactEntityList);
     }
 
     public ContactAdapter() {
@@ -69,6 +103,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
 
     public void setContactEntityList(List<ContactEntity> contactEntityList) {
         this.contactEntityList = contactEntityList;
+        this.fullContactEntityList = new ArrayList<>(contactEntityList);
         Collections.sort(this.contactEntityList, ContactEntity.ContactLastReceivedMessages);
 //        contactAdapter.notifyDataSetChanged();
         notifyDataSetChanged();
@@ -89,6 +124,11 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
                 break;
             }
         }
+    }
+
+    @Override
+    public Filter getFilter() {
+        return filter;
     }
 
     public class ContactViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
