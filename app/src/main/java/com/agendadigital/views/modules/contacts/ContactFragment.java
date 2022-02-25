@@ -19,7 +19,9 @@ import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.User;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
+import com.agendadigital.core.modules.contacts.domain.ContactTypeEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
+import com.agendadigital.core.modules.contacts.infrastructure.ContactTypeRepository;
 import com.agendadigital.core.services.contacts.ContactDto;
 import com.agendadigital.views.modules.contacts.components.ContactAdapter;
 import com.agendadigital.clases.Globals;
@@ -52,6 +54,8 @@ public class ContactFragment extends Fragment {
     private View viewFragment;
     private List<ContactEntity> contactEntityList;
     private ContactRepository contactRepository;
+    private ContactTypeRepository contactTypeRepository;
+    private RecyclerView rvContactList;
     private ProgressBar pbContacts;
     private EditText etContactSearch;
     private ContactAdapter contactAdapter;
@@ -63,9 +67,14 @@ public class ContactFragment extends Fragment {
 
         viewFragment = inflater.inflate(R.layout.fragment_contacts, container, false);
         contactRepository = new ContactRepository(viewFragment.getContext());
-        RecyclerView rvContactList = viewFragment.findViewById(R.id.rvContactList);
+        contactTypeRepository = new ContactTypeRepository(viewFragment.getContext());
+        rvContactList = viewFragment.findViewById(R.id.rvContactList);
         etContactSearch = viewFragment.findViewById(R.id.etContactSearch);
+        initObservable();
+        return viewFragment;
+    }
 
+    private void initObservable() {
         DividerItemDecoration itemDecoration = new DividerItemDecoration(viewFragment.getContext(), DividerItemDecoration.VERTICAL);
         itemDecoration.setDrawable(getResources().getDrawable(R.drawable.divider));
         rvContactList.setLayoutManager(new LinearLayoutManager(viewFragment.getContext(), LinearLayoutManager.VERTICAL, false));
@@ -74,15 +83,15 @@ public class ContactFragment extends Fragment {
         contactAdapter = new ContactAdapter();
         rvContactList.setAdapter(contactAdapter);
         contactDisposable =
-            contactObservable
-                    .getNotificationObservable()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(contactEntity -> {
-                        contactAdapter.updateContactMessage(contactEntity);
-                    },error -> {
-                        Log.d(TAG, "onError: " + error.getMessage());
-                    });
+                contactObservable
+                        .getNotificationObservable()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(contactEntity -> {
+                            contactAdapter.updateContactMessage(contactEntity);
+                        },error -> {
+                            Log.d(TAG, "onError: " + error.getMessage());
+                        });
         try {
             getContactsFromDatabase();
             if (contactEntityList.size() == 0) {
@@ -113,21 +122,21 @@ public class ContactFragment extends Fragment {
             public void onClick(int position, View v) {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("contact", contactAdapter.getItem(position));
-                Navigation.findNavController(requireView()).navigate(R.id.action_fragment_contacts_to_fragment_chat, bundle);
+                Navigation.findNavController(requireView()).navigate(R.id.action_fragment_tabchat_contact_to_fragment_chat, bundle);
             }
 
             @Override
             public void onLongClick(int position, View v) {
                 if ((Globals.user.getTipo() == User.UserType.Director && contactAdapter.getItem(position).getContactType() == ContactEntity.ContactType.TeacherAndDirectorGroup)
                         || (Globals.user.getTipo() == User.UserType.Teacher
-                            && (contactAdapter.getItem(position).getContactType() == ContactEntity.ContactType.Course
-                                || contactAdapter.getItem(position).getContactType() == ContactEntity.ContactType.CourseWithTutors))) {
+                        && (contactAdapter.getItem(position).getContactType() == ContactEntity.ContactType.Course
+                        || contactAdapter.getItem(position).getContactType() == ContactEntity.ContactType.CourseWithTutors))) {
                     PopupMenu popupMenu = new PopupMenu(viewFragment.getContext(), v);
                     popupMenu.setOnMenuItemClickListener(item -> {
                         if(item.getItemId() == R.id.groupRestrictionsConfig) {
                             Bundle bundle = new Bundle();
                             bundle.putSerializable("contact", contactAdapter.getItem(position));
-                            Navigation.findNavController(requireView()).navigate(R.id.action_fragment_contacts_to_fragment_restrictions, bundle);
+                            Navigation.findNavController(requireView()).navigate(R.id.action_fragment_tabchat_contact_to_fragment_restrictions, bundle);
                         }
                         return ContactFragment.super.onOptionsItemSelected(item);
                     });
@@ -137,7 +146,6 @@ public class ContactFragment extends Fragment {
 
             }
         });
-        return viewFragment;
     }
 
     @Override
@@ -167,6 +175,9 @@ public class ContactFragment extends Fragment {
                 pbContacts.setVisibility(View.VISIBLE);
                 for (ContactDto.CreateContactResponse contact: contactEntityList) {
                     ContactEntity newContact = new ContactEntity(contact.getId(), contact.getName(), ContactEntity.ContactType.setValue(contact.getContactType()), 0, "", null);
+                    if (contactTypeRepository.findById(newContact.getContactType().getValue()) == null) {
+                        contactTypeRepository.insert(new ContactTypeEntity(newContact.getContactType().getValue(), newContact.getContactType().getForLabel()));
+                    }
                     long rowsInserted = contactRepository.insert(newContact);
                     if(rowsInserted == -1) {
                         Toast.makeText(viewFragment.getContext(), contact.getName(), Toast.LENGTH_SHORT).show();

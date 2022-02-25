@@ -126,6 +126,7 @@ public class ContactEntity implements Serializable {
         public int getValue() {
             return value;
         }
+
         public static ContactType setValue(int value) throws Exception {
             switch (value){
                 case 0:
@@ -149,6 +150,43 @@ public class ContactEntity implements Serializable {
                 default:
                     throw new Exception("TypeContact inválido." + value);
             }
+        }
+
+        public String getForLabel() {
+            String toString;
+            switch (this) {
+                case None:
+                    toString = "Ninguno";
+                    break;
+                case Tutor:
+                    toString = "Tutores";
+                    break;
+                case Student:
+                    toString = "Estudiantes";
+                    break;
+                case Teacher:
+                    toString = "Profesores";
+                    break;
+                case Director:
+                    toString = "Directores";
+                    break;
+                case Staff:
+                    toString = "Administrativos";
+                    break;
+                case Course:
+                    toString = "Cursos";
+                    break;
+                case CourseWithTutors:
+                    toString = "Curso-Tutores";
+                    break;
+                case TeacherAndDirectorGroup:
+                    toString = "Profesores-Director";
+                    break;
+                default:
+                    toString = "Indefinido";
+                    break;
+            }
+            return toString;
         }
 
         @Override

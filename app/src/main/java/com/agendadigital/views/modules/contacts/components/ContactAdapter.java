@@ -133,19 +133,16 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
 
     public class ContactViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
 
-        private final MessageRepository messageRepository;
         private final TextView tvName;
         private final TextView tvTypeContact;
         private final TextView tvLastMessage;
         private final TextView tvContactUnreadMessages;
         private final TextView tvLastReceivedMessage;
         private final CardView cvContactUnreadMessages;
-//        private final NotificationBadge nbUnreadMessages;
         private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
         public ContactViewHolder(@NonNull View itemView) {
             super(itemView);
-            messageRepository = new MessageRepository(itemView.getContext());
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             tvName = itemView.findViewById(R.id.tvContactName);

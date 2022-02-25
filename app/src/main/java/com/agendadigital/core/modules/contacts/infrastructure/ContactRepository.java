@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-
 import com.agendadigital.clases.AdminSQLite;
 import com.agendadigital.core.modules.contacts.domain.ContactBase;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
@@ -15,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 public class ContactRepository {
+
     private final SQLiteDatabase repository;
 
     public ContactRepository(Context context) {
@@ -41,6 +41,27 @@ public class ContactRepository {
                 ContactBase.SQL_SELECT_ALL,
                 null,
                 null, null, null, null);
+
+        List<ContactEntity> contactEntityList = new ArrayList<>();
+        while(cursor.moveToNext()) {
+            String id = cursor.getString(cursor.getColumnIndexOrThrow(ContactBase._ID));
+            String name = cursor.getString(cursor.getColumnIndexOrThrow(ContactBase.COL_NAME));
+            int typeContact = cursor.getInt(cursor.getColumnIndexOrThrow(ContactBase.COL_TYPE_CONTACT));
+            ContactEntity.ContactType contactTypeEnum = ContactEntity.ContactType.setValue(typeContact);
+            int unreadMessages = cursor.getInt(cursor.getColumnIndexOrThrow(ContactBase.COL_UNREAD_MESSAGES));
+            String lastMessageData = cursor.getString(cursor.getColumnIndexOrThrow(ContactBase.COL_LAST_MESSAGE_DATA));
+            Date lastMessageReceivedAt = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(ContactBase.COL_LAST_MESSAGE_RECEIVED_AT)));
+            contactEntityList.add(new ContactEntity(id, name, contactTypeEnum, unreadMessages, lastMessageData, lastMessageReceivedAt));
+        }
+        cursor.close();
+        return contactEntityList;
+    }
+
+    public List<ContactEntity> findAllByContactType(int contactType) throws Exception {
+        Cursor cursor = repository.query(ContactBase.TABLE_NAME,
+                ContactBase.SQL_SELECT_ALL,
+                ContactBase.COL_TYPE_CONTACT + "=?",
+                new String[] { String.valueOf(contactType) }, null, null, null);
 
         List<ContactEntity> contactEntityList = new ArrayList<>();
         while(cursor.moveToNext()) {
@@ -109,5 +130,19 @@ public class ContactRepository {
         contentValues.put(ContactBase.COL_UNREAD_MESSAGES, 0);
         repository.update(ContactBase.TABLE_NAME, contentValues, ContactBase._ID + "= ? and " + ContactBase.COL_TYPE_CONTACT + "=?",
                 new String[] { currentContact.getId(), String.valueOf(currentContact.getContactType().getValue()) });
+    }
+
+    public List<ContactEntity.ContactType> getContactTypes() throws Exception {
+        List<ContactEntity.ContactType> contactTypeList = new ArrayList<>();
+        Cursor cursor = repository.query(ContactBase.TABLE_NAME,
+                new String[] { ContactBase.COL_TYPE_CONTACT },
+                null,
+                null, ContactBase.COL_TYPE_CONTACT, null, null);
+        while (cursor.moveToNext()) {
+            ContactEntity.ContactType contactType = ContactEntity.ContactType.setValue(cursor.getInt(cursor.getColumnIndexOrThrow(ContactBase.COL_TYPE_CONTACT)));
+            contactTypeList.add(contactType);
+        }
+        cursor.close();
+        return contactTypeList;
     }
 }

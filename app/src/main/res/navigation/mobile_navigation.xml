@@ -41,7 +41,30 @@
             android:id="@+id/action_fragment_contacts_to_fragment_restrictions"
             app:destination="@id/fragmentRestrictions" />
     </fragment>
-    <!--Navigation Drawer-->
+
+    <fragment
+        android:id="@+id/fragmentTabChatContact"
+        android:name="com.agendadigital.views.modules.tabchatcontact.TabChatContactFragment"
+        android:label="Chat"
+        tools:layout="@layout/fragment_tab_chat_contact">
+        <action
+            android:id="@+id/action_fragment_tabchat_contact_to_fragment_chat"
+            app:destination="@id/fragmentChat" />
+        <action
+            android:id="@+id/action_fragment_tabchat_contact_to_fragment_restrictions"
+            app:destination="@id/fragmentRestrictions" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentExpandableContacts"
+        android:name="com.agendadigital.views.modules.expandableContacts.ExpandableContactsFragment"
+        android:label="Chat"
+        tools:layout="@layout/fragment_expandable_contacts">
+        <action
+            android:id="@+id/action_fragment_expandable_contacts_to_fragment_chat"
+            app:destination="@id/fragmentChat" />
+    </fragment>
+
     <fragment
         android:id="@+id/fragment_Registro_Ingreso"
         android:name="com.agendadigital.Fragments.FragmentIngreso"
