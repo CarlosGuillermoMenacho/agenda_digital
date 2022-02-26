@@ -174,7 +174,7 @@ public class ContactEntity implements Serializable {
                     toString = "Administrativos";
                     break;
                 case Course:
-                    toString = "Cursos";
+                    toString = "Cursos-Alumnos";
                     break;
                 case CourseWithTutors:
                     toString = "Curso-Tutores";
