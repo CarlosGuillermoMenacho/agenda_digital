@@ -10,9 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.agendadigital.R;
-import com.agendadigital.core.modules.contacts.application.ContactTypeFinder;
+import com.agendadigital.core.modules.contacts.application.ContactTypeCoursesFinder;
 import com.agendadigital.core.modules.contacts.domain.ContactTypeEntity;
-import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
+import com.agendadigital.core.modules.contacts.infrastructure.ContactCourseRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactTypeRepository;
 import com.agendadigital.views.modules.expandableContacts.components.ExpandableContactAdapter;
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import java.util.List;
 
 public class ExpandableContactsFragment extends Fragment {
 
-    private ContactTypeFinder contactTypeFinder;
+    private ContactTypeCoursesFinder contactTypeCoursesFinder;
     private List<ExpandableContactAdapter> expandableContactAdapterList;
     private RecyclerView rvContactExpandable;
 
@@ -29,7 +29,7 @@ public class ExpandableContactsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_expandable_contacts, container, false);
         expandableContactAdapterList = new ArrayList<>();
-        contactTypeFinder = new ContactTypeFinder(new ContactTypeRepository(view.getContext()), new ContactRepository(view.getContext()));
+        contactTypeCoursesFinder = new ContactTypeCoursesFinder(new ContactTypeRepository(view.getContext()), new ContactCourseRepository(view.getContext()));
         DividerItemDecoration itemDecoration = new DividerItemDecoration(view.getContext(), DividerItemDecoration.VERTICAL);
         itemDecoration.setDrawable(getResources().getDrawable(R.drawable.divider));
         rvContactExpandable = view.findViewById(R.id.rvContactExpandable);
@@ -41,9 +41,9 @@ public class ExpandableContactsFragment extends Fragment {
 
     private void initList() {
         try {
-            List<ContactTypeEntity> contactTypeEntityList = contactTypeFinder.findAll();
-            for (ContactTypeEntity contactTypeEntity: contactTypeEntityList) {
-                ExpandableContactAdapter expandableContactAdapter = new ExpandableContactAdapter(contactTypeEntity);
+            List<ContactTypeEntity.ContactTypeCourses> contactTypeEntityList = contactTypeCoursesFinder.findAll();
+            for (ContactTypeEntity.ContactTypeCourses contactTypeCourses: contactTypeEntityList) {
+                ExpandableContactAdapter expandableContactAdapter = new ExpandableContactAdapter(contactTypeCourses);
                 expandableContactAdapterList.add(expandableContactAdapter);
             }
             ConcatAdapter.Config concatAdapterConfig = new ConcatAdapter.Config.Builder()

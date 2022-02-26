@@ -1,17 +1,15 @@
 package com.agendadigital.core.modules.contacts.domain;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ContactTypeEntity {
-    public int id;
-    public String description;
-    public List<ContactEntity> contactEntityList;
+
+    private int id;
+    private String description;
 
     public ContactTypeEntity(int id, String description) {
         this.id = id;
         this.description = description;
-        this.contactEntityList = new ArrayList<>();
     }
 
     public int getId() {
@@ -30,15 +28,29 @@ public class ContactTypeEntity {
         this.description = description;
     }
 
-    public List<ContactEntity> getContactEntityList() {
-        return contactEntityList;
-    }
+    public static class ContactTypeCourses {
 
-    public void setContactEntityList(List<ContactEntity> contactEntityList) {
-        this.contactEntityList = contactEntityList;
-    }
+        private ContactTypeEntity contactTypeEntity;
+        private List<ContactEntity.CourseEntity> courseEntityList;
 
-    public void addContactEntity(ContactEntity contactEntity) {
-        this.contactEntityList.add(contactEntity);
+        public ContactTypeCourses(ContactTypeEntity contactTypeEntity) {
+            this.contactTypeEntity = contactTypeEntity;
+        }
+
+        public ContactTypeEntity getContactTypeEntity() {
+            return contactTypeEntity;
+        }
+
+        public void setContactTypeEntity(ContactTypeEntity contactTypeEntity) {
+            this.contactTypeEntity = contactTypeEntity;
+        }
+
+        public List<ContactEntity.CourseEntity> getCourseEntityList() {
+            return courseEntityList;
+        }
+
+        public void setCourseEntityList(List<ContactEntity.CourseEntity> courseEntityList) {
+            this.courseEntityList = courseEntityList;
+        }
     }
 }

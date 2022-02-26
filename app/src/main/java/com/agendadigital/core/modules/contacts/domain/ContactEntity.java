@@ -227,4 +227,77 @@ public class ContactEntity implements Serializable {
             return toString;
         }
     }
+
+    public static class CourseEntity implements Serializable{
+        private String courseId;
+        private String courseDescription;
+
+        public CourseEntity(String courseId, String courseDescription) {
+            this.courseId = courseId;
+            this.courseDescription = courseDescription;
+        }
+
+        public String getCourseId() {
+            return courseId;
+        }
+
+        public void setCourseId(String courseId) {
+            this.courseId = courseId;
+        }
+
+        public String getCourseDescription() {
+            return courseDescription;
+        }
+
+        public void setCourseDescription(String courseDescription) {
+            this.courseDescription = courseDescription;
+        }
+    }
+
+    public static class ContactCourseEntity {
+        private int id;
+        private CourseEntity courseEntity;
+        private String contactId;
+        private int contactType;
+
+        public ContactCourseEntity(int id, CourseEntity courseEntity, String contactId, int contactType) {
+            this.id = id;
+            this.courseEntity = courseEntity;
+            this.contactId = contactId;
+            this.contactType = contactType;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public CourseEntity getCourseEntity() {
+            return courseEntity;
+        }
+
+        public void setCourseEntity(CourseEntity courseEntity) {
+            this.courseEntity = courseEntity;
+        }
+
+        public String getContactId() {
+            return contactId;
+        }
+
+        public void setContactId(String contactId) {
+            this.contactId = contactId;
+        }
+
+        public int getContactType() {
+            return contactType;
+        }
+
+        public void setContactType(int contactType) {
+            this.contactType = contactType;
+        }
+    }
+
 }

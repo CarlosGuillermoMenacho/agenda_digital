@@ -53,6 +53,9 @@
         <action
             android:id="@+id/action_fragment_tabchat_contact_to_fragment_restrictions"
             app:destination="@id/fragmentRestrictions" />
+        <action
+            android:id="@+id/action_fragment_tabchat_contact_to_fragment_group_contacts"
+            app:destination="@id/fragmentGroupContacts" />
     </fragment>
 
     <fragment
@@ -62,6 +65,16 @@
         tools:layout="@layout/fragment_expandable_contacts">
         <action
             android:id="@+id/action_fragment_expandable_contacts_to_fragment_chat"
+            app:destination="@id/fragmentChat" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentGroupContacts"
+        android:name="com.agendadigital.views.modules.groupContacts.GroupContactsFragment"
+        android:label="Contactos del grupo"
+        tools:layout="@layout/fragment_group_contacts">
+        <action
+            android:id="@+id/action_fragment_group_contacts_to_fragment_chat"
             app:destination="@id/fragmentChat" />
     </fragment>
 

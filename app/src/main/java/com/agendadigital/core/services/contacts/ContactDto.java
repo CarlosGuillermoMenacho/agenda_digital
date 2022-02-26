@@ -13,10 +13,12 @@ public class ContactDto {
         public static class CreateContactRequest {
             public String userId;
             public int userType;
+            public String schoolId;
 
-            public CreateContactRequest(String userId, int userType) {
+            public CreateContactRequest(String userId, int userType, String schoolId) {
                 this.userId = userId;
                 this.userType = userType;
+                this.schoolId = schoolId;
             }
 
             public String getUserId() {
@@ -35,12 +37,20 @@ public class ContactDto {
                 this.userType = userType;
             }
 
+            public String getSchoolId() {
+                return schoolId;
+            }
+
+            public void setSchoolId(String schoolId) {
+                this.schoolId = schoolId;
+            }
 
             public String toJSON() {
                 JSONObject jsonObject = new JSONObject();
                 try {
                     jsonObject.put("userId", userId);
                     jsonObject.put("userType", userType);
+                    jsonObject.put("schoolId", schoolId);
                     return jsonObject.toString(4);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -49,15 +59,43 @@ public class ContactDto {
             }
         }
 
+        public static class CourseResponse {
+            private String id;
+            private String name;
+
+            public CourseResponse(String id, String name) {
+                this.id = id;
+                this.name = name;
+            }
+
+            public String getId() {
+                return id;
+            }
+
+            public void setId(String id) {
+                this.id = id;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+        }
+
         public static class CreateContactResponse {
             private String id;
             private String name;
             private int contactType;
+            private List<CourseResponse> courses;
 
-            public CreateContactResponse(String id, String name, int contactType) {
+            public CreateContactResponse(String id, String name, int contactType, List<CourseResponse> courses) {
                 this.id = id;
                 this.name = name;
                 this.contactType = contactType;
+                this.courses = courses;
             }
 
             public String getId() {
@@ -82,6 +120,14 @@ public class ContactDto {
 
             public void setContactType(int contactType) {
                 this.contactType = contactType;
+            }
+
+            public List<CourseResponse> getCourses() {
+                return courses;
+            }
+
+            public void setCourses(List<CourseResponse> courses) {
+                this.courses = courses;
             }
         }
 

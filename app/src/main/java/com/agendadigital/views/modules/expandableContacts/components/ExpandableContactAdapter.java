@@ -18,11 +18,11 @@ public class ExpandableContactAdapter extends RecyclerView.Adapter<ExpandableCon
     private final int HEADER = 0;
     private final int CHILD = 1;
 
-    private final ContactTypeEntity contactTypeEntity;
+    private final ContactTypeEntity.ContactTypeCourses contactTypeCourses;
     private boolean isExpanded = false;
 
-    public ExpandableContactAdapter(ContactTypeEntity contactTypeEntity) {
-        this.contactTypeEntity = contactTypeEntity;
+    public ExpandableContactAdapter(ContactTypeEntity.ContactTypeCourses contactTypeCourses) {
+        this.contactTypeCourses = contactTypeCourses;
     }
 
     @NonNull
@@ -45,15 +45,15 @@ public class ExpandableContactAdapter extends RecyclerView.Adapter<ExpandableCon
     @Override
     public void onBindViewHolder(@NonNull ExpandableContactViewHolder holder, int position) {
         if (holder instanceof ExpandableContactViewHolder.ExpandableHeaderContactViewHolder) {
-            ((ExpandableContactViewHolder.ExpandableHeaderContactViewHolder)holder).onBind(contactTypeEntity.description, onHeaderClicked);
+            ((ExpandableContactViewHolder.ExpandableHeaderContactViewHolder)holder).onBind(contactTypeCourses.getContactTypeEntity(), onHeaderClicked);
         } else {
-            ((ExpandableContactViewHolder.ExpandableChildContactViewHolder)holder).onBind(contactTypeEntity.contactEntityList.get(position - 1));
+            ((ExpandableContactViewHolder.ExpandableChildContactViewHolder)holder).onBind(contactTypeCourses.getCourseEntityList().get(position - 1), contactTypeCourses.getContactTypeEntity().getId());
         }
     }
 
     @Override
     public int getItemCount() {
-        return isExpanded ? contactTypeEntity.contactEntityList.size() + 1: 1;
+        return isExpanded ? contactTypeCourses.getCourseEntityList().size() + 1: 1;
     }
 
     @Override
@@ -67,10 +67,10 @@ public class ExpandableContactAdapter extends RecyclerView.Adapter<ExpandableCon
             isExpanded = !isExpanded;
 
             if (isExpanded) {
-                notifyItemRangeInserted(1, contactTypeEntity.contactEntityList.size());
+                notifyItemRangeInserted(1, contactTypeCourses.getCourseEntityList().size());
                 notifyItemChanged(0);
             } else {
-                notifyItemRangeRemoved(1, contactTypeEntity.getContactEntityList().size());
+                notifyItemRangeRemoved(1, contactTypeCourses.getCourseEntityList().size());
                 notifyItemChanged(0);
             }
         }
@@ -85,15 +85,21 @@ public class ExpandableContactAdapter extends RecyclerView.Adapter<ExpandableCon
         public static class ExpandableHeaderContactViewHolder extends ExpandableContactViewHolder {
 
             private final TextView tvContactExpandableHeaderDescription;
+            private int contactType;
 
             public ExpandableHeaderContactViewHolder(@NonNull View itemView) {
                 super(itemView);
                 tvContactExpandableHeaderDescription = itemView.findViewById(R.id.tvContactExpandableHeaderDescription);
             }
 
-            public void onBind(String description, View.OnClickListener clickListener) {
-                this.tvContactExpandableHeaderDescription.setText(description);
+            public void onBind(ContactTypeEntity contactTypeEntity, View.OnClickListener clickListener) {
+                this.tvContactExpandableHeaderDescription.setText(contactTypeEntity.getDescription());
+                this.contactType = contactTypeEntity.getId();
                 itemView.setOnClickListener(clickListener);
+            }
+
+            public int getContactType() {
+                return contactType;
             }
         }
 
@@ -108,13 +114,15 @@ public class ExpandableContactAdapter extends RecyclerView.Adapter<ExpandableCon
                 tvExpandableContactChildContactType = itemView.findViewById(R.id.tvExpandableContactChildContactType);
             }
 
-            public void onBind(ContactEntity contactEntity) {
-                tvExpandableContactChildContactType.setText(contactEntity.getContactType().toString());
-                tvExpandableContactChildName.setText(contactEntity.getName());
+            public void onBind(ContactEntity.CourseEntity courseEntity, int contactType) {
+                tvExpandableContactChildContactType.setText(courseEntity.getCourseDescription().toString());
+                tvExpandableContactChildContactType.setVisibility(View.GONE);
+                tvExpandableContactChildName.setText(courseEntity.getCourseDescription());
                 itemView.setOnClickListener(v -> {
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable("contact", contactEntity);
-                    Navigation.findNavController(itemView).navigate(R.id.action_fragment_tabchat_contact_to_fragment_chat, bundle);
+                    bundle.putSerializable("course", courseEntity);
+                    bundle.putInt("contactType", contactType);
+                    Navigation.findNavController(itemView).navigate(R.id.action_fragment_tabchat_contact_to_fragment_group_contacts, bundle);
                 });
             }
         }

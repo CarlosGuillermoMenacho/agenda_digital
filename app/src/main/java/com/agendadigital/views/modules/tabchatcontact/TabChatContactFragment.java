@@ -24,7 +24,7 @@ public class TabChatContactFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_tab_chat_contact, container, false);
-        tabChatPagerAdapter = new TabChatPagerAdapter(getChildFragmentManager(), 0);
+        tabChatPagerAdapter = new TabChatPagerAdapter(getChildFragmentManager(), 1);
         initViews();
         return view;
     }

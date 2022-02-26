@@ -20,6 +20,7 @@ import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.User;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.domain.ContactTypeEntity;
+import com.agendadigital.core.modules.contacts.infrastructure.ContactCourseRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactTypeRepository;
 import com.agendadigital.core.services.contacts.ContactDto;
@@ -55,6 +56,7 @@ public class ContactFragment extends Fragment {
     private List<ContactEntity> contactEntityList;
     private ContactRepository contactRepository;
     private ContactTypeRepository contactTypeRepository;
+    private ContactCourseRepository contactCourseRepository;
     private RecyclerView rvContactList;
     private ProgressBar pbContacts;
     private EditText etContactSearch;
@@ -68,6 +70,7 @@ public class ContactFragment extends Fragment {
         viewFragment = inflater.inflate(R.layout.fragment_contacts, container, false);
         contactRepository = new ContactRepository(viewFragment.getContext());
         contactTypeRepository = new ContactTypeRepository(viewFragment.getContext());
+        contactCourseRepository = new ContactCourseRepository(viewFragment.getContext());
         rvContactList = viewFragment.findViewById(R.id.rvContactList);
         etContactSearch = viewFragment.findViewById(R.id.etContactSearch);
         initObservable();
@@ -163,8 +166,9 @@ public class ContactFragment extends Fragment {
     private void getContactsFromServer() throws JSONException {
 
         JSONObject jsonObject = new JSONObject();
-        ContactDto.CreateContactRequest contactRequest = new ContactDto.CreateContactRequest(Globals.user.getCodigo(), Globals.user.getTipo().getValue());
+        ContactDto.CreateContactRequest contactRequest = new ContactDto.CreateContactRequest(Globals.user.getCodigo(), Globals.user.getTipo().getValue(), Globals.colegio.getCodigo());
         jsonObject.put("user", new JSONObject(contactRequest.toJSON()));
+        pbContacts.setVisibility(View.VISIBLE);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,ConstantsGlobals.urlChatServer + "/contacts", jsonObject, response -> {
             Log.d(TAG, "onResponse: " + response);
             try {
@@ -172,11 +176,13 @@ public class ContactFragment extends Fragment {
                 }.getType());
                 pbContacts.setMax(contactEntityList.size());
                 int index = 0;
-                pbContacts.setVisibility(View.VISIBLE);
                 for (ContactDto.CreateContactResponse contact: contactEntityList) {
                     ContactEntity newContact = new ContactEntity(contact.getId(), contact.getName(), ContactEntity.ContactType.setValue(contact.getContactType()), 0, "", null);
                     if (contactTypeRepository.findById(newContact.getContactType().getValue()) == null) {
                         contactTypeRepository.insert(new ContactTypeEntity(newContact.getContactType().getValue(), newContact.getContactType().getForLabel()));
+                    }
+                    for(ContactDto.CourseResponse course: contact.getCourses()) {
+                        contactCourseRepository.insert(new ContactEntity.ContactCourseEntity(-1, new ContactEntity.CourseEntity(course.getId(), course.getName()), contact.getId(), contact.getContactType()));
                     }
                     long rowsInserted = contactRepository.insert(newContact);
                     if(rowsInserted == -1) {
@@ -186,14 +192,15 @@ public class ContactFragment extends Fragment {
                         pbContacts.setProgress(index++);
                     }
                 }
-                pbContacts.setVisibility(View.INVISIBLE);
+                pbContacts.setVisibility(View.GONE);
                 Toast.makeText(viewFragment.getContext(), "Contactos sincronizados (" + contactEntityList.size() + ")", Toast.LENGTH_SHORT).show();
 
             } catch (Exception e) {
                 Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
+            } finally {
+                pbContacts.setVisibility(View.GONE);
             }
-
         }, error -> Log.d(TAG, "onErrorResponse: " + error.getMessage()));
 
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
