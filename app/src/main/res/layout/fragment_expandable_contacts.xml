@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".views.modules.expandableContacts.ExpandableContactsFragment">
+
+    <ProgressBar
+        android:id="@+id/pbExpandableContacts"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="123dp"
+        android:layout_height="104dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        tools:visibility="visible" />
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvContactExpandable"
@@ -13,4 +23,4 @@
         android:scrollbars="vertical"
         android:transcriptMode="alwaysScroll" />
 
-</FrameLayout>
+</RelativeLayout>

@@ -15,12 +15,19 @@
         android:layout_centerHorizontal="true"
         tools:visibility="visible" />
 
+    <EditText
+        android:id="@+id/etGroupContactSearch"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:textSize="18dp"
+        android:hint="Buscar"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvGroupContactList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
         android:divider="@android:color/darker_gray"
+        android:layout_below="@id/etGroupContactSearch"
         android:scrollbars="vertical"
         android:transcriptMode="alwaysScroll" />
 

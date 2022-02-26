@@ -8,13 +8,15 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ProgressBar;
-
 import com.agendadigital.MainActivity;
 import com.agendadigital.R;
 import com.agendadigital.core.modules.contacts.application.ContactFinder;
@@ -22,15 +24,16 @@ import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactCourseRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.views.modules.contacts.components.ContactAdapter;
-
+import com.agendadigital.views.modules.groupContacts.components.GroupContactAdapter;
 import java.util.List;
 
 public class GroupContactsFragment extends Fragment {
 
     private View view;
     private RecyclerView rvGroupContactList;
-    private ContactAdapter contactAdapter;
+    private GroupContactAdapter groupContactAdapter;
     private ProgressBar pbGroupContacts;
+    private EditText etGroupContactSearch;
 
     private ContactFinder contactFinder;
 
@@ -55,13 +58,9 @@ public class GroupContactsFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_group_contacts, container, false);
         rvGroupContactList = view.findViewById(R.id.rvGroupContactList);
         pbGroupContacts = view.findViewById(R.id.pbGroupContacts);
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
         loadGroupContacts();
+        initSearcher();
+        return view;
     }
 
     private void loadGroupContacts() {
@@ -69,19 +68,19 @@ public class GroupContactsFragment extends Fragment {
         itemDecoration.setDrawable(getResources().getDrawable(R.drawable.divider));
         rvGroupContactList.setLayoutManager(new LinearLayoutManager(view.getContext(), LinearLayoutManager.VERTICAL, false));
         rvGroupContactList.addItemDecoration(itemDecoration);
-        contactAdapter = new ContactAdapter();
+        groupContactAdapter = new GroupContactAdapter();
 
         contactFinder = new ContactFinder(new ContactCourseRepository(view.getContext()), new ContactRepository(view.getContext()));
         try {
             pbGroupContacts.setVisibility(View.VISIBLE);
             List<ContactEntity> contactEntityList = contactFinder.findAllContactsByCourseAndType(currentCourseEntity.getCourseId(), currentContactType);
-            contactAdapter.setContactEntityList(contactEntityList);
-            rvGroupContactList.setAdapter(contactAdapter);
-            contactAdapter.setOnItemClickListener(new ContactAdapter.CustomClickListener() {
+            groupContactAdapter.setContactEntityList(contactEntityList);
+            rvGroupContactList.setAdapter(groupContactAdapter);
+            groupContactAdapter.setOnItemClickListener(new ContactAdapter.CustomClickListener() {
                 @Override
                 public void onClick(int position, View v) {
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable("contact", contactAdapter.getItem(position));
+                    bundle.putSerializable("contact", groupContactAdapter.getItem(position));
                     Navigation.findNavController(requireView()).navigate(R.id.action_fragment_group_contacts_to_fragment_chat, bundle);
                 }
 
@@ -94,6 +93,26 @@ public class GroupContactsFragment extends Fragment {
         } finally {
             pbGroupContacts.setVisibility(View.GONE);
         }
+    }
+
+    private void initSearcher() {
+        etGroupContactSearch = view.findViewById(R.id.etGroupContactSearch);
+        etGroupContactSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                groupContactAdapter.getFilter().filter(etGroupContactSearch.getText().toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 
     @Override

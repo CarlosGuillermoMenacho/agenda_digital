@@ -129,8 +129,6 @@ public class ChatFragment extends Fragment {
             requestPermissions(new String[] {
                     Manifest.permission.READ_EXTERNAL_STORAGE
             }, 1);
-        } else {
-            Toast.makeText(view.getContext(), "Permisos de lectura", Toast.LENGTH_SHORT).show();
         }
         initViews();
         return view;

@@ -35,9 +35,9 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
         app:cardBackgroundColor="@color/white"
-        app:cardCornerRadius="48dp"
+        app:cardCornerRadius="40dp"
         app:cardElevation="1dp"
-        app:contentPadding="2dp">
+        app:contentPadding="1dp">
         <LinearLayout
             android:id="@+id/messageLayout"
             android:layout_width="match_parent"
@@ -57,8 +57,10 @@
                 android:paddingBottom="4dp"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
-                android:paddingTop="4dp"
+                android:paddingTop="6dp"
+                android:layout_marginTop="1dp"
                 android:layout_marginEnd="8dp"
+                android:layout_marginBottom="1dp"
                 android:layout_weight="1"
                 android:textColor="@color/black"
                 android:textColorHint="@color/main_color_gray"
