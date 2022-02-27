@@ -14,6 +14,13 @@
         android:title="@string/action_darkTheme"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_updateContacts"
+        android:orderInCategory="200"
+        android:title="@string/update_contacts"
+        android:visible="false"
+        app:showAsAction="never"
+        />
+    <item
         android:id="@+id/sessionStop"
         android:orderInCategory="200"
         android:title="@string/cerrar_sesi_n"

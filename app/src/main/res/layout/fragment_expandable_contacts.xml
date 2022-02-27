@@ -12,7 +12,7 @@
         android:layout_height="104dp"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
 
     <androidx.recyclerview.widget.RecyclerView

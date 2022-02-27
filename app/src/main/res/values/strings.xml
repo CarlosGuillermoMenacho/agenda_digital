@@ -116,5 +116,6 @@
     <string name="video_message">Video Message</string>
     <string name="restrictionsTitle"><u>Restricciones</u></string>
     <string name="groupRestrictionConfig">Conf. grupo</string>
+    <string name="update_contacts">Actualizar contactos</string>
 
 </resources>

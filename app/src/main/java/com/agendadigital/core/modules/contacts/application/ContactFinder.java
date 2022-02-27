@@ -3,14 +3,13 @@ package com.agendadigital.core.modules.contacts.application;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactCourseRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class ContactFinder {
 
-    private ContactCourseRepository contactCourseRepository;
-    private ContactRepository contactRepository;
+    private final ContactCourseRepository contactCourseRepository;
+    private final ContactRepository contactRepository;
 
     public ContactFinder(ContactCourseRepository contactCourseRepository, ContactRepository contactRepository) {
         this.contactCourseRepository = contactCourseRepository;

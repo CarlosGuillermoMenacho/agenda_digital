@@ -2,18 +2,26 @@ package com.agendadigital.views.modules.tabchatcontact;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.agendadigital.R;
+import com.agendadigital.views.modules.contacts.ContactFragment;
 import com.agendadigital.views.modules.tabchatcontact.components.TabChatPagerAdapter;
 import com.google.android.material.tabs.TabLayout;
+
+import org.json.JSONException;
 
 public class TabChatContactFragment extends Fragment {
 
@@ -21,6 +29,7 @@ public class TabChatContactFragment extends Fragment {
     private TabChatPagerAdapter tabChatPagerAdapter;
     private TabLayout tabChatContact;
     private ViewPager viewPagerChatContact;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -44,4 +53,5 @@ public class TabChatContactFragment extends Fragment {
             public void onTabReselected(TabLayout.Tab tab) { }
         });
     }
+
 }

@@ -145,4 +145,10 @@ public class ContactRepository {
         cursor.close();
         return contactTypeList;
     }
+
+    public void delete(String id, int contactType) {
+        repository.delete(ContactBase.TABLE_NAME,
+                ContactBase._ID + "=? and " + ContactBase.COL_TYPE_CONTACT + "=?",
+                new String[] { id, String.valueOf(contactType) });
+    }
 }

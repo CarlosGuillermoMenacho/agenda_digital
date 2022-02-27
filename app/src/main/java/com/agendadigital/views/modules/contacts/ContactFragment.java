@@ -1,13 +1,13 @@
 package com.agendadigital.views.modules.contacts;
 
-import android.content.ContentValues;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -18,6 +18,7 @@ import com.agendadigital.clases.Constants;
 import com.agendadigital.clases.ConstantsGlobals;
 import com.agendadigital.clases.MySingleton;
 import com.agendadigital.clases.User;
+import com.agendadigital.core.modules.contacts.application.ContactUpdater;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.domain.ContactTypeEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactCourseRepository;
@@ -42,12 +43,9 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static android.widget.LinearLayout.HORIZONTAL;
 
 public class ContactFragment extends Fragment {
 
@@ -66,7 +64,7 @@ public class ContactFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-
+        setHasOptionsMenu(true);
         viewFragment = inflater.inflate(R.layout.fragment_contacts, container, false);
         contactRepository = new ContactRepository(viewFragment.getContext());
         contactTypeRepository = new ContactTypeRepository(viewFragment.getContext());
@@ -83,6 +81,7 @@ public class ContactFragment extends Fragment {
         rvContactList.setLayoutManager(new LinearLayoutManager(viewFragment.getContext(), LinearLayoutManager.VERTICAL, false));
         rvContactList.addItemDecoration(itemDecoration);
         pbContacts = viewFragment.findViewById(R.id.pbContacts);
+        pbContacts.setVisibility(View.GONE);
         contactAdapter = new ContactAdapter();
         rvContactList.setAdapter(contactAdapter);
         contactDisposable =
@@ -96,7 +95,7 @@ public class ContactFragment extends Fragment {
                             Log.d(TAG, "onError: " + error.getMessage());
                         });
         try {
-            getContactsFromDatabase();
+            contactEntityList = contactRepository.findAll();
             if (contactEntityList.size() == 0) {
                 getContactsFromServer();
             }
@@ -157,14 +156,27 @@ public class ContactFragment extends Fragment {
         contactDisposable.dispose();
     }
 
-    private void getContactsFromDatabase() throws Exception {
-        pbContacts.setVisibility(View.VISIBLE);
-        contactEntityList = contactRepository.findAll();
-        pbContacts.setVisibility(View.INVISIBLE);
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        MenuItem updateContacts = menu.findItem(R.id.action_updateContacts);
+        if (updateContacts != null)
+            updateContacts.setVisible(true);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_updateContacts) {
+            try {
+                updateContactsFromServer();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void getContactsFromServer() throws JSONException {
-
         JSONObject jsonObject = new JSONObject();
         ContactDto.CreateContactRequest contactRequest = new ContactDto.CreateContactRequest(Globals.user.getCodigo(), Globals.user.getTipo().getValue(), Globals.colegio.getCodigo());
         jsonObject.put("user", new JSONObject(contactRequest.toJSON()));
@@ -202,8 +214,38 @@ public class ContactFragment extends Fragment {
                 pbContacts.setVisibility(View.GONE);
             }
         }, error -> Log.d(TAG, "onErrorResponse: " + error.getMessage()));
+        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
+    }
+
+    private void updateContactsFromServer() throws JSONException {
+        ContactUpdater.Deleter contactDeleter = new ContactUpdater.Deleter(contactRepository, contactCourseRepository);
+        ContactUpdater.Inserter contactInserter = new ContactUpdater.Inserter(contactRepository, contactCourseRepository, contactTypeRepository);
+        JSONObject jsonObject = new JSONObject();
+        ContactDto.CreateContactRequest contactRequest = new ContactDto.CreateContactRequest(Globals.user.getCodigo(), Globals.user.getTipo().getValue(), Globals.colegio.getCodigo());
+        jsonObject.put("user", new JSONObject(contactRequest.toJSON()));
+        pbContacts.setVisibility(View.VISIBLE);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,ConstantsGlobals.urlChatServer + "/contacts", jsonObject, response -> {
+            Log.d(TAG, "onResponse: " + response);
+            try {
+                List<ContactDto.CreateContactResponse> contactResponseList = new Gson().fromJson(response.getString("contacts"), new TypeToken<List<ContactDto.CreateContactResponse>>() {
+                }.getType());
+                pbContacts.setMax(contactResponseList.size());
+                List<ContactEntity> actualContactList = contactRepository.findAll();
+                contactDeleter.deleteContactAndCoursesNotFound(actualContactList, contactResponseList);
+                contactInserter.insertNewContactsAndCourses(actualContactList, contactResponseList);
+                contactEntityList = contactRepository.findAll();
+                contactAdapter.setContactEntityList(contactEntityList);
+                contactAdapter.notifyDataSetChanged();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                pbContacts.setVisibility(View.GONE);
+            }
+        }, error -> Log.d(TAG, "onErrorResponse: " + error.getMessage()));
 
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);
     }
+
 }

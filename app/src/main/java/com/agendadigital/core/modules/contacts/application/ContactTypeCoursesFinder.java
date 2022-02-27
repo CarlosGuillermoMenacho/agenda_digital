@@ -1,8 +1,8 @@
 package com.agendadigital.core.modules.contacts.application;
+
 import com.agendadigital.core.modules.contacts.domain.ContactTypeEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactCourseRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactTypeRepository;
-
 import java.util.ArrayList;
 import java.util.List;
 
