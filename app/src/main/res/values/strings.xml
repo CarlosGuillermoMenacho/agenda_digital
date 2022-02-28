@@ -117,5 +117,6 @@
     <string name="restrictionsTitle"><u>Restricciones</u></string>
     <string name="groupRestrictionConfig">Conf. grupo</string>
     <string name="update_contacts">Actualizar contactos</string>
+    <string name="sync_contacts_amount">Contactos sincronizados (%d)</string>
 
 </resources>

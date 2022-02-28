@@ -62,24 +62,6 @@ public class ContactCourseRepository {
         return contactCourseEntities;
     }
 
-    public ContactEntity.ContactCourseEntity findByContactIdAndCourse(String _contactId, int _contactType, String _courseId) {
-        ContactEntity.ContactCourseEntity contactCourseEntity = null;
-        Cursor cursor = repository.query(ContactCourseBase.TABLE_NAME,
-                ContactCourseBase.SQL_SELECT_ALL,
-                ContactCourseBase.COL_CONTACT_ID + " =? and " + ContactCourseBase.COL_CONTACT_TYPE + "=? and " + ContactCourseBase.COL_COURSE_ID + "=?",
-                new String[] { _contactId, String.valueOf(_contactType), _courseId }, null, null, null);
-        if (cursor.moveToNext()) {
-            String courseId = cursor.getString(cursor.getColumnIndexOrThrow(ContactCourseBase.COL_COURSE_ID));
-            String courseDescription = cursor.getString(cursor.getColumnIndexOrThrow(ContactCourseBase.COL_COURSE_DESCRIPTION));
-            ContactEntity.CourseEntity courseEntity = new ContactEntity.CourseEntity(courseId, courseDescription);
-            String contactId = cursor.getString(cursor.getColumnIndexOrThrow(ContactCourseBase.COL_CONTACT_ID));
-            int contactType = cursor.getInt(cursor.getColumnIndexOrThrow(ContactCourseBase.COL_CONTACT_TYPE));
-            contactCourseEntity = new ContactEntity.ContactCourseEntity(0, courseEntity, contactId, contactType);
-        }
-        cursor.close();
-        return contactCourseEntity;
-    }
-
     public void delete(String contactId, int contactType, String courseId) {
         repository.delete(ContactCourseBase.TABLE_NAME,
                 ContactCourseBase.COL_CONTACT_ID + "=? and " + ContactCourseBase.COL_CONTACT_TYPE + "=? and " + ContactCourseBase.COL_COURSE_ID + "=?",

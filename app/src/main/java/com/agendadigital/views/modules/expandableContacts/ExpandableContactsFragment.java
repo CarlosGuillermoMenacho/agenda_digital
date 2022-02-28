@@ -1,18 +1,18 @@
 package com.agendadigital.views.modules.expandableContacts;
 
+import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ConcatAdapter;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import com.agendadigital.R;
 import com.agendadigital.clases.Constants;
 import com.agendadigital.clases.ConstantsGlobals;
@@ -28,6 +28,7 @@ import com.agendadigital.core.modules.contacts.infrastructure.ContactTypeReposit
 import com.agendadigital.core.services.contacts.ContactDto;
 import com.agendadigital.databinding.FragmentExpandableContactsBinding;
 import com.agendadigital.views.modules.expandableContacts.components.ExpandableContactAdapter;
+import com.agendadigital.views.shared.infrastructure.ViewHelpers;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -40,31 +41,38 @@ import java.util.List;
 
 public class ExpandableContactsFragment extends Fragment {
 
-    private final String TAG = "ExpandableFragment";
+    private FragmentExpandableContactsBinding binding;
+    private Context context;
     private ContactTypeCoursesFinder contactTypeCoursesFinder;
     private List<ExpandableContactAdapter> expandableContactAdapterList;
-    private FragmentExpandableContactsBinding binding;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setHasOptionsMenu(true);
         binding = FragmentExpandableContactsBinding.inflate(inflater, container, false);
-        expandableContactAdapterList = new ArrayList<>();
-        contactTypeCoursesFinder = new ContactTypeCoursesFinder(new ContactTypeRepository(binding.getRoot().getContext()), new ContactCourseRepository(binding.getRoot().getContext()));
-        DividerItemDecoration itemDecoration = new DividerItemDecoration(binding.getRoot().getContext(), DividerItemDecoration.VERTICAL);
-        itemDecoration.setDrawable(getResources().getDrawable(R.drawable.divider));
-        binding.rvContactExpandable.setLayoutManager(new LinearLayoutManager(binding.getRoot().getContext(), LinearLayoutManager.VERTICAL, false));
-        binding.rvContactExpandable.addItemDecoration(itemDecoration);
-        initList();
-        return binding.getRoot();
+        View view = binding.getRoot();
+        context = view.getContext();
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        contactTypeCoursesFinder = new ContactTypeCoursesFinder(new ContactTypeRepository(context), new ContactCourseRepository(context));
+        try {
+            ViewHelpers.initRecyclerView(context, binding.rvContactExpandable);
+            loadRecyclerView();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
         expandableContactAdapterList = new ArrayList<>();
-        initList();
+        loadRecyclerView();
     }
 
     @Override
@@ -87,8 +95,9 @@ public class ExpandableContactsFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private void initList() {
+    private void loadRecyclerView() {
         try {
+            expandableContactAdapterList = new ArrayList<>();
             binding.pbExpandableContacts.setVisibility(View.VISIBLE);
             List<ContactTypeEntity.ContactTypeCourses> contactTypeEntityList = contactTypeCoursesFinder.findAll();
             for (ContactTypeEntity.ContactTypeCourses contactTypeCourses: contactTypeEntityList) {
@@ -120,7 +129,6 @@ public class ExpandableContactsFragment extends Fragment {
         jsonObject.put("user", new JSONObject(contactRequest.toJSON()));
         binding.pbExpandableContacts.setVisibility(View.VISIBLE);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,ConstantsGlobals.urlChatServer + "/contacts", jsonObject, response -> {
-            Log.d(TAG, "onResponse: " + response);
             try {
                 List<ContactDto.CreateContactResponse> contactResponseList = new Gson().fromJson(response.getString("contacts"), new TypeToken<List<ContactDto.CreateContactResponse>>() {
                 }.getType());
@@ -129,14 +137,14 @@ public class ExpandableContactsFragment extends Fragment {
                 contactDeleter.deleteContactAndCoursesNotFound(actualContactList, contactResponseList);
                 contactInserter.insertNewContactsAndCourses(actualContactList, contactResponseList);
                 expandableContactAdapterList = new ArrayList<>();
-                initList();
+                loadRecyclerView();
                 binding.pbExpandableContacts.setVisibility(View.GONE);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 binding.pbExpandableContacts.setVisibility(View.GONE);
             }
-        }, error -> Log.d(TAG, "onErrorResponse: " + error.getMessage()));
+        }, error -> Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show());
 
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(Constants.MY_DEFAULT_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         MySingleton.getInstance(getContext()).addToRequest(jsonObjectRequest);

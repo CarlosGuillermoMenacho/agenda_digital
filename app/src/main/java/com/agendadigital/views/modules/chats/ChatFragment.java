@@ -3,12 +3,12 @@ package com.agendadigital.views.modules.chats;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,13 +19,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import com.agendadigital.BuildConfig;
-import com.agendadigital.MainActivity;
 import com.agendadigital.R;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
@@ -35,17 +30,15 @@ import com.agendadigital.core.modules.messages.domain.MultimediaEntity;
 import com.agendadigital.core.modules.messages.infrastructure.MessageRepository;
 import com.agendadigital.core.services.messages.MessageDto;
 import com.agendadigital.core.services.messages.MessageService;
-import com.agendadigital.core.shared.infrastructure.utils.DateFormatter;
 import com.agendadigital.core.shared.infrastructure.utils.DirectoryManager;
 import com.agendadigital.core.shared.infrastructure.utils.FilesUtils;
+import com.agendadigital.databinding.FragmentChatBinding;
 import com.agendadigital.views.modules.chats.components.adapters.MessageAdapter;
-import com.agendadigital.views.modules.chats.components.fab.SendFloatingActionButton;
 import com.agendadigital.views.modules.chats.components.observers.MessageObservable;
 import com.agendadigital.clases.Globals;
 import com.agendadigital.clases.User;
+import com.agendadigital.views.shared.infrastructure.ViewHelpers;
 import com.devlomi.record_view.OnRecordListener;
-import com.devlomi.record_view.RecordButton;
-import com.devlomi.record_view.RecordView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -57,81 +50,77 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
-import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import rx.Subscriber;
 
 public class ChatFragment extends Fragment {
 
     private final String TAG = "ChatFragment";
+    private FragmentChatBinding binding;
+    private Context context;
     private User currentUser;
-    private View view;
     private ContactEntity currentContact;
-
-    private RecyclerView rvMessages;
-    private EditText etTextMessageToSend;
-    private ImageButton btAttach;
-    private ImageButton btCamera;
     private final int CAMERA_REQUEST = 1001;
     private File photoFile;
-
     private MessageAdapter messageAdapter;
     private Disposable messageDisposable;
     private final MessageObservable messageObservable = new MessageObservable();
-    private List<MessageEntity> messageEntityList = new ArrayList<>();
-
     private MessageService messageService;
-
     private MessageRepository messageRepository;
     private ContactRepository contactRepository;
-
-    private LinearLayout messageLayout;
-    private SendFloatingActionButton sendFloatingActionButton;
-    private RecordView rvRecordView;
-    private RecordButton rbRecord;
     private MediaRecorder mediaRecorder;
     private String audioPath;
-    private FirebaseStorage storage;
     private StorageReference storageReference;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        view = inflater.inflate(R.layout.fragment_chat, container, false);
-        currentUser = Globals.user;
-        init();
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
             currentContact = (ContactEntity) bundle.getSerializable("contact");
-            contactRepository.resetUnreadMessages(currentContact);
-            ((MainActivity) getActivity()).getSupportActionBar().setTitle(currentContact.toString());
+            ActionBar actionBar = ViewHelpers.getActionBar(getActivity());
+            if (actionBar != null) {
+                actionBar.setTitle(currentContact.toString());
+            }
         }
-        if(ActivityCompat.checkSelfPermission(view.getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(view.getContext(), "Sin permisos de lectura", Toast.LENGTH_SHORT).show();
-            requestPermissions(new String[] {
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-            }, 1);
-        }
-        initViews();
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        binding = FragmentChatBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
+        context = view.getContext();
+        currentUser = Globals.user;
+
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        try {
+            initRepositories();
+            verifyPermissions();
+            initViews();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        contactRepository.resetUnreadMessages(currentContact);
     }
 
     @Override
@@ -140,34 +129,35 @@ public class ChatFragment extends Fragment {
         messageDisposable.dispose();
     }
 
-    private void init(){
-        messageRepository = new MessageRepository(view.getContext());
-        contactRepository = new ContactRepository(view.getContext());
-        messageService = new MessageService(view.getContext());
-        storage = FirebaseStorage.getInstance();
+    private void initRepositories(){
+        messageRepository = new MessageRepository(context);
+        contactRepository = new ContactRepository(context);
+        messageService = new MessageService(context);
+        FirebaseStorage storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
     }
 
-    private void initViews() {
-        etTextMessageToSend = view.findViewById(R.id.etTextMessageToSend);
-        btAttach = view.findViewById(R.id.btAttach);
-        btCamera = view.findViewById(R.id.btCamera);
+    private void verifyPermissions() {
+        if(ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(context, "Sin permisos de lectura", Toast.LENGTH_SHORT).show();
+            requestPermissions(new String[] {
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+            }, 1);
+        }
+    }
 
-        rvMessages = view.findViewById(R.id.rvMessagesList);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(view.getContext());
+    private void initViews() throws Exception {
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         layoutManager.setStackFromEnd(true);
-        rvMessages.setLayoutManager(layoutManager);
-
-        sendFloatingActionButton = view.findViewById(R.id.sendButton);
-        sendFloatingActionButton.setIconDrawable(getResources().getDrawable(R.drawable.ic_send_white_24dp));
-
-        rvRecordView = view.findViewById(R.id.recordView);
-        rvRecordView.setCounterTimeColor(Color.BLACK);
-        rbRecord = view.findViewById(R.id.recordButton);
-        rbRecord.setRecordView(rvRecordView);
-        rbRecord.setListenForRecord(false);
-
-        messageLayout = view.findViewById(R.id.messageLayout);
+        binding.rvMessagesList.setLayoutManager(layoutManager);
+        Drawable sendButtonDrawable = ContextCompat.getDrawable(context, R.drawable.ic_send_white_24dp);
+        if (sendButtonDrawable == null) {
+            throw new Exception("Send button not found");
+        }
+        binding.sendButton.setIconDrawable(sendButtonDrawable);
+        binding.recordView.setCounterTimeColor(Color.BLACK);
+        binding.recordButton.setRecordView(binding.recordView);
+        binding.recordButton.setListenForRecord(false);
 
         initTextMessageListener();
         initButtonAttachListener();
@@ -179,20 +169,18 @@ public class ChatFragment extends Fragment {
     }
 
     private void initTextMessageListener() {
-        etTextMessageToSend.addTextChangedListener(new TextWatcher() {
+        binding.etTextMessageToSend.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.toString().trim().length() == 0) {
-                    sendFloatingActionButton.setVisibility(View.GONE);
-                    rbRecord.setVisibility(View.VISIBLE);
+                    binding.sendButton.setVisibility(View.GONE);
+                    binding.recordButton.setVisibility(View.VISIBLE);
                 } else {
-                    rbRecord.setVisibility(View.GONE);
-                    sendFloatingActionButton.setVisibility(View.VISIBLE);
+                    binding.recordButton.setVisibility(View.GONE);
+                    binding.sendButton.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -204,45 +192,41 @@ public class ChatFragment extends Fragment {
     }
 
     private void initButtonAttachListener() {
-        btAttach.setOnClickListener(v -> {
-            PopupMenu popupMenu = new PopupMenu(view.getContext(), v);
+        binding.btAttach.setOnClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(context, v);
             popupMenu.setOnMenuItemClickListener(item -> {
-                Intent pickIntent = null;
+                Intent pickIntent;
                 Intent chooserIntent = null;
                 int activityResult = 0;
-                switch (item.getItemId()) {
-                    case R.id.attachDocument:
-                        pickIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                        pickIntent.setType("*/*");
-                        pickIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {
-                                "text/plain",
-                                "application/msword",
-                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                "application/vnd.ms-excel",
-                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                "application/vnd.ms-powerpoint",
-                                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                                "application/pdf"
-                        });
-                        chooserIntent = Intent.createChooser(pickIntent, "Select a document");
-                        activityResult = MessageEntity.MessageType.Document.getValue();
-                        break;
-                    case R.id.attachImage:
-                        pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                        pickIntent.setType("image/*");
-                        pickIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String [] {
-                                "image/jpeg",
-                                "image/png"
-                        });
-                        chooserIntent = Intent.createChooser(pickIntent, "Select a image");
-                        activityResult = MessageEntity.MessageType.Image.getValue();
-                        break;
-                    case R.id.attachVideo:
-                        pickIntent = new Intent(Intent.ACTION_GET_CONTENT, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-                        pickIntent.setType("video/*");
-                        chooserIntent = Intent.createChooser(pickIntent, "Select a video");
-                        activityResult = MessageEntity.MessageType.Video.getValue();
-                        break;
+                if (item.getItemId() == R.id.attachDocument) {
+                    pickIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    pickIntent.setType("*/*");
+                    pickIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {
+                            "text/plain",
+                            "application/msword",
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            "application/vnd.ms-powerpoint",
+                            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                            "application/pdf"
+                    });
+                    chooserIntent = Intent.createChooser(pickIntent, "Select a document");
+                    activityResult = MessageEntity.MessageType.Document.getValue();
+                } else if (item.getItemId() == R.id.attachImage) {
+                    pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                    pickIntent.setType("image/*");
+                    pickIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String [] {
+                            "image/jpeg",
+                            "image/png"
+                    });
+                    chooserIntent = Intent.createChooser(pickIntent, "Select a image");
+                    activityResult = MessageEntity.MessageType.Image.getValue();
+                }else if (item.getItemId() == R.id.attachVideo) {
+                    pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                    pickIntent.setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*");
+                    chooserIntent = Intent.createChooser(pickIntent, "Select a video");
+                    activityResult = MessageEntity.MessageType.Video.getValue();
                 }
                 startActivityForResult(chooserIntent,activityResult);
                 return ChatFragment.super.onOptionsItemSelected(item);
@@ -253,17 +237,18 @@ public class ChatFragment extends Fragment {
     }
 
     private void initButtonCameraListener() {
-        btCamera.setOnClickListener(click -> {
+        binding.btCamera.setOnClickListener(click -> {
             Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
             cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            if (cameraIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            FragmentActivity fragmentActivity = getActivity();
+            if (fragmentActivity != null && cameraIntent.resolveActivity(fragmentActivity.getPackageManager()) != null) {
                 try {
-                    photoFile = FilesUtils.createImageTempFile(view.getContext());
+                    photoFile = FilesUtils.createImageTempFile(context);
                 }catch (Exception e) {
                     Log.d(TAG, "initButtonCameraListener: " + e.getMessage());
                 }
                 if (photoFile != null) {
-                    Uri photoURI = FileProvider.getUriForFile(view.getContext()
+                    Uri photoURI = FileProvider.getUriForFile(context
                             , BuildConfig.APPLICATION_ID + ".provider", photoFile);
 
                     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
@@ -299,75 +284,58 @@ public class ChatFragment extends Fragment {
             try {
                 messageEntity.setMessageType(MessageEntity.MessageType.Image);
                 selectedFile = Uri.fromFile(photoFile);
-                filePath = FilesUtils.saveFileFromUri(view.getContext(), selectedFile, photoFile.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
+                filePath = FilesUtils.saveFileFromUri(context, selectedFile, photoFile.getName(), DirectoryManager.getPathToSave(MessageEntity.MessageType.Image, true));
                 Log.d(TAG, "onActivityResultCamera: " + filePath);
                 fileReference = storageReference.child("images/" + photoFile.getName());
             }catch (Exception e) {
                 Log.e(TAG, "onActivityResultImage: ", e.fillInStackTrace());
             }
         } else {
+            if (data == null)
+                return;
             selectedFile = data.getData();
             if (selectedFile == null || selectedFile.getPath() == null) {
-                Toast.makeText(view.getContext(), "Ocurrió un error al seleccionar el archivo.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Ocurrió un error al seleccionar el archivo.", Toast.LENGTH_SHORT).show();
                 return;
             }
             Log.d(TAG, "onActivityAttach: " + selectedFile.getPath());
-            File file = new File(selectedFile.getPath());
 
-            if(file.getAbsolutePath() != null){
-                String filename;
-                Cursor cursor = view.getContext().getContentResolver().query(selectedFile,null,null,null,null);
-
-                if(cursor == null)
-                    filename=selectedFile.getPath();
-                else{
-                    cursor.moveToFirst();
-                    int idx = cursor.getColumnIndex(MediaStore.Files.FileColumns.DISPLAY_NAME);
-                    filename = cursor.getString(idx);
-                    cursor.close();
-                }
-
-                String extension = filename.substring(filename.lastIndexOf("."));
-                try {
-                    MessageEntity.MessageType messageType = MessageEntity.MessageType.setValue(requestCode);
-                    if (!FilesUtils.validateExtension(extension,messageType)) {
-                        Toast.makeText(view.getContext(), "Seleccione el formato correcto", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    messageEntity.setMessageType(messageType);
-                    filePath = FilesUtils.saveFileFromUri(view.getContext(), selectedFile, filename, DirectoryManager.getPathToSave(messageEntity.getMessageType(), true));
-                    fileReference = storageReference.child(messageEntity.getMessageType().toString() + "/" + filename);
-                }catch(Exception e) {
-                    Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
-                }
-            } else {
-                return;
+            String filename;
+            Cursor cursor = context.getContentResolver().query(selectedFile,null,null,null,null);
+            if(cursor == null)
+                filename=selectedFile.getPath();
+            else{
+                cursor.moveToFirst();
+                int idx = cursor.getColumnIndex(MediaStore.Files.FileColumns.DISPLAY_NAME);
+                filename = cursor.getString(idx);
+                cursor.close();
             }
-        }
-        MultimediaEntity multimediaEntity = new MultimediaEntity(UUID.randomUUID().toString(), messageEntity.getId(), filePath, "");
-        MessageEntity messageSend = new MessageEntity(UUID.randomUUID().toString(),
-                MessageEntity.MessageType.Text,
-                currentUser.getCodigo(),
-                currentUser.getTipo(),
-                currentContact.getId(),
-                currentContact.getContactType(),
-                etTextMessageToSend.getText().toString(),
-                MessageEntity.getGroupId(currentContact),
-                MessageEntity.getGroupId(currentContact).isEmpty() ? ContactEntity.ContactType.None: currentContact.getContactType(),
-                MessageEntity.DestinationState.Create,
-                1,
-                currentTime,
-                currentTime,
-                null);
 
-//        messageRepository.insert(messageSend);
-//        messageAdapter.add(messageSend);
+            String extension = filename.substring(filename.lastIndexOf("."));
+            try {
+                MessageEntity.MessageType messageType = MessageEntity.MessageType.setValue(requestCode);
+                if (!FilesUtils.validateExtension(extension,messageType)) {
+                    Toast.makeText(context, "Seleccione el formato correcto", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                messageEntity.setMessageType(messageType);
+                filePath = FilesUtils.saveFileFromUri(context, selectedFile, filename, DirectoryManager.getPathToSave(messageEntity.getMessageType(), true));
+                fileReference = storageReference.child(messageEntity.getMessageType().toString() + "/" + filename);
+            }catch(Exception e) {
+                Log.e(TAG, "onActivityResult: ", e.fillInStackTrace());
+            }
+
+        }
+        if (fileReference == null)
+            return;
+        MultimediaEntity multimediaEntity = new MultimediaEntity(UUID.randomUUID().toString(), messageEntity.getId(), filePath, "");
         sendMultimediaMessage(fileReference, selectedFile, messageEntity, multimediaEntity);
         super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void initRecyclerView(){
         try {
+            List<MessageEntity> messageEntityList;
             if (currentContact.isGroup()) {
                 messageEntityList = messageRepository.findAllForGroup(currentContact.getId(), currentContact.getContactType().getValue());
             } else {
@@ -380,12 +348,13 @@ public class ChatFragment extends Fragment {
                     confirmAck(message);
                 }
             }
-            messageAdapter.notifyDataSetChanged();
+            messageAdapter.notifyItemRangeChanged(0, messageAdapter.getItemCount());
+//            messageAdapter.notifyDataSetChanged();
         } catch (Exception e) {
             Log.d(TAG, "initRecyclerView: " + e.getMessage());
             e.printStackTrace();
         }
-        rvMessages.setAdapter(messageAdapter);
+        binding.rvMessagesList.setAdapter(messageAdapter);
     }
 
     private void initMessageObserver(){
@@ -401,31 +370,28 @@ public class ChatFragment extends Fragment {
                             try {
                                 confirmAck(messageEntity);
                                 messageAdapter.add(messageEntity);
-                                rvMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
+                                binding.rvMessagesList.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
                             } catch (UnsupportedEncodingException | JSONException e) {
                                 e.printStackTrace();
                             }
                         }
-                   },error-> {
-                       Log.d(TAG, "onError: " + error.getMessage());
-                   });
+                   },error-> Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show());
         }catch (Exception e){
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-            Log.d(TAG, e.getMessage());
         }
     }
 
     private void initSentButtonListener(){
-        sendFloatingActionButton.setOnClickListener(v -> {
+        binding.sendButton.setOnClickListener(v -> {
             Date currentTime = new Date(System.currentTimeMillis());
-            if(!etTextMessageToSend.getText().toString().trim().isEmpty()) {
+            if(!binding.etTextMessageToSend.getText().toString().trim().isEmpty()) {
                 MessageEntity messageSend = new MessageEntity(UUID.randomUUID().toString(),
                         MessageEntity.MessageType.Text,
                         currentUser.getCodigo(),
                         currentUser.getTipo(),
                         currentContact.getId(),
                         currentContact.getContactType(),
-                        etTextMessageToSend.getText().toString(),
+                        binding.etTextMessageToSend.getText().toString(),
                         MessageEntity.getGroupId(currentContact),
                         MessageEntity.getGroupId(currentContact).isEmpty() ? ContactEntity.ContactType.None: currentContact.getContactType(),
                         MessageEntity.DestinationState.Create,
@@ -437,17 +403,14 @@ public class ChatFragment extends Fragment {
                 messageRepository.insert(messageSend);
                 messageAdapter.add(messageSend);
                 sendMessage(messageSend);
-                etTextMessageToSend.setText("");
+                binding.etTextMessageToSend.setText("");
             }
         });
     }
 
     private void initRecordButtonListener() {
-        rbRecord.setOnClickListener(view -> {
-            rbRecord.setListenForRecord(true);
-        });
-
-        rvRecordView.setOnRecordListener(new OnRecordListener() {
+        binding.recordButton.setOnClickListener(view -> binding.recordButton.setListenForRecord(true));
+        binding.recordView.setOnRecordListener(new OnRecordListener() {
             @Override
             public void onStart() {
                 setUpRecording();
@@ -457,8 +420,8 @@ public class ChatFragment extends Fragment {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                messageLayout.setVisibility(View.GONE);
-                rvRecordView.setVisibility(View.VISIBLE);
+                binding.messageLayout.setVisibility(View.GONE);
+                binding.recordView.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -466,10 +429,15 @@ public class ChatFragment extends Fragment {
                 mediaRecorder.reset();
                 mediaRecorder.release();
                 File file = new File(audioPath);
-                if (file.exists())
-                    file.delete();
-                rvRecordView.setVisibility(View.GONE);
-                messageLayout.setVisibility(View.VISIBLE);
+                boolean isDeleted = false;
+                if (file.exists()) {
+                    isDeleted = file.delete();
+                }
+                if (!isDeleted) {
+                    Toast.makeText(context, "No se pudo eliminar el audio", Toast.LENGTH_SHORT).show();
+                }
+                binding.recordView.setVisibility(View.GONE);
+                binding.messageLayout.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -480,8 +448,8 @@ public class ChatFragment extends Fragment {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                rvRecordView.setVisibility(View.GONE);
-                messageLayout.setVisibility(View.VISIBLE);
+                binding.recordView.setVisibility(View.GONE);
+                binding.messageLayout.setVisibility(View.VISIBLE);
 
                 Date currentTime = new Date(System.currentTimeMillis());
                 MessageEntity messageEntity = new MessageEntity(UUID.randomUUID().toString()
@@ -507,10 +475,15 @@ public class ChatFragment extends Fragment {
                 mediaRecorder.reset();
                 mediaRecorder.release();
                 File file = new File(audioPath);
-                if (file.exists())
-                    file.delete();
-                rvRecordView.setVisibility(View.GONE);
-                messageLayout.setVisibility(View.VISIBLE);
+                boolean isDeleted = false;
+                if (file.exists()) {
+                    isDeleted = file.delete();
+                }
+                if (!isDeleted) {
+                    Toast.makeText(context, "No se pudo eliminar el audio", Toast.LENGTH_SHORT).show();
+                }
+                binding.recordView.setVisibility(View.GONE);
+                binding.messageLayout.setVisibility(View.VISIBLE);
             }
         });
 
@@ -563,7 +536,7 @@ public class ChatFragment extends Fragment {
             if(error.networkResponse.data!=null) {
                 body = new String(error.networkResponse.data, StandardCharsets.UTF_8);
                 Log.d(TAG, "sendButtononErrorResponse: " + body);
-                if (body.contains("no tiene permisos")) {
+                if (body.contains("no tiene permisos") || body.contains("cuenta activa")) {
                     messageRepository.delete(messageToSend);
                     messageAdapter.delete(messageToSend);
                 }
@@ -580,19 +553,25 @@ public class ChatFragment extends Fragment {
         UploadTask uploadTask = storageReference.putFile(fileToSend);
         uploadTask.continueWithTask(task -> {
             if (!task.isSuccessful()) {
-                throw task.getException();
+                Exception exception = task.getException();
+                if (exception == null) {
+                    throw new Exception("Ocurrió un error al enviar el archivo.");
+                }
+                throw exception;
             }
             return storageReference.getDownloadUrl();
         }).addOnCompleteListener(task -> {
             Log.d(TAG, "onComplete: " + task.isSuccessful());
             if (!task.isSuccessful()) {
                 Log.d(TAG, "onCompleteError: " + task.getException());
-                Toast.makeText(view.getContext(), "No se pudo subir el archivo.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "No se pudo subir el archivo.", Toast.LENGTH_SHORT).show();
             } else {
                 Uri downloadUri = task.getResult();
-                messageToSend.getMultimediaEntity().setFirebaseUri(downloadUri.toString());
-                sendMessage(messageToSend);
-                rvMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
+                if (downloadUri != null) {
+                    messageToSend.getMultimediaEntity().setFirebaseUri(downloadUri.toString());
+                    sendMessage(messageToSend);
+                    binding.rvMessagesList.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
+                }
             }
         });
     }
