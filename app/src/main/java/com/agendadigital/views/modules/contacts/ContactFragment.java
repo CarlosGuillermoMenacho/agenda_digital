@@ -71,11 +71,15 @@ public class ContactFragment extends Fragment {
         contactCourseRepository = new ContactCourseRepository(viewFragment.getContext());
         rvContactList = viewFragment.findViewById(R.id.rvContactList);
         etContactSearch = viewFragment.findViewById(R.id.etContactSearch);
+        initRecyclerView();
+        initAdapterEvents();
         initObservable();
+        loadContacts();
+        initTextSearcher();
         return viewFragment;
     }
 
-    private void initObservable() {
+    private void initRecyclerView() {
         DividerItemDecoration itemDecoration = new DividerItemDecoration(viewFragment.getContext(), DividerItemDecoration.VERTICAL);
         itemDecoration.setDrawable(getResources().getDrawable(R.drawable.divider));
         rvContactList.setLayoutManager(new LinearLayoutManager(viewFragment.getContext(), LinearLayoutManager.VERTICAL, false));
@@ -84,41 +88,9 @@ public class ContactFragment extends Fragment {
         pbContacts.setVisibility(View.GONE);
         contactAdapter = new ContactAdapter();
         rvContactList.setAdapter(contactAdapter);
-        contactDisposable =
-                contactObservable
-                        .getNotificationObservable()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(contactEntity -> {
-                            contactAdapter.updateContactMessage(contactEntity);
-                        },error -> {
-                            Log.d(TAG, "onError: " + error.getMessage());
-                        });
-        try {
-            contactEntityList = contactRepository.findAll();
-            if (contactEntityList.size() == 0) {
-                getContactsFromServer();
-            }
-            contactAdapter.setContactEntityList(contactEntityList);
-            etContactSearch.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    }
 
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    contactAdapter.getFilter().filter(etContactSearch.getText().toString());
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void initAdapterEvents() {
         contactAdapter.setOnItemClickListener(new ContactAdapter.CustomClickListener() {
             @Override
             public void onClick(int position, View v) {
@@ -145,6 +117,54 @@ public class ContactFragment extends Fragment {
                     popupMenu.inflate(R.menu.popup_group_restrictions_config);
                     popupMenu.show();
                 }
+
+            }
+        });
+    }
+
+    private void initObservable() {
+        contactDisposable =
+                contactObservable
+                        .getNotificationObservable()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(contactEntity -> {
+                            contactAdapter.updateContactMessage(contactEntity);
+                        },error -> {
+                            Log.d(TAG, "onError: " + error.getMessage());
+                        });
+
+
+    }
+
+    private void loadContacts() {
+        try {
+            contactEntityList = contactRepository.findAll();
+            if (contactEntityList.size() == 0) {
+                getContactsFromServer();
+            } else {
+                contactAdapter.setContactEntityList(contactEntityList);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initTextSearcher() {
+        etContactSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                contactAdapter.getFilter().filter(etContactSearch.getText().toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
 
             }
         });
@@ -230,13 +250,11 @@ public class ContactFragment extends Fragment {
             try {
                 List<ContactDto.CreateContactResponse> contactResponseList = new Gson().fromJson(response.getString("contacts"), new TypeToken<List<ContactDto.CreateContactResponse>>() {
                 }.getType());
-                pbContacts.setMax(contactResponseList.size());
                 List<ContactEntity> actualContactList = contactRepository.findAll();
                 contactDeleter.deleteContactAndCoursesNotFound(actualContactList, contactResponseList);
                 contactInserter.insertNewContactsAndCourses(actualContactList, contactResponseList);
                 contactEntityList = contactRepository.findAll();
                 contactAdapter.setContactEntityList(contactEntityList);
-                contactAdapter.notifyDataSetChanged();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {

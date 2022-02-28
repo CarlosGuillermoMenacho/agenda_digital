@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import com.agendadigital.clases.AdminSQLite;
-import com.agendadigital.core.modules.contacts.domain.ContactBase;
 import com.agendadigital.core.modules.contacts.domain.ContactCourseBase;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import java.util.ArrayList;
@@ -82,12 +81,12 @@ public class ContactCourseRepository {
     }
 
     public void delete(String contactId, int contactType, String courseId) {
-        repository.delete(ContactBase.TABLE_NAME,
+        repository.delete(ContactCourseBase.TABLE_NAME,
                 ContactCourseBase.COL_CONTACT_ID + "=? and " + ContactCourseBase.COL_CONTACT_TYPE + "=? and " + ContactCourseBase.COL_COURSE_ID + "=?",
                 new String[] { contactId, String.valueOf(contactType), courseId });
     }
     public void deleteAll(String contactId, int contactType) {
-        repository.delete(ContactBase.TABLE_NAME,
+        repository.delete(ContactCourseBase.TABLE_NAME,
                 ContactCourseBase.COL_CONTACT_ID + "=? and " + ContactCourseBase.COL_CONTACT_TYPE + "=?",
                 new String[] { contactId, String.valueOf(contactType) });
     }

@@ -9,16 +9,10 @@ import android.widget.Filterable;
 import android.widget.TextView;
 import com.agendadigital.R;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
-import com.agendadigital.core.modules.messages.domain.MessageEntity;
-import com.agendadigital.core.modules.messages.infrastructure.MessageRepository;
-import com.nex3z.notificationbadge.NotificationBadge;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,15 +23,15 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
     private List<ContactEntity> fullContactEntityList;
     private List<ContactEntity> contactEntityList;
 
-    private Filter filter = new Filter() {
+    private final Filter filter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             List<ContactEntity> filtered = new ArrayList<>();
             if (constraint == null || constraint.length() == 0) {
                 filtered.addAll(fullContactEntityList);
-            }else {
+            } else {
                 String filterPattern = constraint.toString().toLowerCase().trim();
-                for (ContactEntity contactEntity: fullContactEntityList) {
+                for (ContactEntity contactEntity : fullContactEntityList) {
                     if (contactEntity.getName().toLowerCase().contains(filterPattern) || contactEntity.getContactType().toString().toLowerCase().contains(filterPattern)) {
                         filtered.add(contactEntity);
                     }
@@ -51,7 +45,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             contactEntityList.clear();
-            contactEntityList.addAll((List) results.values);
+            contactEntityList.addAll((List<ContactEntity>) results.values);
             Collections.sort(contactEntityList, ContactEntity.ContactLastReceivedMessages);
             notifyDataSetChanged();
         }
