@@ -78,7 +78,6 @@ public abstract class MessageView extends RelativeLayout {
     }
 
     public void setMessage(MessageEntity message) throws Exception {
-        //messageEntity = message;
         tvMessageContactName.setVisibility(GONE);
         tvMessageBody.setText(message.getData());
 
@@ -248,9 +247,7 @@ public abstract class MessageView extends RelativeLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View dialogLayout = inflater.inflate(R.layout.dialog_full_size_imageview, null);
         builder.setView(dialogLayout);
-        builder.setNegativeButton("Cerrar", (dialog, which) -> {
-            dialog.cancel();
-        });
+        builder.setNegativeButton("Cerrar", (dialog, which) -> dialog.cancel());
         final AlertDialog dialog = builder.create();
 
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -271,9 +268,7 @@ public abstract class MessageView extends RelativeLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View dialogLayout = inflater.inflate(R.layout.dialog_full_size_videoview, null);
         builder.setView(dialogLayout);
-        builder.setNegativeButton("Cerrar", (dialog, which) -> {
-            dialog.cancel();
-        });
+        builder.setNegativeButton("Cerrar", (dialog, which) -> dialog.cancel());
         final AlertDialog dialog = builder.create();
 
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
