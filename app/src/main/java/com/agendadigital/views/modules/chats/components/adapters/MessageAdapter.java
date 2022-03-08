@@ -3,16 +3,12 @@ package com.agendadigital.views.modules.chats.components.adapters;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.agendadigital.core.modules.messages.domain.MessageEntity;
 import com.agendadigital.views.modules.chats.components.views.MessageViewBuilder;
 import com.agendadigital.views.modules.chats.components.views.MessageViewHolder;
 import com.agendadigital.clases.Globals;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,7 +26,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
 
     public void setList(List<MessageEntity> notificationEntities) {
         this.messageEntities = notificationEntities;
-        notifyDataSetChanged();
+        notifyItemRangeChanged(0, this.messageEntities.size());
+        //notifyDataSetChanged();
     }
 
     @Override
@@ -67,20 +64,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
     public void add(MessageEntity messageEntity) {
         if (messageEntity != null) {
             this.messageEntities.add(messageEntity);
-            notifyDataSetChanged();
+            notifyItemInserted(this.messageEntities.size());
+            //notifyDataSetChanged();
         }
     }
 
-    public void set(List<MessageEntity> notificationEntities) {
-        this.messageEntities = notificationEntities;
-        notifyDataSetChanged();
-    }
-
     public void updateDestinationState(MessageEntity messageSend) {
-        for (MessageEntity message: this.messageEntities) {
+        for (int i = 0; i < this.messageEntities.size(); i++) {
+            MessageEntity message = this.messageEntities.get(i);
             if (message.getId().equals(messageSend.getId())) {
                 message.setDestinationState(messageSend.getDestinationState());
-                notifyDataSetChanged();
+                notifyItemChanged(i);
+                //notifyDataSetChanged();
                 break;
             }
         }
@@ -89,7 +84,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
         for (int i = 0; i < this.messageEntities.size(); i++) {
             if (messageEntities.get(i).getId().equals(messageSend.getId())) {
                 this.messageEntities.remove(i);
-                notifyDataSetChanged();
+                notifyItemRemoved(i);
+                //notifyDataSetChanged();
                 break;
             }
         }
@@ -99,7 +95,4 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
         return messageEntities;
     }
 
-    public void setMessageEntities(List<MessageEntity> messageEntities) {
-        this.messageEntities = messageEntities;
-    }
 }

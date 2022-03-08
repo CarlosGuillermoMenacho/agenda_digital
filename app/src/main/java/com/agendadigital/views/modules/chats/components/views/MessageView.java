@@ -12,6 +12,7 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,6 @@ import androidx.core.content.FileProvider;
 
 public abstract class MessageView extends RelativeLayout {
 
-    protected MessageEntity messageEntity;
     protected TextView tvMessageContactName;
     protected CardView bubble;
     protected TextView tvMessageBody;
@@ -53,7 +53,7 @@ public abstract class MessageView extends RelativeLayout {
     protected Button btAudioPause;
     protected SeekBar sbAudioBar;
     protected MediaPlayer mediaPlayer;
-    private Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler();
 
     public MessageView(@NonNull ViewGroup viewGroup) {
         super(viewGroup.getContext());
@@ -78,17 +78,21 @@ public abstract class MessageView extends RelativeLayout {
     }
 
     public void setMessage(MessageEntity message) throws Exception {
-        messageEntity = message;
+        //messageEntity = message;
         tvMessageContactName.setVisibility(GONE);
-        tvMessageBody.setText(messageEntity.getData());
+        tvMessageBody.setText(message.getData());
 
-        if(messageEntity.getMessageType() != MessageEntity.MessageType.Text) {
-            if (messageEntity.getDestinationState() == MessageEntity.DestinationState.Create) {
+        if(message.getMessageType() != MessageEntity.MessageType.Text) {
+            if (message.getDestinationState() == MessageEntity.DestinationState.Create) {
                 flMessageLoadingContainer.setVisibility(VISIBLE);
-            }else {
+                ivImage.setVisibility(GONE);
+                flVideoMessageContainer.setVisibility(GONE);
+                rlMessageAudioContainer.setVisibility(GONE);
+            } else {
+                Log.d("MessageView", "setMessage: " + message.getDestinationState().toString() + ";" + message.getMultimediaEntity().getLocalUri());
                 flMessageLoadingContainer.setVisibility(GONE);
-                File file = new File(messageEntity.getMultimediaEntity().getLocalUri());
-                switch (messageEntity.getMessageType()) {
+                File file = new File(message.getMultimediaEntity().getLocalUri());
+                switch (message.getMessageType()) {
                     case Image:
                         rlMessageAudioContainer.setVisibility(GONE);
                         flVideoMessageContainer.setVisibility(GONE);

@@ -87,8 +87,9 @@ public class ChatFragment extends Fragment {
     private StorageReference storageReference;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        binding = FragmentChatBinding.inflate(inflater, container, false);
         Bundle bundle = getArguments();
         if (bundle != null) {
             currentContact = (ContactEntity) bundle.getSerializable("contact");
@@ -97,12 +98,6 @@ public class ChatFragment extends Fragment {
                 actionBar.setTitle(currentContact.toString());
             }
         }
-    }
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        binding = FragmentChatBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
         context = view.getContext();
         currentUser = Globals.user;
@@ -349,7 +344,6 @@ public class ChatFragment extends Fragment {
                 }
             }
             messageAdapter.notifyItemRangeChanged(0, messageAdapter.getItemCount());
-//            messageAdapter.notifyDataSetChanged();
         } catch (Exception e) {
             Log.d(TAG, "initRecyclerView: " + e.getMessage());
             e.printStackTrace();
@@ -364,12 +358,14 @@ public class ChatFragment extends Fragment {
                    .subscribeOn(Schedulers.io())
                    .observeOn(AndroidSchedulers.mainThread())
                    .subscribe(messageEntity -> {
+                       Log.d(TAG, "initMessageObserver:1 " + (messageEntity.getDestinationId()));
                         if ((currentContact.isGroup() && currentContact.getId().equals(messageEntity.getGroupId()) && currentContact.getContactType() == messageEntity.getGroupType())
                             || (!currentContact.isGroup() && messageEntity.getGroupId().isEmpty() && currentUser.getCodigo().equals(messageEntity.getDestinationId()) && currentUser.getTipo().getValue() == messageEntity.getDestinationType().getValue()
                                 && currentContact.getId().equals(messageEntity.getDeviceFromId()) && currentContact.getContactType().getValue() == messageEntity.getDeviceFromType().getValue()) ) {
                             try {
                                 confirmAck(messageEntity);
                                 messageAdapter.add(messageEntity);
+                                Log.d(TAG, "initMessageObserver: 2" + messageEntity.getId());
                                 binding.rvMessagesList.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
                             } catch (UnsupportedEncodingException | JSONException e) {
                                 e.printStackTrace();
