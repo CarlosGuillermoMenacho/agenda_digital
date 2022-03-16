@@ -398,6 +398,7 @@ public class ChatFragment extends Fragment {
 
                 messageRepository.insert(messageSend);
                 messageAdapter.add(messageSend);
+                binding.rvMessagesList.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
                 sendMessage(messageSend);
                 binding.etTextMessageToSend.setText("");
             }
@@ -545,6 +546,7 @@ public class ChatFragment extends Fragment {
         messageToSend.setMultimediaEntity(multimediaToSend);
         messageRepository.insert(messageToSend);
         messageAdapter.add(messageToSend);
+        binding.rvMessagesList.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
 
         UploadTask uploadTask = storageReference.putFile(fileToSend);
         uploadTask.continueWithTask(task -> {
@@ -566,7 +568,6 @@ public class ChatFragment extends Fragment {
                 if (downloadUri != null) {
                     messageToSend.getMultimediaEntity().setFirebaseUri(downloadUri.toString());
                     sendMessage(messageToSend);
-                    binding.rvMessagesList.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
                 }
             }
         });
