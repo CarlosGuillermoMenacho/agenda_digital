@@ -31,7 +31,7 @@ public class ContactTypeEntity {
     public static class ContactTypeCourses {
 
         private ContactTypeEntity contactTypeEntity;
-        private List<ContactEntity.CourseEntity> courseEntityList;
+        private List<ContactEntity.GroupEntity> groupEntityList;
 
         public ContactTypeCourses(ContactTypeEntity contactTypeEntity) {
             this.contactTypeEntity = contactTypeEntity;
@@ -45,12 +45,12 @@ public class ContactTypeEntity {
             this.contactTypeEntity = contactTypeEntity;
         }
 
-        public List<ContactEntity.CourseEntity> getCourseEntityList() {
-            return courseEntityList;
+        public List<ContactEntity.GroupEntity> getCourseEntityList() {
+            return groupEntityList;
         }
 
-        public void setCourseEntityList(List<ContactEntity.CourseEntity> courseEntityList) {
-            this.courseEntityList = courseEntityList;
+        public void setCourseEntityList(List<ContactEntity.GroupEntity> groupEntityList) {
+            this.groupEntityList = groupEntityList;
         }
     }
 }

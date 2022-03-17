@@ -22,7 +22,7 @@ import com.agendadigital.core.modules.contacts.application.ContactTypeCoursesFin
 import com.agendadigital.core.modules.contacts.application.ContactUpdater;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.domain.ContactTypeEntity;
-import com.agendadigital.core.modules.contacts.infrastructure.ContactCourseRepository;
+import com.agendadigital.core.modules.contacts.infrastructure.ContactGroupRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactTypeRepository;
 import com.agendadigital.core.services.contacts.ContactDto;
@@ -59,7 +59,7 @@ public class ExpandableContactsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        contactTypeCoursesFinder = new ContactTypeCoursesFinder(new ContactTypeRepository(context), new ContactCourseRepository(context));
+        contactTypeCoursesFinder = new ContactTypeCoursesFinder(new ContactTypeRepository(context), new ContactGroupRepository(context));
         try {
             ViewHelpers.initRecyclerView(context, binding.rvContactExpandable);
             loadRecyclerView();
@@ -119,10 +119,10 @@ public class ExpandableContactsFragment extends Fragment {
 
     private void updateContactsFromServer() throws JSONException {
         ContactRepository contactRepository = new ContactRepository(getContext());
-        ContactCourseRepository contactCourseRepository = new ContactCourseRepository(getContext());
+        ContactGroupRepository contactGroupRepository = new ContactGroupRepository(getContext());
         ContactTypeRepository contactTypeRepository = new ContactTypeRepository(getContext());
-        ContactUpdater.Deleter contactDeleter = new ContactUpdater.Deleter(contactRepository, contactCourseRepository);
-        ContactUpdater.Inserter contactInserter = new ContactUpdater.Inserter(contactRepository, contactCourseRepository, contactTypeRepository);
+        ContactUpdater.Deleter contactDeleter = new ContactUpdater.Deleter(contactRepository, contactGroupRepository);
+        ContactUpdater.Inserter contactInserter = new ContactUpdater.Inserter(contactRepository, contactGroupRepository, contactTypeRepository);
 
         JSONObject jsonObject = new JSONObject();
         ContactDto.CreateContactRequest contactRequest = new ContactDto.CreateContactRequest(Globals.user.getCodigo(), Globals.user.getTipo().getValue(), Globals.colegio.getCodigo());

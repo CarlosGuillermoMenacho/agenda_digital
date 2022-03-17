@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import com.agendadigital.R;
 import com.agendadigital.core.modules.contacts.application.ContactFinder;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
-import com.agendadigital.core.modules.contacts.infrastructure.ContactCourseRepository;
+import com.agendadigital.core.modules.contacts.infrastructure.ContactGroupRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.databinding.FragmentGroupContactsBinding;
 import com.agendadigital.views.modules.contacts.components.ContactAdapter;
@@ -29,7 +29,7 @@ public class GroupContactsFragment extends Fragment {
     private Context context;
     private GroupContactAdapter groupContactAdapter;
 
-    private ContactEntity.CourseEntity currentCourseEntity;
+    private ContactEntity.GroupEntity currentGroupEntity;
     int currentContactType;
 
     @Override
@@ -37,11 +37,11 @@ public class GroupContactsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            currentCourseEntity = (ContactEntity.CourseEntity) bundle.getSerializable("course");
+            currentGroupEntity = (ContactEntity.GroupEntity) bundle.getSerializable("course");
             currentContactType = bundle.getInt("contactType");
             ActionBar actionBar = ViewHelpers.getActionBar(getActivity());
             if (actionBar != null) {
-                actionBar.setTitle(currentCourseEntity.getCourseDescription());
+                actionBar.setTitle(currentGroupEntity.getCourseDescription());
             }
         }
     }
@@ -79,10 +79,10 @@ public class GroupContactsFragment extends Fragment {
     private void loadGroupContacts() throws Exception {
         ViewHelpers.initRecyclerView(context, binding.rvGroupContactList);
         groupContactAdapter = new GroupContactAdapter();
-        ContactFinder contactFinder = new ContactFinder(new ContactCourseRepository(context), new ContactRepository(context));
+        ContactFinder contactFinder = new ContactFinder(new ContactGroupRepository(context), new ContactRepository(context));
         try {
             binding.pbGroupContacts.setVisibility(View.VISIBLE);
-            List<ContactEntity> contactEntityList = contactFinder.findAllContactsByCourseAndType(currentCourseEntity.getCourseId(), currentContactType);
+            List<ContactEntity> contactEntityList = contactFinder.findAllContactsByCourseAndType(currentGroupEntity.getCourseId(), currentContactType);
             groupContactAdapter.setContactEntityList(contactEntityList);
             binding.rvGroupContactList.setAdapter(groupContactAdapter);
             groupContactAdapter.setOnItemClickListener(new ContactAdapter.CustomClickListener() {

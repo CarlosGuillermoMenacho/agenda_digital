@@ -114,13 +114,13 @@ public class ExpandableContactAdapter extends RecyclerView.Adapter<ExpandableCon
                 tvExpandableContactChildContactType = itemView.findViewById(R.id.tvExpandableContactChildContactType);
             }
 
-            public void onBind(ContactEntity.CourseEntity courseEntity, int contactType) {
-                tvExpandableContactChildContactType.setText(courseEntity.getCourseDescription().toString());
+            public void onBind(ContactEntity.GroupEntity groupEntity, int contactType) {
+                tvExpandableContactChildContactType.setText(groupEntity.getCourseDescription().toString());
                 tvExpandableContactChildContactType.setVisibility(View.GONE);
-                tvExpandableContactChildName.setText(courseEntity.getCourseDescription());
+                tvExpandableContactChildName.setText(groupEntity.getCourseDescription());
                 itemView.setOnClickListener(v -> {
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable("course", courseEntity);
+                    bundle.putSerializable("course", groupEntity);
                     bundle.putInt("contactType", contactType);
                     Navigation.findNavController(itemView).navigate(R.id.action_fragment_tabchat_contact_to_fragment_group_contacts, bundle);
                 });

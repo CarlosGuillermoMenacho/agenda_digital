@@ -490,7 +490,11 @@ public class LoginActivity extends AppCompatActivity {
                         String codigo = adm1.getString("codigo");
                         String nombre = adm1.getString("nombre");
                         String foto = adm1.getString("foto");
+                        int cod_cargo = adm1.getInt("cod_cargo");
+                        String cargo = adm1.getString("cargo");
 
+                        User.UserType userType = (cod_cargo == 1 || cod_cargo == 2) ? User.UserType.Director:User.UserType.Staff;
+                        Globals.user = new User(codigo,nombre,foto, userType);
                         ArrayList<String> valores = new ArrayList<>();
                         valores.add(codigo);
                         valores.add(nombre);

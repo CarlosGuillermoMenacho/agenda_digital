@@ -2,7 +2,7 @@ package com.agendadigital.core.modules.contacts.application;
 
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.domain.ContactTypeEntity;
-import com.agendadigital.core.modules.contacts.infrastructure.ContactCourseRepository;
+import com.agendadigital.core.modules.contacts.infrastructure.ContactGroupRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactTypeRepository;
 import com.agendadigital.core.services.contacts.ContactDto;
@@ -13,11 +13,11 @@ public class ContactUpdater {
     public static class Deleter {
 
         private final ContactRepository contactRepository;
-        private final ContactCourseRepository contactCourseRepository;
+        private final ContactGroupRepository contactGroupRepository;
 
-        public Deleter(ContactRepository contactRepository, ContactCourseRepository contactCourseRepository) {
+        public Deleter(ContactRepository contactRepository, ContactGroupRepository contactGroupRepository) {
             this.contactRepository = contactRepository;
-            this.contactCourseRepository = contactCourseRepository;
+            this.contactGroupRepository = contactGroupRepository;
         }
 
         public void deleteContactAndCoursesNotFound(List<ContactEntity> actualContactList, List<ContactDto.CreateContactResponse> contactResponseList) {
@@ -26,25 +26,31 @@ public class ContactUpdater {
                 for (ContactDto.CreateContactResponse contactResponse : contactResponseList) {
                     if (actualContact.getId().equals(contactResponse.getId()) && actualContact.getContactType().getValue() == contactResponse.getContactType() ) {
                         isContactFound = true;
-                        List<ContactEntity.ContactCourseEntity> actualContactCourseList = contactCourseRepository.findAllCoursesByContactId(actualContact.getId(), actualContact.getContactType().getValue());
-                        for (ContactEntity.ContactCourseEntity actualContactCourse: actualContactCourseList) {
-                            boolean isCourseFound = false;
-                            for (ContactDto.CourseResponse courseResponse : contactResponse.getCourses()) {
-                                if (actualContactCourse.getCourseEntity().getCourseId().equals(courseResponse.getId())) {
-                                    isCourseFound = true;
-                                    break;
+                        List<ContactEntity.ContactGroupEntity> actualContactCourseList = null;
+                        try {
+                            actualContactCourseList = contactGroupRepository.findAllCoursesByContactId(actualContact.getId(), actualContact.getContactType().getValue());
+
+                            for (ContactEntity.ContactGroupEntity actualContactCourse: actualContactCourseList) {
+                                boolean isCourseFound = false;
+                                for (ContactDto.CourseResponse courseResponse : contactResponse.getCourses()) {
+                                    if (actualContactCourse.getGroupEntity().getCourseId().equals(courseResponse.getId())) {
+                                        isCourseFound = true;
+                                        break;
+                                    }
+                                }
+                                if (!isCourseFound) {
+                                    contactGroupRepository.delete(actualContact.getId(), actualContact.getContactType().getValue(),actualContactCourse.getGroupEntity().getCourseId());
                                 }
                             }
-                            if (!isCourseFound) {
-                                contactCourseRepository.delete(actualContact.getId(), actualContact.getContactType().getValue(),actualContactCourse.getCourseEntity().getCourseId());
-                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                         break;
                     }
                 }
                 if (!isContactFound) {
                     contactRepository.delete(actualContact.getId(), actualContact.getContactType().getValue());
-                    contactCourseRepository.deleteAll(actualContact.getId(), actualContact.getContactType().getValue());
+                    contactGroupRepository.deleteAll(actualContact.getId(), actualContact.getContactType().getValue());
                 }
             }
         }
@@ -53,12 +59,12 @@ public class ContactUpdater {
     public static class Inserter {
 
         private final ContactRepository contactRepository;
-        private final ContactCourseRepository contactCourseRepository;
+        private final ContactGroupRepository contactGroupRepository;
         private final ContactTypeRepository contactTypeRepository;
 
-        public Inserter(ContactRepository contactRepository, ContactCourseRepository contactCourseRepository, ContactTypeRepository contactTypeRepository) {
+        public Inserter(ContactRepository contactRepository, ContactGroupRepository contactGroupRepository, ContactTypeRepository contactTypeRepository) {
             this.contactRepository = contactRepository;
-            this.contactCourseRepository = contactCourseRepository;
+            this.contactGroupRepository = contactGroupRepository;
             this.contactTypeRepository = contactTypeRepository;
         }
 
@@ -68,13 +74,13 @@ public class ContactUpdater {
                 for (ContactEntity actualContact : actualContactList) {
                     if (contactResponse.getId().equals(actualContact.getId()) && contactResponse.getContactType() == actualContact.getContactType().getValue() ) {
                         isContactFound = true;
-                        List<ContactEntity.ContactCourseEntity> actualContactCourseList = contactCourseRepository.findAllCoursesByContactId(actualContact.getId(), actualContact.getContactType().getValue());
+                        List<ContactEntity.ContactGroupEntity> actualContactCourseList = contactGroupRepository.findAllCoursesByContactId(actualContact.getId(), actualContact.getContactType().getValue());
                         for (ContactDto.CourseResponse courseResponse : contactResponse.getCourses()) {
-                            for (ContactEntity.ContactCourseEntity actualContactCourse: actualContactCourseList) {
-                                if (!actualContactCourse.getCourseEntity().getCourseId().equals(courseResponse.getId())) {
-                                    contactCourseRepository.insert(new ContactEntity.ContactCourseEntity(
+                            for (ContactEntity.ContactGroupEntity actualContactCourse: actualContactCourseList) {
+                                if (!actualContactCourse.getGroupEntity().getCourseId().equals(courseResponse.getId())) {
+                                    contactGroupRepository.insert(new ContactEntity.ContactGroupEntity(
                                             0,
-                                            new ContactEntity.CourseEntity(courseResponse.getId(), courseResponse.getName()),
+                                            new ContactEntity.GroupEntity(courseResponse.getId(), courseResponse.getName(), ContactEntity.GroupType.setValue(courseResponse.getType())),
                                             actualContact.getId(),
                                             actualContact.getContactType().getValue()));
                                 }
@@ -96,10 +102,10 @@ public class ContactUpdater {
                             "",
                             null));
                     for(ContactDto.CourseResponse course: contactResponse.getCourses()) {
-                        contactCourseRepository.insert(new ContactEntity.ContactCourseEntity(
+                        contactGroupRepository.insert(new ContactEntity.ContactGroupEntity(
                                 -1,
-                                new ContactEntity.CourseEntity(course.getId(),
-                                        course.getName()),
+                                new ContactEntity.GroupEntity(course.getId(),
+                                        course.getName(), ContactEntity.GroupType.setValue(course.getType())),
                                 contactResponse.getId(),
                                 contactResponse.getContactType()));
                     }

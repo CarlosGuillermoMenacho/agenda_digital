@@ -1,18 +1,18 @@
 package com.agendadigital.core.modules.contacts.application;
 
 import com.agendadigital.core.modules.contacts.domain.ContactTypeEntity;
-import com.agendadigital.core.modules.contacts.infrastructure.ContactCourseRepository;
+import com.agendadigital.core.modules.contacts.infrastructure.ContactGroupRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactTypeRepository;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ContactTypeCoursesFinder {
     private final ContactTypeRepository contactTypeRepository;
-    private final ContactCourseRepository contactCourseRepository;
+    private final ContactGroupRepository contactGroupRepository;
 
-    public ContactTypeCoursesFinder(ContactTypeRepository contactTypeRepository, ContactCourseRepository contactCourseRepository) {
+    public ContactTypeCoursesFinder(ContactTypeRepository contactTypeRepository, ContactGroupRepository contactGroupRepository) {
         this.contactTypeRepository = contactTypeRepository;
-        this.contactCourseRepository = contactCourseRepository;
+        this.contactGroupRepository = contactGroupRepository;
     }
 
     public List<ContactTypeEntity.ContactTypeCourses> findAll() throws Exception {
@@ -20,7 +20,7 @@ public class ContactTypeCoursesFinder {
         List<ContactTypeEntity> contactTypeEntityList = contactTypeRepository.findAll();
         for (ContactTypeEntity contactTypeEntity: contactTypeEntityList) {
             ContactTypeEntity.ContactTypeCourses contactTypeCourse = new ContactTypeEntity.ContactTypeCourses(contactTypeEntity);
-            contactTypeCourse.setCourseEntityList(contactCourseRepository.findAllCoursesByContactType(contactTypeEntity.getId()));
+            contactTypeCourse.setCourseEntityList(contactGroupRepository.findAllCoursesByContactType(contactTypeEntity.getId()));
             contactTypeCourses.add(contactTypeCourse);
         }
         return contactTypeCourses;

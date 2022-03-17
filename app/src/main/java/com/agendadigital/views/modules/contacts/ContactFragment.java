@@ -20,7 +20,7 @@ import com.agendadigital.clases.User;
 import com.agendadigital.core.modules.contacts.application.ContactUpdater;
 import com.agendadigital.core.modules.contacts.domain.ContactEntity;
 import com.agendadigital.core.modules.contacts.domain.ContactTypeEntity;
-import com.agendadigital.core.modules.contacts.infrastructure.ContactCourseRepository;
+import com.agendadigital.core.modules.contacts.infrastructure.ContactGroupRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactRepository;
 import com.agendadigital.core.modules.contacts.infrastructure.ContactTypeRepository;
 import com.agendadigital.core.services.contacts.ContactDto;
@@ -54,7 +54,7 @@ public class ContactFragment extends Fragment {
     private List<ContactEntity> contactEntityList;
     private ContactRepository contactRepository;
     private ContactTypeRepository contactTypeRepository;
-    private ContactCourseRepository contactCourseRepository;
+    private ContactGroupRepository contactGroupRepository;
     private ContactAdapter contactAdapter;
     private Disposable contactDisposable;
     private final ContactObservable contactObservable = new ContactObservable();
@@ -73,7 +73,7 @@ public class ContactFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         contactRepository = new ContactRepository(context);
         contactTypeRepository = new ContactTypeRepository(context);
-        contactCourseRepository = new ContactCourseRepository(context);
+        contactGroupRepository = new ContactGroupRepository(context);
         try {
             initRecyclerView();
             initAdapterEvents();
@@ -211,7 +211,7 @@ public class ContactFragment extends Fragment {
                         contactTypeRepository.insert(new ContactTypeEntity(newContact.getContactType().getValue(), newContact.getContactType().getForLabel()));
                     }
                     for(ContactDto.CourseResponse course: contact.getCourses()) {
-                        contactCourseRepository.insert(new ContactEntity.ContactCourseEntity(-1, new ContactEntity.CourseEntity(course.getId(), course.getName()), contact.getId(), contact.getContactType()));
+                        contactGroupRepository.insert(new ContactEntity.ContactGroupEntity(-1, new ContactEntity.GroupEntity(course.getId(), course.getName(), ContactEntity.GroupType.setValue(course.getType())), contact.getId(), contact.getContactType()));
                     }
                     long rowsInserted = contactRepository.insert(newContact);
                     if(rowsInserted == -1) {
@@ -236,8 +236,8 @@ public class ContactFragment extends Fragment {
     }
 
     private void updateContactsFromServer() throws JSONException {
-        ContactUpdater.Deleter contactDeleter = new ContactUpdater.Deleter(contactRepository, contactCourseRepository);
-        ContactUpdater.Inserter contactInserter = new ContactUpdater.Inserter(contactRepository, contactCourseRepository, contactTypeRepository);
+        ContactUpdater.Deleter contactDeleter = new ContactUpdater.Deleter(contactRepository, contactGroupRepository);
+        ContactUpdater.Inserter contactInserter = new ContactUpdater.Inserter(contactRepository, contactGroupRepository, contactTypeRepository);
         JSONObject jsonObject = new JSONObject();
         ContactDto.CreateContactRequest contactRequest = new ContactDto.CreateContactRequest(Globals.user.getCodigo(), Globals.user.getTipo().getValue(), Globals.colegio.getCodigo());
         jsonObject.put("user", new JSONObject(contactRequest.toJSON()));

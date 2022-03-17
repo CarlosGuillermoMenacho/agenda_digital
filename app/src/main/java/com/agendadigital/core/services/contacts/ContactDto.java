@@ -62,10 +62,12 @@ public class ContactDto {
         public static class CourseResponse {
             private String id;
             private String name;
+            private int type;
 
-            public CourseResponse(String id, String name) {
+            public CourseResponse(String id, String name, int type) {
                 this.id = id;
                 this.name = name;
+                this.type = type;
             }
 
             public String getId() {
@@ -82,6 +84,14 @@ public class ContactDto {
 
             public void setName(String name) {
                 this.name = name;
+            }
+
+            public int getType() {
+                return type;
+            }
+
+            public void setType(int type) {
+                this.type = type;
             }
         }
 

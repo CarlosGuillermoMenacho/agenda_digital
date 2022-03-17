@@ -1,7 +1,5 @@
 package com.agendadigital.core.modules.contacts.domain;
 
-import com.agendadigital.core.modules.messages.domain.MessageEntity;
-
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
@@ -228,13 +226,15 @@ public class ContactEntity implements Serializable {
         }
     }
 
-    public static class CourseEntity implements Serializable{
+    public static class GroupEntity implements Serializable{
         private String courseId;
         private String courseDescription;
+        private GroupType type;
 
-        public CourseEntity(String courseId, String courseDescription) {
+        public GroupEntity(String courseId, String courseDescription, GroupType type) {
             this.courseId = courseId;
             this.courseDescription = courseDescription;
+            this.type = type;
         }
 
         public String getCourseId() {
@@ -252,17 +252,25 @@ public class ContactEntity implements Serializable {
         public void setCourseDescription(String courseDescription) {
             this.courseDescription = courseDescription;
         }
+
+        public GroupType getType() {
+            return type;
+        }
+
+        public void setType(GroupType type) {
+            this.type = type;
+        }
     }
 
-    public static class ContactCourseEntity {
+    public static class ContactGroupEntity {
         private int id;
-        private CourseEntity courseEntity;
+        private GroupEntity groupEntity;
         private String contactId;
         private int contactType;
 
-        public ContactCourseEntity(int id, CourseEntity courseEntity, String contactId, int contactType) {
+        public ContactGroupEntity(int id, GroupEntity groupEntity, String contactId, int contactType) {
             this.id = id;
-            this.courseEntity = courseEntity;
+            this.groupEntity = groupEntity;
             this.contactId = contactId;
             this.contactType = contactType;
         }
@@ -275,20 +283,12 @@ public class ContactEntity implements Serializable {
             this.id = id;
         }
 
-        public CourseEntity getCourseEntity() {
-            return courseEntity;
-        }
-
-        public void setCourseEntity(CourseEntity courseEntity) {
-            this.courseEntity = courseEntity;
+        public GroupEntity getGroupEntity() {
+            return groupEntity;
         }
 
         public String getContactId() {
             return contactId;
-        }
-
-        public void setContactId(String contactId) {
-            this.contactId = contactId;
         }
 
         public int getContactType() {
@@ -297,6 +297,32 @@ public class ContactEntity implements Serializable {
 
         public void setContactType(int contactType) {
             this.contactType = contactType;
+        }
+    }
+
+    public enum GroupType {
+        Course(1),
+        Occupation(2);
+
+        private final int value;
+
+        GroupType(int value) {
+            this.value =value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static GroupType setValue(int value) throws Exception {
+            switch (value){
+                case 1:
+                    return Course;
+                case 2:
+                    return Occupation;
+                default:
+                    throw new Exception("GroupType inválido." + value);
+            }
         }
     }
 

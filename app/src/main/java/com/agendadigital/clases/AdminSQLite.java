@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.agendadigital.core.modules.contacts.domain.ContactBase;
-import com.agendadigital.core.modules.contacts.domain.ContactCourseBase;
+import com.agendadigital.core.modules.contacts.domain.ContactGroupBase;
 import com.agendadigital.core.modules.contacts.domain.ContactTypeBase;
 import com.agendadigital.core.modules.messages.domain.MessageBase;
 import com.agendadigital.core.modules.messages.domain.MultimediaBase;
@@ -100,7 +100,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL(MessageBase.SQL_CREATE_TABLE);
         db.execSQL(MultimediaBase.SQL_CREATE_TABLE);
         db.execSQL(ContactTypeBase.SQL_CREATE_TABLE);
-        db.execSQL(ContactCourseBase.SQL_CREATE_TABLE);
+        db.execSQL(ContactGroupBase.SQL_CREATE_TABLE);
         /*db.execSQL("insert into materias values('1','1','Matemáticas')");
         db.execSQL("insert into materias values('1','2','Física')");
         db.execSQL("insert into materias values('1','3','Lenguaje')");
