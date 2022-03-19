@@ -499,7 +499,9 @@ public class LoginActivity extends AppCompatActivity {
                         valores.add(codigo);
                         valores.add(nombre);
                         valores.add(foto);
+                        valores.add(String.valueOf(cod_cargo));
                         adminSQLite.saveAdm(valores);
+
                         JSONArray colegios = jsonObject.getJSONArray("colegios");
                         for (int i = 0 ; i < colegios.length(); i++){
                             JSONObject colegio = colegios.getJSONObject(i);

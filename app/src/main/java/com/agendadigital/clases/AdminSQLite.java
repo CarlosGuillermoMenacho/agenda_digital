@@ -78,7 +78,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
         db.execSQL("create table prof_col(cod_pro int,cod_col int,estado int)");
         db.execSQL("create table colegios(cod_col int,nombre varchar,turno varchar,ip varchar)");
 
-        db.execSQL("create table personal(codigo int,nombre varchar, foto varchar,activo int,cargo varchar)");
+        db.execSQL("create table personal(codigo int,nombre varchar, foto varchar,activo int,cargo int)");
 
         db.execSQL("create table ult_usr(id int,codigo int,nombre varchar,tipo varchar)");
 
@@ -210,9 +210,8 @@ public class AdminSQLite extends SQLiteOpenHelper {
         return getReadableDatabase().rawQuery("select * from profesor where codigo='"+codigo+"'",null);
     }
 
-
     public void saveAdm(ArrayList<String> valores){//guarda un profesor habilitado
-        getWritableDatabase().execSQL("insert into personal values('" + valores.get(0) + "','" + valores.get(1) + "','"+valores.get(2)+"' ,0,'')");
+        getWritableDatabase().execSQL("insert into personal values('" + valores.get(0) + "','" + valores.get(1) + "','"+valores.get(2)+"' ,0,+ '" + valores.get(3) +"')");
     }
 
 
@@ -448,6 +447,7 @@ public class AdminSQLite extends SQLiteOpenHelper {
         }
         return new User();
     }
+
     public User getUserActivo(){
 
         @SuppressLint("Recycle") Cursor cursor = getReadableDatabase().rawQuery("select * from tutor where activo = 1",null);
@@ -471,13 +471,12 @@ public class AdminSQLite extends SQLiteOpenHelper {
         }
 
         @SuppressLint("Recycle") Cursor cursor4 = getReadableDatabase().rawQuery("select * from personal where activo = 1",null);
-        if (cursor4.moveToFirst()&&cursor4.getCount()==1){
-            return new User(cursor4.getString(0),cursor4.getString(1), cursor4.getString(2), User.UserType.Staff);
+        if (cursor4.moveToFirst()) {
+            int cargo = cursor4.getInt(cursor4.getColumnIndexOrThrow("cargo"));
+            return new User(cursor4.getString(0),cursor4.getString(1), cursor4.getString(2), cargo == 1 || cargo == 2? User.UserType.Director: User.UserType.Staff);
         }
         return new User();
     }
-
-
 
     public Cursor getNotificacion(String codigo){
         return getReadableDatabase().rawQuery("select * from notificaction where codigo="+codigo,null);
